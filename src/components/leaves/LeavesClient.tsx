@@ -18,7 +18,7 @@ import { format } from 'date-fns';
 import { enUS, ru, hy } from 'date-fns/locale';
 import i18n from 'i18next';
 import { toast } from 'sonner';
-import { useQuery, useMutation } from 'convex/react';
+import { useQuery, useMutation, usePaginatedQuery } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import type { Id } from '../../../convex/_generated/dataModel';
 import { Button } from '@/components/ui/button';
@@ -120,11 +120,20 @@ export function LeavesClient() {
       ? { requesterId: user.id as Id<'users'> }
       : null;
 
-  // Use organization-specific query if superadmin has selected an org, otherwise use default
-  const leaves = useQuery(
-    shouldUseOrgQuery ? api.leaves.getLeavesForOrganization : api.leaves.getAllLeaves,
-    user?.id && queryParams !== null ? queryParams : 'skip',
-  );
+  // Paginated leaves query
+  const paginatedArgs = user?.id
+    ? {
+        requesterId: user.id as Id<'users'>,
+        ...(selectedOrgId ? { organizationId: selectedOrgId as Id<'organizations'> } : {}),
+      }
+    : 'skip';
+  const {
+    results: leaves,
+    status: leavesStatus,
+    loadMore: loadMoreLeaves,
+  } = usePaginatedQuery(api.leaves.listLeavesPaginated, paginatedArgs as any, {
+    initialNumItems: 30,
+  });
   const unreadCount = useQuery(
     api.leaves.getUnreadCount,
     user?.id ? { requesterId: user.id as Id<'users'> } : 'skip',
@@ -214,8 +223,8 @@ export function LeavesClient() {
     }
   };
 
-  const isLoading = leaves === undefined;
-  const isError = leaves === null;
+  const isLoading = leavesStatus === 'LoadingFirstPage';
+  const isError = false;
   const isSuperadmin = user?.role === 'superadmin';
   const isAdmin = !isSuperadmin && (user?.role === 'admin' || user?.role === 'supervisor');
 
@@ -608,6 +617,14 @@ export function LeavesClient() {
                   </table>
                 </div>
               </div>
+            )}
+            {leavesStatus === 'CanLoadMore' && (
+              <button
+                onClick={() => loadMoreLeaves(30)}
+                className="w-full mt-3 py-2 text-sm text-[#2563eb] hover:underline"
+              >
+                {t('leaves.loadMore', { defaultValue: 'Load more requests' })}
+              </button>
             )}
           </CardContent>
         </Card>

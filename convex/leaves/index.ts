@@ -8,6 +8,7 @@ export {
   getUnreadCount,
   getLeavesPagederated,
   getLeaveById,
+  listLeavesPaginated,
 } from './queries';
 export {
   createLeave,

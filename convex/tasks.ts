@@ -1,5 +1,6 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
+import { paginationOptsValidator } from 'convex/server';
 import type { Id } from './_generated/dataModel';
 import { SUPERADMIN_EMAIL } from './lib/auth';
 import { DEFAULT_LIST_CAP, SMALL_LIST_CAP } from './lib/limits';
@@ -648,6 +649,27 @@ export const getTaskComments = query({
       ...c,
       author: authorMap.get(c.authorId),
     }));
+  },
+});
+
+/** Paginated task comments */
+export const listCommentsPaginated = query({
+  args: { taskId: v.id('tasks'), paginationOpts: paginationOptsValidator },
+  handler: async (ctx, { taskId, paginationOpts }) => {
+    const result = await ctx.db
+      .query('taskComments')
+      .withIndex('by_task', (q) => q.eq('taskId', taskId))
+      .order('desc')
+      .paginate(paginationOpts);
+
+    const authorIds = [...new Set(result.page.map((c) => c.authorId))];
+    const authors = await Promise.all(authorIds.map((id: Id<'users'>) => ctx.db.get(id)));
+    const authorMap = new Map(authors.map((a) => [a?._id, a]));
+
+    return {
+      ...result,
+      page: result.page.map((c) => ({ ...c, author: authorMap.get(c.authorId) })),
+    };
   },
 });
 

@@ -1,5 +1,6 @@
 import { v } from 'convex/values';
 import { query } from '../_generated/server';
+import { paginationOptsValidator } from 'convex/server';
 import type { Id, Doc } from '../_generated/dataModel';
 import type { QueryCtx } from '../_generated/server';
 import { MAX_PAGE_SIZE } from '../pagination';
@@ -78,6 +79,40 @@ export const getAllUsers = query({
     }
 
     return await query.take(effectiveLimit + 1);
+  },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PAGINATED EMPLOYEES — native Convex pagination
+// ─────────────────────────────────────────────────────────────────────────────
+export const listUsersPaginated = query({
+  args: {
+    requesterId: v.id('users'),
+    organizationId: v.optional(v.id('organizations')),
+    paginationOpts: paginationOptsValidator,
+  },
+  handler: async (ctx, { requesterId, organizationId, paginationOpts }) => {
+    const requester = await ctx.db.get(requesterId);
+    if (!requester) throw new Error('Requester not found');
+
+    const isSuperadmin = requester.email.toLowerCase() === SUPERADMIN_EMAIL;
+
+    if (organizationId) {
+      return await ctx.db
+        .query('users')
+        .withIndex('by_org', (q) => q.eq('organizationId', organizationId))
+        .order('desc')
+        .paginate(paginationOpts);
+    } else if (isSuperadmin) {
+      return await ctx.db.query('users').order('desc').paginate(paginationOpts);
+    } else if (requester.organizationId) {
+      return await ctx.db
+        .query('users')
+        .withIndex('by_org', (q) => q.eq('organizationId', requester.organizationId))
+        .order('desc')
+        .paginate(paginationOpts);
+    }
+    return { page: [], isDone: true, continueCursor: '' };
   },
 });
 

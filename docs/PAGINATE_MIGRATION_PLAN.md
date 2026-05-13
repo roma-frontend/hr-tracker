@@ -371,7 +371,10 @@ const { results, status, loadMore } = usePaginatedQuery(
   - 3-collect: `departments.ts` (2U cap + 1S→by_org), `employeeProfiles.ts` (3 capped SMALL/DEFAULT), `organizationRequests.ts` (3U capped), `supervisorRatings.ts` (2L capped + 1S→by_org)
   - 2-collect: `drivers/recurring_trips.ts` (1U capped), `drivers/requests_queries.ts` (2S→by_driver+by_passenger), `employeeNotes.ts` (2L capped SMALL), `notifications.ts` (1U capped), `users/auth.ts` (2U capped SMALL). Unchanged (L-keep/already done): `leaves/mutations.ts`, `messenger/messages.ts`, `superadmin/emergency.ts`, `users/admin.ts`
   - 1-collect: `aiChatMutations.ts` (1M capped SMALL), `aiSiteEditor.ts` (1L capped 500), `messenger/conversations.ts` (1L capped MAX_PAGE_SIZE), `migrations.ts` (1M capped XLARGE), `sharepointSync.ts` (1U capped DEFAULT), `subscriptions.ts` (1U capped DEFAULT), `subscriptions_admin.ts` (1U capped DEFAULT). Unchanged: `userPreferences.ts` (already .take)
-- [ ] 4.5. True-paginate proход (notifications/chat/audit)
+- [x] 4.5. True-paginate проход:
+  - [x] `notifications.ts` → `listPaginated` + Navbar `usePaginatedQuery` (initialNumItems: 20, Load More)
+  - [x] `chat/queries.ts` → `listMessagesPaginated` + ChatWindow `usePaginatedQuery` (initialNumItems: 50, Load older)
+  - [x] `security.ts` → `listAuditLogsPaginated` + ComplianceClient `usePaginatedQuery` (initialNumItems: 50, Load more)
 - [ ] 4.6. Удалить `convex/pagination.ts`, финальный build + test
 
 **Current status (check before resuming):**

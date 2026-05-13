@@ -6,6 +6,7 @@
 
 import { v } from 'convex/values';
 import { query } from '../_generated/server';
+import { paginationOptsValidator } from 'convex/server';
 import { MAX_PAGE_SIZE } from '../pagination';
 import { DEFAULT_LIST_CAP } from '../lib/limits';
 
@@ -100,6 +101,33 @@ export const getMyRequests = query({
     );
 
     return enriched;
+  },
+});
+
+/** Paginated driver requests history for a user */
+export const listMyRequestsPaginated = query({
+  args: { userId: v.id('users'), paginationOpts: paginationOptsValidator },
+  handler: async (ctx, { userId, paginationOpts }) => {
+    const result = await ctx.db
+      .query('driverRequests')
+      .withIndex('by_requester', (q) => q.eq('requesterId', userId))
+      .order('desc')
+      .paginate(paginationOpts);
+
+    const enriched = await Promise.all(
+      result.page.map(async (request) => {
+        const driver = await ctx.db.get(request.driverId);
+        const driverUser = driver ? await ctx.db.get(driver.userId) : null;
+        return {
+          ...request,
+          driverName: driverUser?.name,
+          driverAvatar: driverUser?.avatarUrl,
+          driverVehicle: driver?.vehicleInfo,
+        };
+      }),
+    );
+
+    return { ...result, page: enriched };
   },
 });
 

@@ -3,6 +3,7 @@
  */
 
 import { query } from './_generated/server';
+import { paginationOptsValidator } from 'convex/server';
 import { v } from 'convex/values';
 import type { Id } from './_generated/dataModel';
 import { DEFAULT_LIST_CAP } from './lib/limits';
@@ -18,8 +19,20 @@ export const getConversations = query({
 
     return conversations.map((conv) => ({
       ...conv,
-      messages: [] as Array<{ _id: Id<'aiMessages'>; content: string; role: string }>, // Don't load all messages here
+      messages: [] as Array<{ _id: Id<'aiMessages'>; content: string; role: string }>,
     }));
+  },
+});
+
+/** Paginated AI conversations list */
+export const listConversationsPaginated = query({
+  args: { userId: v.id('users'), paginationOpts: paginationOptsValidator },
+  handler: async (ctx, { userId, paginationOpts }) => {
+    return await ctx.db
+      .query('aiConversations')
+      .withIndex('by_user', (q) => q.eq('userId', userId))
+      .order('desc')
+      .paginate(paginationOpts);
   },
 });
 

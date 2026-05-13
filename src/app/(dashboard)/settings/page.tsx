@@ -2,7 +2,7 @@
 
 import { useTranslation } from 'react-i18next';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { motion, AnimatePresence } from '@/lib/cssMotion';
+import { motion } from '@/lib/cssMotion';
 import {
   Save,
   Bell,
@@ -391,90 +391,72 @@ export default function SettingsPage() {
         </div>
 
         {/* Tab Content */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.2 }}
-          >
-            {/* Profile Tab */}
-            <TabsContent value="profile" className="space-y-6 mt-0">
-              <ProfileSettings
-                user={user}
-                name={name}
-                email={email}
-                onNameChange={setName}
-                onEmailChange={setEmail}
-              />
-            </TabsContent>
+        {/* Tab Content */}
+        <div className="animate-in fade-in duration-150">
+          <TabsContent value="profile" className="space-y-6 mt-0">
+            <ProfileSettings
+              user={user}
+              name={name}
+              email={email}
+              onNameChange={setName}
+              onEmailChange={setEmail}
+            />
+          </TabsContent>
 
-            {/* Productivity Tab */}
-            <TabsContent value="productivity" className="space-y-6 mt-0">
-              <ProductivitySettings user={user} onSettingsChange={setProductivitySettings} />
-            </TabsContent>
+          <TabsContent value="productivity" className="space-y-6 mt-0">
+            <ProductivitySettings user={user} onSettingsChange={setProductivitySettings} />
+          </TabsContent>
 
-            {/* Notifications Tab */}
-            <TabsContent value="notifications" className="space-y-6 mt-0">
-              <NotificationSettings
-                emailNotifs={emailNotifications}
-                pushNotifs={pushNotifications}
-                weeklyReport={weeklyReport}
-                onEmailNotifsChange={setEmailNotifications}
-                onPushNotifsChange={setPushNotifications}
-                onWeeklyReportChange={setWeeklyReport}
-              />
-            </TabsContent>
+          <TabsContent value="notifications" className="space-y-6 mt-0">
+            <NotificationSettings
+              emailNotifs={emailNotifications}
+              pushNotifs={pushNotifications}
+              weeklyReport={weeklyReport}
+              onEmailNotifsChange={setEmailNotifications}
+              onPushNotifsChange={setPushNotifications}
+              onWeeklyReportChange={setWeeklyReport}
+            />
+          </TabsContent>
 
-            {/* Security Tab */}
-            <TabsContent value="security" className="space-y-6 mt-0">
-              <SecuritySettings userId={user?.id ?? ''} />
-            </TabsContent>
+          <TabsContent value="security" className="space-y-6 mt-0">
+            <SecuritySettings userId={user?.id ?? ''} />
+          </TabsContent>
 
-            {/* Advanced Security Tab */}
-            <TabsContent value="advanced-security" className="space-y-6 mt-0">
-              <AdvancedSecuritySettings />
-            </TabsContent>
+          <TabsContent value="advanced-security" className="space-y-6 mt-0">
+            <AdvancedSecuritySettings />
+          </TabsContent>
 
-            {/* Appearance Tab */}
-            <TabsContent value="appearance" className="space-y-6 mt-0">
-              <AppearanceSettings />
-            </TabsContent>
+          <TabsContent value="appearance" className="space-y-6 mt-0">
+            <AppearanceSettings />
+          </TabsContent>
 
-            {/* Dashboard Customization Tab */}
-            <TabsContent value="dashboard" className="space-y-6 mt-0">
-              <DashboardCustomization user={user} onSettingsChange={setDashboardSettings} />
-            </TabsContent>
+          <TabsContent value="dashboard" className="space-y-6 mt-0">
+            <DashboardCustomization user={user} onSettingsChange={setDashboardSettings} />
+          </TabsContent>
 
-            {/* Localization Tab */}
-            <TabsContent value="localization" className="space-y-6 mt-0">
-              <LocalizationSettings
-                userId={user?.id as Id<'users'>}
-                user={user}
-                onSettingsChange={setLocalizationSettings}
-              />
-            </TabsContent>
+          <TabsContent value="localization" className="space-y-6 mt-0">
+            <LocalizationSettings
+              userId={user?.id as Id<'users'>}
+              user={user}
+              onSettingsChange={setLocalizationSettings}
+            />
+          </TabsContent>
 
-            {/* Integrations Tab */}
-            <TabsContent value="integrations" className="space-y-6 mt-0">
-              <IntegrationSettings />
-            </TabsContent>
+          <TabsContent value="integrations" className="space-y-6 mt-0">
+            <IntegrationSettings />
+          </TabsContent>
 
-            {/* Billing Tab */}
-            <TabsContent value="billing" className="space-y-6 mt-0">
-              <SubscriptionPlanCard />
-              <CookiePreferences />
-            </TabsContent>
+          <TabsContent value="billing" className="space-y-6 mt-0">
+            <SubscriptionPlanCard />
+            <CookiePreferences />
+          </TabsContent>
 
-            {/* Admin Tab */}
-            {user?.role === 'admin' && (
-              <TabsContent value="admin" className="space-y-6 mt-0">
-                <SLASettings />
-              </TabsContent>
-            )}
-          </motion.div>
-        </AnimatePresence>
+          {user?.role === 'admin' && (
+            <TabsContent value="admin" className="space-y-6 mt-0">
+              <SLASettings />
+            </TabsContent>
+          )}
+        </div>
       </Tabs>
 
       {/* Save Button - Fixed at bottom */}

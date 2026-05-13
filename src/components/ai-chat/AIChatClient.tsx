@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
-import { useQuery, useMutation } from 'convex/react';
+import { useQuery, useMutation, usePaginatedQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
 import { getRoleSuggestions, type UserRole } from '@/lib/aiAssistant';
@@ -175,7 +175,13 @@ export default function AIChatPage() {
   };
 
   // Convex queries
-  const savedConversations = useQuery(api.aiChat.getConversations, userId ? { userId } : 'skip');
+  const {
+    results: savedConversations,
+    loadMore: loadMoreConversations,
+    status: convsStatus,
+  } = usePaginatedQuery(api.aiChat.listConversationsPaginated, userId ? { userId } : 'skip', {
+    initialNumItems: 30,
+  });
 
   // Load messages for active conversation
   const savedMessages = useQuery(

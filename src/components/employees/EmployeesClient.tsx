@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { useMainRef } from '@/hooks/useMainRef';
 import { useTranslation } from 'react-i18next';
-import { useQuery, useMutation } from 'convex/react';
+import { useQuery, useMutation, usePaginatedQuery } from 'convex/react';
 import { useDebouncedCallback } from 'use-debounce';
 import { api } from '../../../convex/_generated/api';
 import { Id } from '../../../convex/_generated/dataModel';
@@ -104,10 +104,24 @@ export function EmployeesClient() {
   const [isPanelOpen, setIsPanelOpen] = useState(false); // Закрыт по умолчанию
 
   // Server-side pagination state
-  const [cursor, setCursor] = useState<Id<'users'> | undefined>(undefined);
-  const [accumulatedUsers, setAccumulatedUsers] = useState<any[]>([]);
-  const [hasMore, setHasMore] = useState(true);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const paginatedArgs =
+    mounted && user?.id
+      ? {
+          requesterId: user.id as Id<'users'>,
+          ...(selectedOrgId ? { organizationId: selectedOrgId as Id<'organizations'> } : {}),
+        }
+      : 'skip';
+
+  const {
+    results: accumulatedUsers,
+    status: usersStatus,
+    loadMore,
+  } = usePaginatedQuery(api.users.listUsersPaginated, paginatedArgs as any, {
+    initialNumItems: 50,
+  });
+
+  const hasMore = usersStatus === 'CanLoadMore';
+  const isLoadingMore = usersStatus === 'LoadingMore';
 
   // Debounced search - prevents excessive re-renders while typing
   const handleSearchChange = useDebouncedCallback((value: string) => {
@@ -117,71 +131,6 @@ export function EmployeesClient() {
   // For superadmin with selected org, ALWAYS use getOrgMembers
   // For others, use getAllUsers which returns their org's members
   const isSuperadmin = user?.role === 'superadmin';
-  const useOrgFilter = mounted && isSuperadmin && selectedOrgId;
-
-  // Paginated queries - separate to avoid TS2589 deep type instantiation
-  const currentPageOrg = useQuery(
-    api.organizations.getOrgMembers,
-    mounted && user?.id && useOrgFilter
-      ? {
-          organizationId: selectedOrgId as Id<'organizations'>,
-          superadminUserId: user.id as Id<'users'>,
-          cursor,
-          limit: 50,
-        }
-      : 'skip',
-  );
-
-  const currentPageAll = useQuery(
-    api.users.getAllUsers,
-    mounted && user?.id && !useOrgFilter
-      ? { requesterId: user.id as Id<'users'>, cursor, limit: 50 }
-      : 'skip',
-  );
-
-  const currentPage = useOrgFilter ? currentPageOrg : currentPageAll;
-
-  // Accumulate pages
-  React.useEffect(() => {
-    if (currentPage && currentPage.length > 0) {
-      const hasMorePages = currentPage.length > 10;
-      const pageUsers = hasMorePages ? currentPage.slice(0, 10) : currentPage;
-
-      setAccumulatedUsers((prev) => {
-        // Avoid duplicates by checking if we already have these users
-        const existingIds = new Set(prev.map((u: any) => u._id));
-        const newUsers = pageUsers.filter((u: any) => !existingIds.has(u._id));
-        return [...prev, ...newUsers];
-      });
-
-      setHasMore(hasMorePages);
-      if (hasMorePages && pageUsers.length > 0) {
-        const lastUser = pageUsers[pageUsers.length - 1];
-        if (lastUser?._id) {
-          setCursor(lastUser._id);
-        }
-      }
-    }
-  }, [currentPage]);
-
-  // Reset pagination when filters change
-  React.useEffect(() => {
-    setAccumulatedUsers([]);
-    setCursor(undefined);
-    setHasMore(true);
-  }, [debouncedSearch, filterRole, filterType, filterStatus, useOrgFilter]);
-
-  // Load more function
-  const loadMore = (e?: React.MouseEvent) => {
-    e?.stopPropagation();
-    if (!hasMore || isLoadingMore) return;
-    setIsLoadingMore(true);
-    // Trigger refetch by updating cursor
-    if (accumulatedUsers.length > 0) {
-      setCursor(accumulatedUsers[accumulatedUsers.length - 1]._id);
-    }
-    setTimeout(() => setIsLoadingMore(false), 500);
-  };
 
   // Build supervisor lookup map from accumulatedUsers
   const supervisorMap = useMemo(() => {
@@ -736,7 +685,7 @@ export function EmployeesClient() {
               {hasMore && filtered.length > 0 && (
                 <div className="flex justify-center mt-6">
                   <button
-                    onClick={loadMore}
+                    onClick={() => loadMore(50)}
                     disabled={isLoadingMore}
                     className="px-6 py-3 rounded-xl border text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{
@@ -946,7 +895,7 @@ export function EmployeesClient() {
               {hasMore && filtered.length > 0 && (
                 <div className="flex justify-center mt-6">
                   <button
-                    onClick={loadMore}
+                    onClick={() => loadMore(50)}
                     disabled={isLoadingMore}
                     className="px-6 py-3 rounded-xl border text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{

@@ -96,7 +96,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isAIChatPage = pathname?.startsWith('/ai-chat');
   const isChatPage = pathname?.startsWith('/chat') && !isAIChatPage;
-  const isAuthOnboardingPage = pathname?.startsWith('/onboarding/select-organization') || pathname?.startsWith('/onboarding/pending');
+  const isAuthOnboardingPage =
+    pathname?.startsWith('/onboarding/select-organization') ||
+    pathname?.startsWith('/onboarding/pending');
   const redirectedRef = React.useRef(false);
   const hasHydratedRef = React.useRef(false);
 
@@ -124,7 +126,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   // Redirect to onboarding if user needs it (and not already on onboarding page)
   useEffect(() => {
-    if (hydrated && user && !user.organizationId && !isAuthOnboardingPage && !redirectedRef.current) {
+    if (
+      hydrated &&
+      user &&
+      !user.organizationId &&
+      !isAuthOnboardingPage &&
+      !redirectedRef.current
+    ) {
       redirectedRef.current = true;
       router.push('/onboarding/select-organization');
     }
@@ -187,7 +195,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
                   ? 'flex-1 overflow-hidden flex flex-col min-h-0'
                   : 'flex-1 overflow-y-auto overflow-x-hidden min-h-0'
               }
-              style={{ contain: 'paint' }}
+              style={{
+                contain: 'paint',
+                scrollbarGutter: isChatPage || isAIChatPage ? undefined : 'stable',
+              }}
             >
               {isChatPage ? (
                 <div className="flex flex-col flex-1 min-h-0 h-full p-0 sm:p-3 md:p-4">

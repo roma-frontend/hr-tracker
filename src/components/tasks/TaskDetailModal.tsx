@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import { useMainRef } from '@/hooks/useMainRef';
-import { useMutation, useQuery } from 'convex/react';
+import { useMutation, useQuery, usePaginatedQuery } from 'convex/react';
 import { useTranslation } from 'react-i18next';
 import { formatDate } from '@/lib/date-format';
 import { api } from '../../../convex/_generated/api';
@@ -127,7 +127,15 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
   const freshTask = useQuery(api.tasks.getTask, { taskId: task._id });
   const taskData = freshTask ?? task;
 
-  const comments = useQuery(api.tasks.getTaskComments, { taskId: task._id });
+  const {
+    results: comments,
+    status: commentsStatus,
+    loadMore: loadMoreComments,
+  } = usePaginatedQuery(
+    api.tasks.listCommentsPaginated,
+    { taskId: task._id },
+    { initialNumItems: 20 },
+  );
   const updateStatus = useMutation(api.tasks.updateTaskStatus);
   const updateTask = useMutation(api.tasks.updateTask);
   const deleteTask = useMutation(api.tasks.deleteTask);
@@ -489,6 +497,15 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
                     </div>
                   </div>
                 ))}
+                {commentsStatus === 'CanLoadMore' && (
+                  <button
+                    type="button"
+                    onClick={() => loadMoreComments(20)}
+                    className="text-xs text-[#2563eb] hover:underline py-1"
+                  >
+                    {t('taskDetail.loadMoreComments', { defaultValue: 'Load more comments' })}
+                  </button>
+                )}
               </div>
 
               {/* Comment input */}

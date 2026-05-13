@@ -1,5 +1,6 @@
 import { v } from 'convex/values';
 import { query, mutation, action } from './_generated/server';
+import { paginationOptsValidator } from 'convex/server';
 import { api } from './_generated/api';
 import type { Id } from './_generated/dataModel';
 import { DEFAULT_LIST_CAP, SMALL_LIST_CAP } from './lib/limits';
@@ -117,6 +118,27 @@ export const listCandidatesByVacancy = query({
     );
 
     return enriched.sort((a, b) => b.createdAt - a.createdAt);
+  },
+});
+
+/** Paginated applications for a vacancy */
+export const listApplicationsPaginated = query({
+  args: { vacancyId: v.id('vacancies'), paginationOpts: paginationOptsValidator },
+  handler: async (ctx, { vacancyId, paginationOpts }) => {
+    const result = await ctx.db
+      .query('applications')
+      .withIndex('by_vacancy', (q) => q.eq('vacancyId', vacancyId))
+      .order('desc')
+      .paginate(paginationOpts);
+
+    const enriched = await Promise.all(
+      result.page.map(async (app) => {
+        const profile = await ctx.db.get(app.candidateId);
+        return { ...app, candidate: profile };
+      }),
+    );
+
+    return { ...result, page: enriched };
   },
 });
 

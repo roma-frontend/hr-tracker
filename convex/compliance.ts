@@ -1,5 +1,6 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
+import { paginationOptsValidator } from 'convex/server';
 import type { Doc, Id } from './_generated/dataModel';
 import { isSuperadmin, SUPERADMIN_EMAIL } from './lib/auth';
 import { DEFAULT_LIST_CAP, XLARGE_LIST_CAP } from './lib/limits';
@@ -184,6 +185,45 @@ export const getGdprRequests = query({
         processedByName: processedBy?.name ?? null,
       };
     });
+  },
+});
+
+// ── Paginated GDPR Requests ───────────────────────────────────────────────────
+export const listGdprRequestsPaginated = query({
+  args: { adminId: v.id('users'), paginationOpts: paginationOptsValidator },
+  handler: async (ctx, { adminId, paginationOpts }) => {
+    const { orgId } = await requireAdmin(ctx, adminId);
+
+    const result = orgId
+      ? await ctx.db
+          .query('gdprRequests')
+          .withIndex('by_org', (q) => q.eq('organizationId', orgId))
+          .order('desc')
+          .paginate(paginationOpts)
+      : await ctx.db.query('gdprRequests').order('desc').paginate(paginationOpts);
+
+    const uniqueUserIds = [
+      ...new Set([
+        ...result.page.map((r) => r.userId),
+        ...result.page.map((r) => r.requestedBy),
+        ...result.page.map((r) => r.processedBy).filter(Boolean),
+      ]),
+    ];
+    const usersBatch = await Promise.all(uniqueUserIds.map((id) => ctx.db.get(id as Id<'users'>)));
+    const userMap = new Map(
+      usersBatch.filter((u): u is Doc<'users'> => u !== null).map((u) => [u._id, u]),
+    );
+
+    return {
+      ...result,
+      page: result.page.map((r) => ({
+        ...r,
+        userName: userMap.get(r.userId)?.name ?? 'Unknown',
+        userEmail: userMap.get(r.userId)?.email ?? '',
+        requestedByName: userMap.get(r.requestedBy)?.name ?? 'Unknown',
+        processedByName: r.processedBy ? (userMap.get(r.processedBy)?.name ?? null) : null,
+      })),
+    };
   },
 });
 
@@ -445,6 +485,41 @@ export const getDataAccessLogs = query({
         accessedByEmail: accessedBy?.email ?? '',
       };
     });
+  },
+});
+
+// ── Paginated Data Access Logs ────────────────────────────────────────────────
+export const listDataAccessLogsPaginated = query({
+  args: { adminId: v.id('users'), paginationOpts: paginationOptsValidator },
+  handler: async (ctx, { adminId, paginationOpts }) => {
+    const { orgId } = await requireAdmin(ctx, adminId);
+
+    const result = orgId
+      ? await ctx.db
+          .query('dataAccessLogs')
+          .withIndex('by_org', (q) => q.eq('organizationId', orgId))
+          .order('desc')
+          .paginate(paginationOpts)
+      : await ctx.db.query('dataAccessLogs').order('desc').paginate(paginationOpts);
+
+    const uniqueUserIds = [
+      ...new Set([...result.page.map((l) => l.userId), ...result.page.map((l) => l.accessedBy)]),
+    ];
+    const usersBatch = await Promise.all(uniqueUserIds.map((id) => ctx.db.get(id as Id<'users'>)));
+    const userMap = new Map(
+      usersBatch.filter((u): u is Doc<'users'> => u !== null).map((u) => [u._id, u]),
+    );
+
+    return {
+      ...result,
+      page: result.page.map((log) => ({
+        ...log,
+        userName: userMap.get(log.userId)?.name ?? 'Unknown',
+        userEmail: userMap.get(log.userId)?.email ?? '',
+        accessedByName: userMap.get(log.accessedBy)?.name ?? 'Unknown',
+        accessedByEmail: userMap.get(log.accessedBy)?.email ?? '',
+      })),
+    };
   },
 });
 
