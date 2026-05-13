@@ -2,8 +2,9 @@
  * Migrations for fixing duplicate users
  */
 
-import { v } from "convex/values";
-import { mutation } from "./_generated/server";
+import { v } from 'convex/values';
+import { mutation } from './_generated/server';
+import { XLARGE_LIST_CAP } from './lib/limits';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Fix duplicate users — merge users with same email
@@ -11,28 +12,27 @@ import { mutation } from "./_generated/server";
 export const fixDuplicateUsers = mutation({
   args: {},
   handler: async (ctx) => {
-    const allUsers = await ctx.db.query("users").collect();
-    
+    const allUsers = await ctx.db.query('users').take(XLARGE_LIST_CAP);
+
     // Group by email
     const emailMap = new Map<string, typeof allUsers>();
-    
+
     for (const user of allUsers) {
       const email = user.email.toLowerCase();
       const existing = emailMap.get(email) || [];
       existing.push(user);
       emailMap.set(email, existing);
     }
-    
+
     let fixedCount = 0;
-    
+
     for (const [email, users] of emailMap.entries()) {
       if (users.length <= 1) continue;
-      
-      
+
       // Find the approved user (prefer approved over non-approved)
-      const approvedUser = users.find(u => u.isApproved);
-      const nonApprovedUsers = users.filter(u => u !== approvedUser);
-      
+      const approvedUser = users.find((u) => u.isApproved);
+      const nonApprovedUsers = users.filter((u) => u !== approvedUser);
+
       if (approvedUser && nonApprovedUsers.length > 0) {
         // Delete non-approved duplicates
         for (const dupUser of nonApprovedUsers) {
@@ -41,9 +41,9 @@ export const fixDuplicateUsers = mutation({
         }
       } else {
         // No approved user — keep the one with organizationId
-        const userWithOrg = users.find(u => u.organizationId);
-        const usersWithoutOrg = users.filter(u => u !== userWithOrg);
-        
+        const userWithOrg = users.find((u) => u.organizationId);
+        const usersWithoutOrg = users.filter((u) => u !== userWithOrg);
+
         if (userWithOrg && usersWithoutOrg.length > 0) {
           for (const dupUser of usersWithoutOrg) {
             await ctx.db.delete(dupUser._id);
@@ -52,7 +52,7 @@ export const fixDuplicateUsers = mutation({
         }
       }
     }
-    
+
     return { fixed: fixedCount };
   },
 });

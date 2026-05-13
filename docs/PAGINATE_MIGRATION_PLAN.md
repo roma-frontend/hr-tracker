@@ -367,18 +367,19 @@ const { results, status, loadMore } = usePaginatedQuery(
   - [x] aiEvaluator.ts (5), corporate.ts (5), productivity.ts (5), recognition.ts (5) — 4 × 5-collect
   - [x] careers.ts (4), drivers/driver_operations.ts (4), organizationJoinRequests.ts (4), positions.ts (4), users/mutations.ts (4) — 5 × 4-collect
   - [x] automation.ts (3), birthdays.ts (3), driverAI.ts (3), drivers/requests_mutations.ts (3) — 4 × 3-collect
-- [ ] 4.4c. Low-priority remaining (16 files, ~35 collects):
-  - 3-collect: `departments.ts`, `employeeProfiles.ts`, `organizationRequests.ts`, `supervisorRatings.ts`
-  - 2-collect: `drivers/recurring_trips.ts`, `drivers/requests_queries.ts`, `employeeNotes.ts`, `leaves/mutations.ts`, `messenger/messages.ts`, `notifications.ts`, `superadmin/emergency.ts`, `users/admin.ts`, `users/auth.ts`
-  - 1-collect: `aiChatMutations.ts`, `aiSiteEditor.ts`, `messenger/conversations.ts`, `migrations.ts`, `sharepointSync.ts`, `subscriptions.ts`, `subscriptions_admin.ts`, `userPreferences.ts`
+- [x] 4.4c. Low-priority remaining (16 files, ~35 collects):
+  - 3-collect: `departments.ts` (2U cap + 1S→by_org), `employeeProfiles.ts` (3 capped SMALL/DEFAULT), `organizationRequests.ts` (3U capped), `supervisorRatings.ts` (2L capped + 1S→by_org)
+  - 2-collect: `drivers/recurring_trips.ts` (1U capped), `drivers/requests_queries.ts` (2S→by_driver+by_passenger), `employeeNotes.ts` (2L capped SMALL), `notifications.ts` (1U capped), `users/auth.ts` (2U capped SMALL). Unchanged (L-keep/already done): `leaves/mutations.ts`, `messenger/messages.ts`, `superadmin/emergency.ts`, `users/admin.ts`
+  - 1-collect: `aiChatMutations.ts` (1M capped SMALL), `aiSiteEditor.ts` (1L capped 500), `messenger/conversations.ts` (1L capped MAX_PAGE_SIZE), `migrations.ts` (1M capped XLARGE), `sharepointSync.ts` (1U capped DEFAULT), `subscriptions.ts` (1U capped DEFAULT), `subscriptions_admin.ts` (1U capped DEFAULT). Unchanged: `userPreferences.ts` (already .take)
 - [ ] 4.5. True-paginate proход (notifications/chat/audit)
 - [ ] 4.6. Удалить `convex/pagination.ts`, финальный build + test
 
 **Current status (check before resuming):**
 
 - `npx tsc --noEmit` = 0 errors throughout
-- Remaining `.collect()` across convex/: ~106 (mostly L-keep in already-migrated files + 16 untouched low-priority files)
-- All hi-priority (7) and all mid-priority (12) done. 19 of 35 low-priority done.
+- All hi-priority (7), mid-priority (12), and low-priority (35) files DONE.
+- Remaining `.collect()` across convex/: ~70 (all L-keep with NOTE comments or bounded by single-entity indexes)
+- Next: Step 4.5 (true-paginate pass) and 4.6 (cleanup)
 
 ---
 

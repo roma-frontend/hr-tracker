@@ -1,5 +1,6 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
+import { DEFAULT_LIST_CAP } from './lib/limits';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ADB-ARRM ORGANIZATION RESTRICTION
@@ -124,7 +125,7 @@ export const deactivateSharePointUsers = mutation({
       .query('users')
       .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
       .filter((q) => q.eq(q.field('isActive'), true))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     let deactivated = 0;
 

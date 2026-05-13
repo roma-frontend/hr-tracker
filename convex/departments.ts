@@ -1,6 +1,7 @@
 import { v } from 'convex/values';
 import { query, mutation } from './_generated/server';
 import type { Id } from './_generated/dataModel';
+import { DEFAULT_LIST_CAP } from './lib/limits';
 
 export const list = query({
   args: {
@@ -14,9 +15,14 @@ export const list = query({
           .query('departments')
           .withIndex('by_org', (q: any) => q.eq('organizationId', orgId))
           .collect()
-      : await ctx.db.query('departments').collect();
+      : await ctx.db.query('departments').take(DEFAULT_LIST_CAP);
 
-    const users = await ctx.db.query('users').collect();
+    const users = orgId
+      ? await ctx.db
+          .query('users')
+          .withIndex('by_org', (q: any) => q.eq('organizationId', orgId))
+          .take(DEFAULT_LIST_CAP)
+      : await ctx.db.query('users').take(DEFAULT_LIST_CAP);
 
     return departments.map((dept: any) => {
       const manager = users.find((u: any) => u._id === dept.managerId);

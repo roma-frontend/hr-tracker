@@ -2,29 +2,30 @@
  * AI Chat Conversations - Mutation functions
  */
 
-import { mutation } from "./_generated/server";
-import { v } from "convex/values";
+import { mutation } from './_generated/server';
+import { v } from 'convex/values';
+import { SMALL_LIST_CAP } from './lib/limits';
 
 export const createConversation = mutation({
   args: {
-    userId: v.id("users"),
+    userId: v.id('users'),
     title: v.string(),
   },
   handler: async (ctx, args) => {
-    const conversationId = await ctx.db.insert("aiConversations", {
+    const conversationId = await ctx.db.insert('aiConversations', {
       userId: args.userId,
       title: args.title,
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });
-    
+
     return { conversationId };
   },
 });
 
 export const updateConversationTitle = mutation({
   args: {
-    conversationId: v.id("aiConversations"),
+    conversationId: v.id('aiConversations'),
     title: v.string(),
   },
   handler: async (ctx, args) => {
@@ -32,39 +33,39 @@ export const updateConversationTitle = mutation({
       title: args.title,
       updatedAt: Date.now(),
     });
-    
+
     return { success: true };
   },
 });
 
 export const deleteConversation = mutation({
-  args: { conversationId: v.id("aiConversations") },
+  args: { conversationId: v.id('aiConversations') },
   handler: async (ctx, args) => {
     // Delete all messages first
     const messages = await ctx.db
-      .query("aiMessages")
-      .withIndex("by_conversation", (q) => q.eq("conversationId", args.conversationId))
-      .collect();
-    
+      .query('aiMessages')
+      .withIndex('by_conversation', (q) => q.eq('conversationId', args.conversationId))
+      .take(SMALL_LIST_CAP);
+
     for (const message of messages) {
       await ctx.db.delete(message._id);
     }
-    
+
     // Delete conversation
     await ctx.db.delete(args.conversationId);
-    
+
     return { success: true };
   },
 });
 
 export const addMessage = mutation({
   args: {
-    conversationId: v.id("aiConversations"),
-    role: v.union(v.literal("user"), v.literal("assistant")),
+    conversationId: v.id('aiConversations'),
+    role: v.union(v.literal('user'), v.literal('assistant')),
     content: v.string(),
   },
   handler: async (ctx, args) => {
-    const messageId = await ctx.db.insert("aiMessages", {
+    const messageId = await ctx.db.insert('aiMessages', {
       conversationId: args.conversationId,
       role: args.role,
       content: args.content,
@@ -81,7 +82,7 @@ export const addMessage = mutation({
 });
 
 export const deleteMessage = mutation({
-  args: { messageId: v.id("aiMessages") },
+  args: { messageId: v.id('aiMessages') },
   handler: async (ctx, args) => {
     await ctx.db.delete(args.messageId);
     return { success: true };
@@ -90,13 +91,13 @@ export const deleteMessage = mutation({
 
 export const autoRenameConversation = mutation({
   args: {
-    conversationId: v.id("aiConversations"),
+    conversationId: v.id('aiConversations'),
     firstMessage: v.string(),
   },
   handler: async (ctx, args) => {
     // Generate a short title from the first message (max 50 chars)
     const title = args.firstMessage.slice(0, 50).trim();
-    
+
     await ctx.db.patch(args.conversationId, {
       title,
       updatedAt: Date.now(),
@@ -108,14 +109,14 @@ export const autoRenameConversation = mutation({
 
 export const createLeaveRequest = mutation({
   args: {
-    requesterId: v.id("users"),
-    organizationId: v.id("organizations"),
+    requesterId: v.id('users'),
+    organizationId: v.id('organizations'),
     type: v.union(
-      v.literal("paid"),
-      v.literal("unpaid"),
-      v.literal("sick"),
-      v.literal("family"),
-      v.literal("doctor")
+      v.literal('paid'),
+      v.literal('unpaid'),
+      v.literal('sick'),
+      v.literal('family'),
+      v.literal('doctor'),
     ),
     startDate: v.string(),
     endDate: v.string(),
@@ -123,9 +124,13 @@ export const createLeaveRequest = mutation({
   },
   handler: async (ctx, args) => {
     const now = Date.now();
-    const days = Math.ceil((new Date(args.endDate).getTime() - new Date(args.startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1;
-    
-    const leaveId = await ctx.db.insert("leaveRequests", {
+    const days =
+      Math.ceil(
+        (new Date(args.endDate).getTime() - new Date(args.startDate).getTime()) /
+          (1000 * 60 * 60 * 24),
+      ) + 1;
+
+    const leaveId = await ctx.db.insert('leaveRequests', {
       userId: args.requesterId,
       organizationId: args.organizationId,
       type: args.type,
@@ -133,7 +138,7 @@ export const createLeaveRequest = mutation({
       endDate: args.endDate,
       days: days,
       reason: args.reason,
-      status: "pending",
+      status: 'pending',
       isRead: false,
       reviewedBy: undefined,
       reviewComment: undefined,
@@ -148,24 +153,24 @@ export const createLeaveRequest = mutation({
 
 export const createTask = mutation({
   args: {
-    assigneeId: v.id("users"),
-    assignerId: v.id("users"),
-    organizationId: v.id("organizations"),
+    assigneeId: v.id('users'),
+    assignerId: v.id('users'),
+    organizationId: v.id('organizations'),
     title: v.string(),
     description: v.optional(v.string()),
     deadline: v.optional(v.number()),
-    priority: v.union(v.literal("low"), v.literal("medium"), v.literal("high")),
+    priority: v.union(v.literal('low'), v.literal('medium'), v.literal('high')),
   },
   handler: async (ctx, args) => {
     const now = Date.now();
-    
-    const taskId = await ctx.db.insert("tasks", {
+
+    const taskId = await ctx.db.insert('tasks', {
       assignedTo: args.assigneeId,
       assignedBy: args.assignerId,
       organizationId: args.organizationId,
       title: args.title,
-      description: args.description || "",
-      status: "pending",
+      description: args.description || '',
+      status: 'pending',
       priority: args.priority,
       deadline: args.deadline,
       createdAt: now,

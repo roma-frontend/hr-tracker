@@ -1,5 +1,6 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
+import { SMALL_LIST_CAP, DEFAULT_LIST_CAP } from './lib/limits';
 
 // ── Get Employee Profile with Extended Data ──────────────────────────────────
 export const getEmployeeProfile = query({
@@ -18,7 +19,7 @@ export const getEmployeeProfile = query({
     const documents = await ctx.db
       .query('employeeDocuments')
       .withIndex('by_user', (q) => q.eq('userId', args.userId))
-      .collect();
+      .take(SMALL_LIST_CAP);
 
     // Get performance metrics
     const metrics = await ctx.db
@@ -111,7 +112,7 @@ export const getDocuments = query({
       .query('employeeDocuments')
       .withIndex('by_user', (q) => q.eq('userId', args.userId))
       .order('desc')
-      .collect();
+      .take(SMALL_LIST_CAP);
   },
 });
 
@@ -244,7 +245,7 @@ export const getEmployeesByOrganization = query({
     const profiles = await ctx.db
       .query('employeeProfiles')
       .withIndex('by_org', (q) => q.eq('organizationId', args.organizationId))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     return profiles;
   },

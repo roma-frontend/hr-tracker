@@ -379,7 +379,7 @@ export const addParticipants = mutation({
     const allMemberships = await ctx.db
       .query('chatMembers')
       .withIndex('by_conversation', (q: any) => q.eq('conversationId', conversationId))
-      .collect();
+      .take(MAX_PAGE_SIZE);
     const existingMemberIds = new Set(allMemberships.map((m: any) => m.userId));
 
     for (const uid of userIds) {

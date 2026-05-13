@@ -2,6 +2,7 @@ import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
 import { Id } from './_generated/dataModel';
 import { SUPERADMIN_EMAIL } from './lib/auth';
+import { DEFAULT_LIST_CAP, SMALL_LIST_CAP } from './lib/limits';
 
 // ── Create/Update Supervisor Rating ──────────────────────────────────────
 export const createRating = mutation({
@@ -169,7 +170,7 @@ export const getAverageRatings = query({
     const allRatings = await ctx.db
       .query('supervisorRatings')
       .withIndex('by_employee', (q) => q.eq('employeeId', args.employeeId))
-      .collect();
+      .take(SMALL_LIST_CAP);
 
     if (allRatings.length === 0) {
       return {
@@ -261,7 +262,7 @@ async function updatePerformanceMetrics(ctx: any, employeeId: Id<'users'>, updat
   const ratings = await ctx.db
     .query('supervisorRatings')
     .withIndex('by_employee', (q: any) => q.eq('employeeId', employeeId))
-    .collect();
+    .take(SMALL_LIST_CAP);
 
   if (ratings.length === 0) return;
 
@@ -321,15 +322,18 @@ export const getEmployeesNeedingRating = query({
 
     const currentPeriod = new Date().toISOString().slice(0, 7);
 
-    // Get all active employees
-    let allUsers = await ctx.db.query('users').collect();
-
-    // Filter by organization if not superadmin
+    // Get active employees scoped to org
+    let allUsers;
     if (!isSuperadmin) {
       if (!supervisor.organizationId) {
         throw new Error('User does not belong to an organization');
       }
-      allUsers = allUsers.filter((u) => u.organizationId === supervisor.organizationId);
+      allUsers = await ctx.db
+        .query('users')
+        .withIndex('by_org', (q: any) => q.eq('organizationId', supervisor.organizationId))
+        .take(DEFAULT_LIST_CAP);
+    } else {
+      allUsers = await ctx.db.query('users').take(DEFAULT_LIST_CAP);
     }
 
     // Exclude superadmins and admins from rating list

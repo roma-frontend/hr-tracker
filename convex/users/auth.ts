@@ -2,6 +2,7 @@ import { v } from 'convex/values';
 import { mutation, query } from '../_generated/server';
 import type { Id } from '../_generated/dataModel';
 import { SUPERADMIN_EMAIL } from '../lib/auth';
+import { SMALL_LIST_CAP } from '../lib/limits';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CREATE OAUTH USER — for Google OAuth sign in
@@ -58,7 +59,7 @@ export const createOAuthUser = mutation({
     const isSuperAdmin = emailLower === SUPERADMIN_EMAIL;
 
     // Get first organization or create error
-    const allOrgs = await ctx.db.query('organizations').collect();
+    const allOrgs = await ctx.db.query('organizations').take(SMALL_LIST_CAP);
 
     if (allOrgs.length === 0) {
       throw new Error('No organization found. Please create an organization first.');
@@ -71,7 +72,7 @@ export const createOAuthUser = mutation({
       ? await ctx.db
           .query('users')
           .withIndex('by_org', (q) => q.eq('organizationId', organizationId!))
-          .collect()
+          .take(SMALL_LIST_CAP)
       : [];
 
     const isFirstMember = orgMembers.length === 0;

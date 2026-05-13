@@ -1,6 +1,7 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
 import { MAX_PAGE_SIZE } from './pagination';
+import { DEFAULT_LIST_CAP } from './lib/limits';
 
 // ── Get notifications for a user ───────────────────────────────────────────
 export const getUserNotifications = query({
@@ -38,11 +39,11 @@ export const markAsRead = mutation({
 export const markAllAsRead = mutation({
   args: { userId: v.id('users') },
   handler: async (ctx, { userId }) => {
-    // NOTE: Using .collect() here because we must mark ALL unread notifications as read for this user
+    // Mark all unread notifications as read (capped for safety)
     const unread = await ctx.db
       .query('notifications')
       .withIndex('by_user_unread', (q) => q.eq('userId', userId).eq('isRead', false))
-      .collect();
+      .take(DEFAULT_LIST_CAP);
     for (const n of unread) {
       await ctx.db.patch(n._id, { isRead: true });
     }

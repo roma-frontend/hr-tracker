@@ -1,41 +1,50 @@
-import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { v } from 'convex/values';
+import { mutation, query } from './_generated/server';
+import { SMALL_LIST_CAP } from './lib/limits';
 
 // ── Add Manager Note ──────────────────────────────────────────────
 export const addNote = mutation({
   args: {
-    employeeId: v.id("users"),
-    authorId: v.id("users"),
+    employeeId: v.id('users'),
+    authorId: v.id('users'),
     type: v.union(
-      v.literal("performance"),
-      v.literal("behavior"),
-      v.literal("achievement"),
-      v.literal("concern"),
-      v.literal("general")
+      v.literal('performance'),
+      v.literal('behavior'),
+      v.literal('achievement'),
+      v.literal('concern'),
+      v.literal('general'),
     ),
     visibility: v.union(
-      v.literal("private"),
-      v.literal("hr_only"),
-      v.literal("manager_only"),
-      v.literal("employee_visible")
+      v.literal('private'),
+      v.literal('hr_only'),
+      v.literal('manager_only'),
+      v.literal('employee_visible'),
     ),
     content: v.string(),
     tags: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
     // Simple sentiment analysis based on keywords
-    const positiveWords = ["excellent", "great", "outstanding", "impressive", "exceeded", "strong", "good"];
-    const negativeWords = ["poor", "weak", "concerning", "issue", "problem", "below", "failed"];
-    
-    const contentLower = args.content.toLowerCase();
-    const hasPositive = positiveWords.some(word => contentLower.includes(word));
-    const hasNegative = negativeWords.some(word => contentLower.includes(word));
-    
-    let sentiment: "positive" | "neutral" | "negative" = "neutral";
-    if (hasPositive && !hasNegative) sentiment = "positive";
-    else if (hasNegative && !hasPositive) sentiment = "negative";
+    const positiveWords = [
+      'excellent',
+      'great',
+      'outstanding',
+      'impressive',
+      'exceeded',
+      'strong',
+      'good',
+    ];
+    const negativeWords = ['poor', 'weak', 'concerning', 'issue', 'problem', 'below', 'failed'];
 
-    return await ctx.db.insert("employeeNotes", {
+    const contentLower = args.content.toLowerCase();
+    const hasPositive = positiveWords.some((word) => contentLower.includes(word));
+    const hasNegative = negativeWords.some((word) => contentLower.includes(word));
+
+    let sentiment: 'positive' | 'neutral' | 'negative' = 'neutral';
+    if (hasPositive && !hasNegative) sentiment = 'positive';
+    else if (hasNegative && !hasPositive) sentiment = 'negative';
+
+    return await ctx.db.insert('employeeNotes', {
       employeeId: args.employeeId,
       authorId: args.authorId,
       type: args.type,
@@ -50,26 +59,30 @@ export const addNote = mutation({
 
 // ── Get Employee Notes ──────────────────────────────────────────────
 export const getNotes = query({
-  args: { 
-    employeeId: v.id("users"),
-    viewerId: v.id("users"),
+  args: {
+    employeeId: v.id('users'),
+    viewerId: v.id('users'),
   },
   handler: async (ctx, args) => {
     const viewer = await ctx.db.get(args.viewerId);
     if (!viewer) return [];
 
     const allNotes = await ctx.db
-      .query("employeeNotes")
-      .withIndex("by_employee", (q) => q.eq("employeeId", args.employeeId))
-      .order("desc")
-      .collect();
+      .query('employeeNotes')
+      .withIndex('by_employee', (q) => q.eq('employeeId', args.employeeId))
+      .order('desc')
+      .take(SMALL_LIST_CAP);
 
     // Filter by visibility
-    const filtered = allNotes.filter(note => {
-      if (note.visibility === "employee_visible") return true;
-      if (note.visibility === "hr_only" && viewer.role === "admin") return true;
-      if (note.visibility === "manager_only" && (viewer.role === "admin" || viewer.role === "supervisor")) return true;
-      if (note.visibility === "private" && note.authorId === args.viewerId) return true;
+    const filtered = allNotes.filter((note) => {
+      if (note.visibility === 'employee_visible') return true;
+      if (note.visibility === 'hr_only' && viewer.role === 'admin') return true;
+      if (
+        note.visibility === 'manager_only' &&
+        (viewer.role === 'admin' || viewer.role === 'supervisor')
+      )
+        return true;
+      if (note.visibility === 'private' && note.authorId === args.viewerId) return true;
       return false;
     });
 
@@ -79,9 +92,9 @@ export const getNotes = query({
         const author = await ctx.db.get(note.authorId);
         return {
           ...note,
-          authorName: author?.name ?? "Unknown",
+          authorName: author?.name ?? 'Unknown',
         };
-      })
+      }),
     );
 
     return notesWithAuthors;
@@ -91,31 +104,39 @@ export const getNotes = query({
 // ── Update Note ──────────────────────────────────────────────
 export const updateNote = mutation({
   args: {
-    noteId: v.id("employeeNotes"),
+    noteId: v.id('employeeNotes'),
     content: v.optional(v.string()),
     tags: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
     const updates: any = {};
-    
+
     if (args.content !== undefined) {
       updates.content = args.content;
-      
+
       // Re-analyze sentiment
-      const positiveWords = ["excellent", "great", "outstanding", "impressive", "exceeded", "strong", "good"];
-      const negativeWords = ["poor", "weak", "concerning", "issue", "problem", "below", "failed"];
-      
+      const positiveWords = [
+        'excellent',
+        'great',
+        'outstanding',
+        'impressive',
+        'exceeded',
+        'strong',
+        'good',
+      ];
+      const negativeWords = ['poor', 'weak', 'concerning', 'issue', 'problem', 'below', 'failed'];
+
       const contentLower = args.content.toLowerCase();
-      const hasPositive = positiveWords.some(word => contentLower.includes(word));
-      const hasNegative = negativeWords.some(word => contentLower.includes(word));
-      
-      let sentiment: "positive" | "neutral" | "negative" = "neutral";
-      if (hasPositive && !hasNegative) sentiment = "positive";
-      else if (hasNegative && !hasPositive) sentiment = "negative";
-      
+      const hasPositive = positiveWords.some((word) => contentLower.includes(word));
+      const hasNegative = negativeWords.some((word) => contentLower.includes(word));
+
+      let sentiment: 'positive' | 'neutral' | 'negative' = 'neutral';
+      if (hasPositive && !hasNegative) sentiment = 'positive';
+      else if (hasNegative && !hasPositive) sentiment = 'negative';
+
       updates.sentiment = sentiment;
     }
-    
+
     if (args.tags !== undefined) {
       updates.tags = args.tags;
     }
@@ -126,7 +147,7 @@ export const updateNote = mutation({
 
 // ── Delete Note ──────────────────────────────────────────────
 export const deleteNote = mutation({
-  args: { noteId: v.id("employeeNotes") },
+  args: { noteId: v.id('employeeNotes') },
   handler: async (ctx, args) => {
     await ctx.db.delete(args.noteId);
   },
@@ -134,24 +155,24 @@ export const deleteNote = mutation({
 
 // ── Get Notes Summary ──────────────────────────────────────────────
 export const getNotesSummary = query({
-  args: { employeeId: v.id("users") },
+  args: { employeeId: v.id('users') },
   handler: async (ctx, args) => {
     const notes = await ctx.db
-      .query("employeeNotes")
-      .withIndex("by_employee", (q) => q.eq("employeeId", args.employeeId))
-      .collect();
+      .query('employeeNotes')
+      .withIndex('by_employee', (q) => q.eq('employeeId', args.employeeId))
+      .take(SMALL_LIST_CAP);
 
     const total = notes.length;
-    const positive = notes.filter(n => n.sentiment === "positive").length;
-    const negative = notes.filter(n => n.sentiment === "negative").length;
-    const neutral = notes.filter(n => n.sentiment === "neutral").length;
+    const positive = notes.filter((n) => n.sentiment === 'positive').length;
+    const negative = notes.filter((n) => n.sentiment === 'negative').length;
+    const neutral = notes.filter((n) => n.sentiment === 'neutral').length;
 
     const byType = {
-      performance: notes.filter(n => n.type === "performance").length,
-      behavior: notes.filter(n => n.type === "behavior").length,
-      achievement: notes.filter(n => n.type === "achievement").length,
-      concern: notes.filter(n => n.type === "concern").length,
-      general: notes.filter(n => n.type === "general").length,
+      performance: notes.filter((n) => n.type === 'performance').length,
+      behavior: notes.filter((n) => n.type === 'behavior').length,
+      achievement: notes.filter((n) => n.type === 'achievement').length,
+      concern: notes.filter((n) => n.type === 'concern').length,
+      general: notes.filter((n) => n.type === 'general').length,
     };
 
     return {

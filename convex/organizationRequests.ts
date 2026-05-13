@@ -2,6 +2,7 @@ import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
 
 import { SUPERADMIN_EMAIL } from './lib/auth';
+import { DEFAULT_LIST_CAP, SMALL_LIST_CAP } from './lib/limits';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PUBLIC: Create a self-service Starter organization (instant)
@@ -203,9 +204,9 @@ export const getOrganizationRequests = query({
         .query('organizationRequests')
         .withIndex('by_status', (q) => q.eq('status', status))
         .order('desc')
-        .collect();
+        .take(DEFAULT_LIST_CAP);
     } else {
-      requests = await ctx.db.query('organizationRequests').order('desc').collect();
+      requests = await ctx.db.query('organizationRequests').order('desc').take(DEFAULT_LIST_CAP);
     }
 
     return requests;
@@ -347,7 +348,7 @@ export const getPendingRequestCount = query({
     const pending = await ctx.db
       .query('organizationRequests')
       .withIndex('by_status', (q) => q.eq('status', 'pending'))
-      .collect();
+      .take(SMALL_LIST_CAP);
 
     return pending.length;
   },

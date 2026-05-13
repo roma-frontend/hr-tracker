@@ -7,6 +7,7 @@
 import { v } from 'convex/values';
 import { mutation, query } from '../_generated/server';
 import { MAX_PAGE_SIZE } from '../pagination';
+import { DEFAULT_LIST_CAP } from '../lib/limits';
 
 /** Create a recurring trip template */
 export const createRecurringTrip = mutation({
@@ -107,13 +108,13 @@ export const generateRecurringRequests = mutation({
     const dayOfWeek = today.getDay();
     const todayStr = today.toISOString().slice(0, 10);
 
-    // NOTE: Using .collect() here because we need to generate trips from ALL active recurring templates
+    // NOTE: Using .take() cap — active recurring trips per org should be bounded but cap for safety
     const recurringTrips = await ctx.db
       .query('recurringTrips')
       .withIndex('by_org_active', (q) =>
         q.eq('organizationId', organizationId).eq('isActive', true),
       )
-      .collect();
+      .take(DEFAULT_LIST_CAP);
 
     let generated = 0;
     for (const trip of recurringTrips) {

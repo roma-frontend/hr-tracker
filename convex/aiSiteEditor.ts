@@ -9,7 +9,7 @@ export const getCurrentMonthUsage = query({
   handler: async (ctx, { userId }) => {
     const now = new Date();
     const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-    
+
     const usage = await ctx.db
       .query('aiSiteEditorUsage')
       .withIndex('by_user_month', (q) => q.eq('userId', userId).eq('month', month))
@@ -66,7 +66,7 @@ export const canMakeEdit = query({
     // For starter plan, check limits
     const now = new Date();
     const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-    
+
     const usage = await ctx.db
       .query('aiSiteEditorUsage')
       .withIndex('by_user_month', (q) => q.eq('userId', userId).eq('month', month))
@@ -85,7 +85,7 @@ export const canMakeEdit = query({
       design: 5,
       content: 10,
       layout: 2,
-      logic: 0,        // Not allowed
+      logic: 0, // Not allowed
       full_control: 0, // Not allowed
     };
 
@@ -93,33 +93,33 @@ export const canMakeEdit = query({
     switch (editType) {
       case 'design':
         if (currentUsage.designChanges >= limits.design) {
-          return { 
-            allowed: false, 
-            reason: `Вы достигли лимита изменений дизайна (${limits.design}/месяц). Обновитесь до Professional для неограниченного доступа.` 
+          return {
+            allowed: false,
+            reason: `Вы достигли лимита изменений дизайна (${limits.design}/месяц). Обновитесь до Professional для неограниченного доступа.`,
           };
         }
         break;
       case 'content':
         if (currentUsage.contentChanges >= limits.content) {
-          return { 
-            allowed: false, 
-            reason: `Вы достигли лимита изменений контента (${limits.content}/месяц). Обновитесь до Professional для неограниченного доступа.` 
+          return {
+            allowed: false,
+            reason: `Вы достигли лимита изменений контента (${limits.content}/месяц). Обновитесь до Professional для неограниченного доступа.`,
           };
         }
         break;
       case 'layout':
         if (currentUsage.layoutChanges >= limits.layout) {
-          return { 
-            allowed: false, 
-            reason: `Вы достигли лимита изменений макета (${limits.layout}/месяц). Обновитесь до Professional для неограниченного доступа.` 
+          return {
+            allowed: false,
+            reason: `Вы достигли лимита изменений макета (${limits.layout}/месяц). Обновитесь до Professional для неограниченного доступа.`,
           };
         }
         break;
       case 'logic':
       case 'full_control':
-        return { 
-          allowed: false, 
-          reason: 'Эта функция доступна только для плана Professional и выше.' 
+        return {
+          allowed: false,
+          reason: 'Эта функция доступна только для плана Professional и выше.',
         };
     }
 
@@ -146,7 +146,7 @@ export const incrementUsage = mutation({
 
     const now = new Date();
     const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-    
+
     const usage = await ctx.db
       .query('aiSiteEditorUsage')
       .withIndex('by_user_month', (q) => q.eq('userId', userId).eq('month', month))
@@ -210,9 +210,8 @@ export const createSession = mutation({
     const org = await ctx.db.get(args.organizationId);
     if (!org) throw new Error('Organization not found');
 
-    const limitType = (org.plan === 'professional' || org.plan === 'enterprise') 
-      ? 'unlimited' 
-      : 'limited';
+    const limitType =
+      org.plan === 'professional' || org.plan === 'enterprise' ? 'unlimited' : 'limited';
 
     return await ctx.db.insert('aiSiteEditorSessions', {
       organizationId: args.organizationId,
@@ -236,18 +235,16 @@ export const updateSession = mutation({
   args: {
     sessionId: v.id('aiSiteEditorSessions'),
     aiResponse: v.string(),
-    changesMade: v.array(v.object({
-      file: v.string(),
-      type: v.string(),
-      description: v.string(),
-      before: v.optional(v.string()),
-      after: v.optional(v.string()),
-    })),
-    status: v.union(
-      v.literal('completed'),
-      v.literal('failed'),
-      v.literal('rejected'),
+    changesMade: v.array(
+      v.object({
+        file: v.string(),
+        type: v.string(),
+        description: v.string(),
+        before: v.optional(v.string()),
+        after: v.optional(v.string()),
+      }),
     ),
+    status: v.union(v.literal('completed'), v.literal('failed'), v.literal('rejected')),
     errorMessage: v.optional(v.string()),
     tokensUsed: v.optional(v.number()),
   },
@@ -304,27 +301,30 @@ export const getOrganizationStats = query({
   handler: async (ctx, { organizationId }) => {
     const now = new Date();
     const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-    
+
     const usageRecords = await ctx.db
       .query('aiSiteEditorUsage')
       .withIndex('by_org_month', (q) => q.eq('organizationId', organizationId).eq('month', month))
-      .collect();
+      .take(500);
 
-    const totalStats = usageRecords.reduce((acc, record) => ({
-      designChanges: acc.designChanges + record.designChanges,
-      contentChanges: acc.contentChanges + record.contentChanges,
-      layoutChanges: acc.layoutChanges + record.layoutChanges,
-      logicChanges: acc.logicChanges + record.logicChanges,
-      fullControlChanges: acc.fullControlChanges + record.fullControlChanges,
-      totalRequests: acc.totalRequests + record.totalRequests,
-    }), {
-      designChanges: 0,
-      contentChanges: 0,
-      layoutChanges: 0,
-      logicChanges: 0,
-      fullControlChanges: 0,
-      totalRequests: 0,
-    });
+    const totalStats = usageRecords.reduce(
+      (acc, record) => ({
+        designChanges: acc.designChanges + record.designChanges,
+        contentChanges: acc.contentChanges + record.contentChanges,
+        layoutChanges: acc.layoutChanges + record.layoutChanges,
+        logicChanges: acc.logicChanges + record.logicChanges,
+        fullControlChanges: acc.fullControlChanges + record.fullControlChanges,
+        totalRequests: acc.totalRequests + record.totalRequests,
+      }),
+      {
+        designChanges: 0,
+        contentChanges: 0,
+        layoutChanges: 0,
+        logicChanges: 0,
+        fullControlChanges: 0,
+        totalRequests: 0,
+      },
+    );
 
     return totalStats;
   },

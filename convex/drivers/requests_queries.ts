@@ -7,6 +7,7 @@
 import { v } from 'convex/values';
 import { query } from '../_generated/server';
 import { MAX_PAGE_SIZE } from '../pagination';
+import { DEFAULT_LIST_CAP } from '../lib/limits';
 
 /** Get pending driver requests for a driver */
 export const getDriverRequests = query({
@@ -118,20 +119,29 @@ export const getCompletedTrips = query({
     // Filter to approved requests where trip is completed
     const completedRequests = [];
 
-    // Batch-load all schedules for these requests upfront
-    const allSchedules = await ctx.db.query('driverSchedules').collect();
+    // Load schedules per driver (indexed) instead of full table scan
+    const uniqueDriverIds = [
+      ...new Set(requests.filter((r) => r.status === 'approved').map((r) => r.driverId)),
+    ];
+    const schedulesByDriver = await Promise.all(
+      uniqueDriverIds.map((dId) =>
+        ctx.db
+          .query('driverSchedules')
+          .withIndex('by_driver', (q) => q.eq('driverId', dId))
+          .take(DEFAULT_LIST_CAP),
+      ),
+    );
     const scheduleMap = new Map<string, any>();
-    for (const schedule of allSchedules) {
-      if (schedule.status === 'completed') {
-        const key = `${schedule.driverId}:${schedule.userId}:${schedule.startTime}`;
-        scheduleMap.set(key, schedule);
+    for (const driverSchedules of schedulesByDriver) {
+      for (const schedule of driverSchedules) {
+        if (schedule.status === 'completed') {
+          const key = `${schedule.driverId}:${schedule.userId}:${schedule.startTime}`;
+          scheduleMap.set(key, schedule);
+        }
       }
     }
 
     // Batch-load all unique driver IDs and their user IDs
-    const uniqueDriverIds = [
-      ...new Set(requests.filter((r) => r.status === 'approved').map((r) => r.driverId)),
-    ];
     const driversBatch = await Promise.all(uniqueDriverIds.map((id) => ctx.db.get(id)));
     const driverMap = new Map(
       driversBatch.filter((d): d is NonNullable<typeof d> => d !== null).map((d) => [d._id, d]),
@@ -151,13 +161,14 @@ export const getCompletedTrips = query({
       driverUsersBatch.filter((u): u is NonNullable<typeof u> => u !== null).map((u) => [u._id, u]),
     );
 
-    // Batch-load all ratings
-    const allRatings = await ctx.db.query('passengerRatings').collect();
+    // Load ratings by passenger (indexed) instead of full table scan
+    const allRatings = await ctx.db
+      .query('passengerRatings')
+      .withIndex('by_passenger', (q) => q.eq('passengerId', userId))
+      .take(DEFAULT_LIST_CAP);
     const ratingMap = new Map<string, any>();
     for (const rating of allRatings) {
-      if (rating.passengerId === userId) {
-        ratingMap.set(rating.scheduleId, rating);
-      }
+      ratingMap.set(rating.scheduleId, rating);
     }
 
     for (const request of requests) {

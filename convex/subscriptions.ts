@@ -1,6 +1,7 @@
 import { mutation, query } from './_generated/server';
 import { v } from 'convex/values';
 import { SUPERADMIN_EMAIL } from './lib/auth';
+import { DEFAULT_LIST_CAP } from './lib/limits';
 
 // ── Upsert subscription after checkout.session.completed ─────────────────────
 export const upsertSubscription = mutation({
@@ -187,6 +188,6 @@ export const listAll = query({
 
     if (!currentUser || !isSuperAdmin) return [];
 
-    return ctx.db.query('subscriptions').collect();
+    return ctx.db.query('subscriptions').take(DEFAULT_LIST_CAP);
   },
 });
