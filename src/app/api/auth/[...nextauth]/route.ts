@@ -1,5 +1,6 @@
 import NextAuth from 'next-auth';
 import Google from 'next-auth/providers/google';
+import Credentials from 'next-auth/providers/credentials';
 import type { NextAuthConfig } from 'next-auth';
 
 // ═══════════════════════════════════════════════════════════════
@@ -35,6 +36,56 @@ export const authConfig: NextAuthConfig = {
           email: profile.email,
           image: profile.picture,
         };
+      },
+    }),
+    Credentials({
+      name: 'credentials',
+      credentials: {
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Password', type: 'password' },
+      },
+      async authorize(credentials) {
+        const email = credentials?.email as string;
+        const password = credentials?.password as string;
+        if (!email || !password) return null;
+
+        const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
+        if (!convexUrl) return null;
+
+        try {
+          // Verify credentials via Convex auth:login
+          const res = await fetch(`${convexUrl}/api/mutation`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              path: 'auth:login',
+              args: {
+                email,
+                password,
+                sessionToken: crypto.randomUUID(),
+                sessionExpiry: Date.now() + 7 * 24 * 60 * 60 * 1000,
+              },
+            }),
+            cache: 'no-store',
+          });
+
+          if (!res.ok) return null;
+          const data = await res.json();
+          if (data.status === 'error') return null;
+
+          const user = data.value;
+          return {
+            id: user.userId,
+            name: user.name,
+            email: user.email,
+            image: user.avatarUrl,
+            role: user.role,
+            organizationId: user.organizationId,
+            isApproved: user.isApproved,
+          };
+        } catch {
+          return null;
+        }
       },
     }),
   ],
@@ -156,6 +207,8 @@ export const authConfig: NextAuthConfig = {
     signIn: '/login',
     error: '/login',
   },
+
+  session: { strategy: 'jwt' },
 
   debug: process.env.NODE_ENV === 'development',
 };
