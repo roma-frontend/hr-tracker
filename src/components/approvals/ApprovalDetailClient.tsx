@@ -83,7 +83,7 @@ export default function ApprovalDetailClient() {
     if (!currentUser) return;
     setIsApproving(true);
     try {
-      await approveUser({ userId, adminId: currentUser._id });
+      await approveUser({ userId });
       toast.success(t('ui.userApproved'));
       router.push('/approvals');
     } catch {
@@ -97,7 +97,7 @@ export default function ApprovalDetailClient() {
     if (!currentUser) return;
     setIsRejecting(true);
     try {
-      await rejectUser({ userId, adminId: currentUser._id });
+      await rejectUser({ userId });
       toast.success(t('ui.userRejected'));
       router.push('/approvals');
     } catch {

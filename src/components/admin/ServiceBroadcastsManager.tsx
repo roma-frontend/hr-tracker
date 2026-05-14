@@ -58,7 +58,6 @@ export function ServiceBroadcastsManager({
       );
       await deleteMessage({
         messageId: selectedBroadcastId,
-        userId,
         deleteForEveryone: true,
       });
       logger.log(`[ServiceBroadcastsManager] ✓ Broadcast deleted successfully`);

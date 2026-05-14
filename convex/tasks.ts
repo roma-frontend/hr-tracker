@@ -3,7 +3,7 @@ import { mutation, query } from './_generated/server';
 import { paginationOptsValidator } from 'convex/server';
 import type { Id } from './_generated/dataModel';
 import type { MutationCtx } from './_generated/server';
-import { isSuperadmin } from './lib/auth';
+import { isSuperadmin, requireAuthUser } from './lib/auth';
 import { withAuth } from './lib/withAuth';
 import { DEFAULT_LIST_CAP, SMALL_LIST_CAP } from './lib/limits';
 
@@ -81,7 +81,6 @@ export const createTask = mutation({
     title: v.string(),
     description: v.optional(v.string()),
     assignedTo: v.id('users'),
-    assignedBy: v.id('users'),
     priority: v.union(
       v.literal('low'),
       v.literal('medium'),
@@ -92,15 +91,15 @@ export const createTask = mutation({
     tags: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
-    const assigner = await ctx.db.get(args.assignedBy);
-    const organizationId = assigner?.organizationId;
+    const caller = await requireAuthUser(ctx);
+    const organizationId = caller.organizationId;
 
     const now = Date.now();
     const taskId = await ctx.db.insert('tasks', {
       title: args.title,
       description: args.description,
       assignedTo: args.assignedTo,
-      assignedBy: args.assignedBy,
+      assignedBy: caller._id,
       organizationId,
       status: 'pending',
       priority: args.priority,
@@ -111,9 +110,9 @@ export const createTask = mutation({
     });
 
     // Notify the person who assigned the task (skip superadmin)
-    if (assigner?.role !== 'superadmin') {
+    if (caller.role !== 'superadmin') {
       await ctx.db.insert('notifications', {
-        userId: args.assignedBy,
+        userId: caller._id,
         type: 'system',
         title: 'Task Assigned',
         message: `You assigned a task: "${args.title}"`,
@@ -127,7 +126,7 @@ export const createTask = mutation({
     // Audit log: task created
     await ctx.db.insert('auditLogs', {
       organizationId,
-      userId: args.assignedBy,
+      userId: caller._id,
       action: 'task_created',
       target: taskId,
       details: JSON.stringify({
@@ -154,9 +153,9 @@ export const updateTaskStatus = mutation({
       v.literal('completed'),
       v.literal('cancelled'),
     ),
-    userId: v.id('users'),
   },
   handler: async (ctx, args) => {
+    const caller = await requireAuthUser(ctx);
     const task = await ctx.db.get(args.taskId);
     if (!task) throw new Error('Task not found');
 
@@ -169,14 +168,13 @@ export const updateTaskStatus = mutation({
 
     // Notify supervisor when task goes to review or completed (skip superadmin)
     if (args.status === 'review' || args.status === 'completed') {
-      const employee = await ctx.db.get(args.userId);
       const supervisor = await ctx.db.get(task.assignedBy);
       if (supervisor?.role !== 'superadmin') {
         await ctx.db.insert('notifications', {
           userId: task.assignedBy,
           type: 'system',
           title: args.status === 'completed' ? 'Task Completed' : 'Task Ready for Review',
-          message: `"${task.title}" has been ${args.status === 'completed' ? 'completed' : 'submitted for review'} by ${employee?.name ?? 'employee'}`,
+          message: `"${task.title}" has been ${args.status === 'completed' ? 'completed' : 'submitted for review'} by ${caller.name ?? 'employee'}`,
           isRead: false,
           relatedId: args.taskId,
           route: '/tasks',
@@ -188,7 +186,7 @@ export const updateTaskStatus = mutation({
     // Audit log: task status updated
     await ctx.db.insert('auditLogs', {
       organizationId: task.organizationId,
-      userId: args.userId,
+      userId: caller._id,
       action: 'task_status_updated',
       target: args.taskId,
       details: JSON.stringify({
@@ -278,17 +276,17 @@ export const deleteTask = mutation({
 export const addComment = mutation({
   args: {
     taskId: v.id('tasks'),
-    authorId: v.id('users'),
     content: v.string(),
   },
   handler: async (ctx, args) => {
+    const caller = await requireAuthUser(ctx);
     const task = await ctx.db.get(args.taskId);
     if (!task) throw new Error('Task not found');
 
     const now = Date.now();
     await ctx.db.insert('taskComments', {
       taskId: args.taskId,
-      authorId: args.authorId,
+      authorId: caller._id,
       content: args.content,
       createdAt: now,
     });
@@ -297,7 +295,7 @@ export const addComment = mutation({
     // Audit log: task comment added
     await ctx.db.insert('auditLogs', {
       organizationId: task.organizationId,
-      userId: args.authorId,
+      userId: caller._id,
       action: 'task_comment_added',
       target: args.taskId,
       details: JSON.stringify({ content: args.content.slice(0, 100) }),
@@ -572,9 +570,9 @@ export const addAttachment = mutation({
     name: v.string(),
     type: v.string(),
     size: v.number(),
-    uploadedBy: v.id('users'),
   },
   handler: async (ctx, args) => {
+    const caller = await requireAuthUser(ctx);
     const task = await ctx.db.get(args.taskId);
     if (!task) throw new Error('Task not found');
     const attachments = task.attachments ?? [];
@@ -586,7 +584,7 @@ export const addAttachment = mutation({
           name: args.name,
           type: args.type,
           size: args.size,
-          uploadedBy: args.uploadedBy,
+          uploadedBy: caller._id,
           uploadedAt: Date.now(),
         },
       ],
@@ -596,7 +594,7 @@ export const addAttachment = mutation({
     // Audit log: attachment added
     await ctx.db.insert('auditLogs', {
       organizationId: task?.organizationId,
-      userId: args.uploadedBy,
+      userId: caller._id,
       action: 'task_attachment_added',
       target: args.taskId,
       details: JSON.stringify({ name: args.name, type: args.type, size: args.size }),

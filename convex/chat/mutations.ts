@@ -3,6 +3,7 @@ import { mutation } from '../_generated/server';
 import type { Id } from '../_generated/dataModel';
 import { MAX_PAGE_SIZE } from '../pagination';
 import { DEFAULT_LIST_CAP } from '../lib/limits';
+import { requireAuthUser } from '../lib/auth';
 
 /**
  * Convert emoji to ASCII-safe key format using Unicode code points
@@ -25,11 +26,11 @@ function emojiToKey(emoji: string): string {
 export const getOrCreateDM = mutation({
   args: {
     organizationId: v.optional(v.id('organizations')),
-    currentUserId: v.id('users'),
     targetUserId: v.id('users'),
   },
   handler: async (ctx, args) => {
-    const ids = [args.currentUserId, args.targetUserId].sort();
+    const caller = await requireAuthUser(ctx);
+    const ids = [caller._id, args.targetUserId].sort();
     const dmKey = ids.join('_');
 
     const existing = await ctx.db
@@ -42,7 +43,7 @@ export const getOrCreateDM = mutation({
       const currentMember = await ctx.db
         .query('chatMembers')
         .withIndex('by_conversation_user', (q) =>
-          q.eq('conversationId', existing._id).eq('userId', args.currentUserId),
+          q.eq('conversationId', existing._id).eq('userId', caller._id),
         )
         .first();
       const targetMember = await ctx.db
@@ -68,7 +69,7 @@ export const getOrCreateDM = mutation({
     const convId = await ctx.db.insert('chatConversations', {
       organizationId: args.organizationId,
       type: 'direct',
-      createdBy: args.currentUserId,
+      createdBy: caller._id,
       dmKey,
       createdAt: now,
       updatedAt: now,
@@ -77,7 +78,7 @@ export const getOrCreateDM = mutation({
     // Add both members
     await ctx.db.insert('chatMembers', {
       conversationId: convId,
-      userId: args.currentUserId,
+      userId: caller._id,
       organizationId: args.organizationId,
       role: 'member',
       unreadCount: 0,
@@ -97,11 +98,11 @@ export const getOrCreateDM = mutation({
     // Audit log: DM conversation created
     await ctx.db.insert('auditLogs', {
       organizationId: args.organizationId,
-      userId: args.currentUserId,
+      userId: caller._id,
       action: 'chat_dm_created',
       target: convId,
       details: JSON.stringify({
-        currentUserId: args.currentUserId,
+        currentUserId: caller._id,
         targetUserId: args.targetUserId,
       }),
       createdAt: now,
@@ -115,19 +116,19 @@ export const getOrCreateDM = mutation({
 export const createGroup = mutation({
   args: {
     organizationId: v.optional(v.id('organizations')),
-    createdBy: v.id('users'),
     name: v.string(),
     description: v.optional(v.string()),
     memberIds: v.array(v.id('users')),
   },
   handler: async (ctx, args) => {
+    const caller = await requireAuthUser(ctx);
     const now = Date.now();
     const convId = await ctx.db.insert('chatConversations', {
       organizationId: args.organizationId,
       type: 'group',
       name: args.name,
       description: args.description,
-      createdBy: args.createdBy,
+      createdBy: caller._id,
       createdAt: now,
       updatedAt: now,
     });
@@ -135,7 +136,7 @@ export const createGroup = mutation({
     // Add creator as owner
     await ctx.db.insert('chatMembers', {
       conversationId: convId,
-      userId: args.createdBy,
+      userId: caller._id,
       organizationId: args.organizationId,
       role: 'owner',
       unreadCount: 0,
@@ -145,7 +146,7 @@ export const createGroup = mutation({
 
     // Add other members
     for (const uid of args.memberIds) {
-      if (uid === args.createdBy) continue;
+      if (uid === caller._id) continue;
       await ctx.db.insert('chatMembers', {
         conversationId: convId,
         userId: uid,
@@ -161,7 +162,7 @@ export const createGroup = mutation({
     await ctx.db.insert('chatMessages', {
       conversationId: convId,
       organizationId: args.organizationId,
-      senderId: args.createdBy,
+      senderId: caller._id,
       type: 'system',
       content: `Group "${args.name}" was created`,
       createdAt: now,
@@ -170,7 +171,7 @@ export const createGroup = mutation({
     // Audit log: group created
     await ctx.db.insert('auditLogs', {
       organizationId: args.organizationId,
-      userId: args.createdBy,
+      userId: caller._id,
       action: 'chat_group_created',
       target: convId,
       details: JSON.stringify({ name: args.name, memberCount: args.memberIds.length + 1 }),
@@ -185,15 +186,15 @@ export const createGroup = mutation({
 export const updateGroup = mutation({
   args: {
     conversationId: v.id('chatConversations'),
-    userId: v.id('users'),
     name: v.optional(v.string()),
     description: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    const caller = await requireAuthUser(ctx);
     const membership = await ctx.db
       .query('chatMembers')
       .withIndex('by_conversation_user', (q) =>
-        q.eq('conversationId', args.conversationId).eq('userId', args.userId),
+        q.eq('conversationId', args.conversationId).eq('userId', caller._id),
       )
       .first();
     if (!membership || (membership.role !== 'owner' && membership.role !== 'admin')) {
@@ -207,7 +208,7 @@ export const updateGroup = mutation({
     // Audit log: group updated
     await ctx.db.insert('auditLogs', {
       organizationId: membership.organizationId,
-      userId: args.userId,
+      userId: caller._id,
       action: 'chat_group_updated',
       target: args.conversationId,
       details: JSON.stringify({
@@ -222,11 +223,11 @@ export const updateGroup = mutation({
 export const addMember = mutation({
   args: {
     conversationId: v.id('chatConversations'),
-    requesterId: v.id('users'),
     userId: v.id('users'),
     organizationId: v.optional(v.id('organizations')),
   },
   handler: async (ctx, args) => {
+    const caller = await requireAuthUser(ctx);
     const existing = await ctx.db
       .query('chatMembers')
       .withIndex('by_conversation_user', (q) =>
@@ -250,7 +251,7 @@ export const addMember = mutation({
     await ctx.db.insert('chatMessages', {
       conversationId: args.conversationId,
       organizationId: args.organizationId,
-      senderId: args.requesterId,
+      senderId: caller._id,
       type: 'system',
       content: `${user?.name ?? 'Someone'} was added to the group`,
       createdAt: now,
@@ -259,7 +260,7 @@ export const addMember = mutation({
     // Audit log: member added
     await ctx.db.insert('auditLogs', {
       organizationId: args.organizationId,
-      userId: args.requesterId,
+      userId: caller._id,
       action: 'chat_member_added',
       target: args.conversationId,
       details: JSON.stringify({ addedUserId: args.userId, addedUserName: user?.name }),
@@ -272,37 +273,36 @@ export const addMember = mutation({
 export const leaveConversation = mutation({
   args: {
     conversationId: v.id('chatConversations'),
-    userId: v.id('users'),
   },
   handler: async (ctx, args) => {
+    const caller = await requireAuthUser(ctx);
     const membership = await ctx.db
       .query('chatMembers')
       .withIndex('by_conversation_user', (q) =>
-        q.eq('conversationId', args.conversationId).eq('userId', args.userId),
+        q.eq('conversationId', args.conversationId).eq('userId', caller._id),
       )
       .first();
     if (!membership) return;
     await ctx.db.delete(membership._id);
 
-    const user = await ctx.db.get(args.userId);
     const conv = await ctx.db.get(args.conversationId);
     if (conv) {
       await ctx.db.insert('chatMessages', {
         conversationId: args.conversationId,
         organizationId: conv.organizationId as Id<'organizations'>,
-        senderId: args.userId,
+        senderId: caller._id,
         type: 'system',
-        content: `${user?.name ?? 'Someone'} left the group`,
+        content: `${caller.name ?? 'Someone'} left the group`,
         createdAt: Date.now(),
       });
 
       // Audit log: member left
       await ctx.db.insert('auditLogs', {
         organizationId: conv.organizationId,
-        userId: args.userId,
+        userId: caller._id,
         action: 'chat_member_left',
         target: args.conversationId,
-        details: JSON.stringify({ leftUserId: args.userId, leftUserName: user?.name }),
+        details: JSON.stringify({ leftUserId: caller._id, leftUserName: caller.name }),
         createdAt: Date.now(),
       });
     }
@@ -315,7 +315,6 @@ export const leaveConversation = mutation({
 export const sendMessage = mutation({
   args: {
     conversationId: v.id('chatConversations'),
-    senderId: v.id('users'),
     organizationId: v.optional(v.id('organizations')),
     type: v.union(
       v.literal('text'),
@@ -354,13 +353,13 @@ export const sendMessage = mutation({
     audioDuration: v.optional(v.number()), // Duration in seconds for voice messages
   },
   handler: async (ctx, args) => {
+    const caller = await requireAuthUser(ctx);
     const now = Date.now();
 
     // Check if trying to send to System Announcements channel
     const conversation = await ctx.db.get(args.conversationId);
     if (conversation?.name === 'System Announcements') {
-      const sender = await ctx.db.get(args.senderId);
-      if (!sender || sender.role !== 'superadmin') {
+      if (caller.role !== 'superadmin') {
         throw new Error('Only superadmin can send messages to System Announcements channel');
       }
     }
@@ -380,7 +379,7 @@ export const sendMessage = mutation({
     const msgId = await ctx.db.insert('chatMessages', {
       conversationId: args.conversationId,
       organizationId: args.organizationId,
-      senderId: args.senderId,
+      senderId: caller._id,
       type: args.type,
       content: args.content,
       attachments: args.attachments,
@@ -398,7 +397,7 @@ export const sendMessage = mutation({
     await ctx.db.patch(args.conversationId, {
       lastMessageAt: now,
       lastMessageText: preview,
-      lastMessageSenderId: args.senderId,
+      lastMessageSenderId: caller._id,
       updatedAt: now,
     });
 
@@ -411,7 +410,7 @@ export const sendMessage = mutation({
       .take(DEFAULT_LIST_CAP);
 
     const recipientIds: Array<{ userId: Id<'users'>; readAt: number }> = members
-      .filter((m) => m.userId !== args.senderId)
+      .filter((m) => m.userId !== caller._id)
       .map((m) => ({ userId: m.userId, readAt: -1 }));
 
     // Patch readBy on the new message with delivered stamps
@@ -421,7 +420,7 @@ export const sendMessage = mutation({
 
     await Promise.all(
       members
-        .filter((m) => m.userId !== args.senderId && !m.isMuted)
+        .filter((m) => m.userId !== caller._id && !m.isMuted)
         .map((m) => {
           // Don't increment unreadCount if user just marked conversation as read in the last 500ms
           const recentlyRead = m.lastReadAt && now - m.lastReadAt < 500;
@@ -442,14 +441,13 @@ export const sendMessage = mutation({
 
     // Send notification for mentions
     if (args.mentionedUserIds && args.mentionedUserIds.length > 0) {
-      const sender = await ctx.db.get(args.senderId);
       for (const mentionedId of args.mentionedUserIds) {
-        if (mentionedId === args.senderId) continue;
+        if (mentionedId === caller._id) continue;
         await ctx.db.insert('notifications', {
           organizationId: args.organizationId,
           userId: mentionedId,
           type: 'system',
-          title: `${sender?.name ?? 'Someone'} mentioned you`,
+          title: `${caller.name ?? 'Someone'} mentioned you`,
           message: args.content.slice(0, 100),
           isRead: false,
           relatedId: args.conversationId,
@@ -462,7 +460,7 @@ export const sendMessage = mutation({
     // Audit log: message sent
     await ctx.db.insert('auditLogs', {
       organizationId: args.organizationId,
-      userId: args.senderId,
+      userId: caller._id,
       action: 'chat_message_sent',
       target: msgId,
       details: JSON.stringify({
@@ -481,12 +479,12 @@ export const sendMessage = mutation({
 export const editMessage = mutation({
   args: {
     messageId: v.id('chatMessages'),
-    userId: v.id('users'),
     content: v.string(),
   },
   handler: async (ctx, args) => {
+    const caller = await requireAuthUser(ctx);
     const msg = await ctx.db.get(args.messageId);
-    if (!msg || msg.senderId !== args.userId) throw new Error('Not authorized');
+    if (!msg || msg.senderId !== caller._id) throw new Error('Not authorized');
     await ctx.db.patch(args.messageId, {
       content: args.content,
       isEdited: true,
@@ -496,7 +494,7 @@ export const editMessage = mutation({
     // Audit log: message edited
     await ctx.db.insert('auditLogs', {
       organizationId: msg.organizationId,
-      userId: args.userId,
+      userId: caller._id,
       action: 'chat_message_edited',
       target: args.messageId,
       details: JSON.stringify({
@@ -512,21 +510,16 @@ export const editMessage = mutation({
 export const deleteMessage = mutation({
   args: {
     messageId: v.id('chatMessages'),
-    userId: v.id('users'),
     deleteForEveryone: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
+    const caller = await requireAuthUser(ctx);
     const msg = await ctx.db.get(args.messageId);
     if (!msg) {
       throw new Error('Message not found');
     }
 
-    const user = await ctx.db.get(args.userId);
-    if (!user) {
-      throw new Error('User not found');
-    }
-
-    const isSuperadmin = user.role === 'superadmin';
+    const isSuperadmin = caller.role === 'superadmin';
 
     // If deleteForEveryone flag is set, sender can delete for everyone within 5 minutes (or superadmin anytime)
     if (args.deleteForEveryone) {
@@ -580,7 +573,7 @@ export const deleteMessage = mutation({
       }
 
       // Regular messages: only sender (within 5 minutes)
-      if (msg.senderId !== args.userId) {
+      if (msg.senderId !== caller._id) {
         throw new Error('Not authorized');
       }
 
@@ -638,9 +631,9 @@ export const deleteMessage = mutation({
     } else {
       // Delete only for current user
       const existing: Id<'users'>[] = (msg.deletedForUsers as Id<'users'>[] | undefined) ?? [];
-      if (!existing.includes(args.userId)) {
+      if (!existing.includes(caller._id)) {
         await ctx.db.patch(args.messageId, {
-          deletedForUsers: [...existing, args.userId],
+          deletedForUsers: [...existing, caller._id],
         });
 
         // If this was the last message, find new last message
@@ -659,7 +652,7 @@ export const deleteMessage = mutation({
               if (m._id === msg._id) return false;
               const delForUsers: Id<'users'>[] =
                 (m.deletedForUsers as Id<'users'>[] | undefined) ?? [];
-              return !delForUsers.includes(args.userId) && !m.isDeleted;
+              return !delForUsers.includes(caller._id) && !m.isDeleted;
             });
 
             if (nextValidMsg) {
@@ -684,7 +677,7 @@ export const deleteMessage = mutation({
     // Audit log: message deleted
     await ctx.db.insert('auditLogs', {
       organizationId: msg.organizationId,
-      userId: args.userId,
+      userId: caller._id,
       action: 'chat_message_deleted',
       target: args.messageId,
       details: JSON.stringify({
@@ -700,15 +693,15 @@ export const deleteMessage = mutation({
 export const deleteMessageForMe = mutation({
   args: {
     messageId: v.id('chatMessages'),
-    userId: v.id('users'),
   },
   handler: async (ctx, args) => {
+    const caller = await requireAuthUser(ctx);
     const msg = await ctx.db.get(args.messageId);
     if (!msg) throw new Error('Message not found');
     const existing: Id<'users'>[] = (msg.deletedForUsers as Id<'users'>[] | undefined) ?? [];
-    if (!existing.includes(args.userId)) {
+    if (!existing.includes(caller._id)) {
       await ctx.db.patch(args.messageId, {
-        deletedForUsers: [...existing, args.userId],
+        deletedForUsers: [...existing, caller._id],
       });
 
       // If this was the last message for this conversation, find new last message
@@ -726,7 +719,7 @@ export const deleteMessageForMe = mutation({
             if (m._id === msg._id) continue;
             const delForUsers: Id<'users'>[] =
               (m.deletedForUsers as Id<'users'>[] | undefined) ?? [];
-            if (!delForUsers.includes(args.userId) && !m.isDeleted) {
+            if (!delForUsers.includes(caller._id) && !m.isDeleted) {
               nextValidMsg = m;
               break;
             }
@@ -752,7 +745,7 @@ export const deleteMessageForMe = mutation({
       // Audit log: message deleted for me
       await ctx.db.insert('auditLogs', {
         organizationId: msg.organizationId,
-        userId: args.userId,
+        userId: caller._id,
         action: 'chat_message_deleted_for_me',
         target: args.messageId,
         details: JSON.stringify({ conversationId: msg.conversationId }),
@@ -766,10 +759,10 @@ export const deleteMessageForMe = mutation({
 export const toggleReaction = mutation({
   args: {
     messageId: v.id('chatMessages'),
-    userId: v.id('users'),
     emoji: v.string(),
   },
   handler: async (ctx, args) => {
+    const caller = await requireAuthUser(ctx);
     const msg = await ctx.db.get(args.messageId);
     if (!msg) throw new Error('Message not found');
 
@@ -810,12 +803,12 @@ export const toggleReaction = mutation({
 
     // Toggle the reaction using the ASCII-safe key
     const users = reactions[emojiKey] ?? [];
-    const idx = users.indexOf(args.userId);
+    const idx = users.indexOf(caller._id);
 
     if (idx >= 0) {
       users.splice(idx, 1);
     } else {
-      users.push(args.userId);
+      users.push(caller._id);
     }
 
     if (users.length === 0) {
@@ -829,7 +822,7 @@ export const toggleReaction = mutation({
     // Audit log: reaction toggled
     await ctx.db.insert('auditLogs', {
       organizationId: msg.organizationId,
-      userId: args.userId,
+      userId: caller._id,
       action: 'chat_reaction_toggled',
       target: args.messageId,
       details: JSON.stringify({ emoji: sanitizedEmoji, reactionCount: users.length }),
@@ -842,23 +835,23 @@ export const toggleReaction = mutation({
 export const pinMessage = mutation({
   args: {
     messageId: v.id('chatMessages'),
-    userId: v.id('users'),
     pin: v.boolean(),
   },
   handler: async (ctx, args) => {
+    const caller = await requireAuthUser(ctx);
     const msg = await ctx.db.get(args.messageId);
     if (!msg) throw new Error('Message not found');
 
     await ctx.db.patch(args.messageId, {
       isPinned: args.pin,
-      pinnedBy: args.pin ? args.userId : undefined,
+      pinnedBy: args.pin ? caller._id : undefined,
       pinnedAt: args.pin ? Date.now() : undefined,
     });
 
     // Audit log: message pinned/unpinned
     await ctx.db.insert('auditLogs', {
       organizationId: msg.organizationId,
-      userId: args.userId,
+      userId: caller._id,
       action: args.pin ? 'chat_message_pinned' : 'chat_message_unpinned',
       target: args.messageId,
       details: JSON.stringify({ pinned: args.pin }),
@@ -871,13 +864,13 @@ export const pinMessage = mutation({
 export const markAsRead = mutation({
   args: {
     conversationId: v.id('chatConversations'),
-    userId: v.id('users'),
   },
   handler: async (ctx, args) => {
+    const caller = await requireAuthUser(ctx);
     const membership = await ctx.db
       .query('chatMembers')
       .withIndex('by_conversation_user', (q) =>
-        q.eq('conversationId', args.conversationId).eq('userId', args.userId),
+        q.eq('conversationId', args.conversationId).eq('userId', caller._id),
       )
       .first();
     if (!membership) return;
@@ -895,19 +888,19 @@ export const markAsRead = mutation({
       .take(20);
 
     for (const msg of recent) {
-      if (msg.senderId === args.userId) continue;
+      if (msg.senderId === caller._id) continue;
       const readBy: Array<{ userId: Id<'users'>; readAt: number }> =
         (msg.readBy as Array<{ userId: Id<'users'>; readAt: number }> | undefined) ?? [];
-      if (readBy.some((r) => r.userId === args.userId)) continue;
+      if (readBy.some((r) => r.userId === caller._id)) continue;
       await ctx.db.patch(msg._id, {
-        readBy: [...readBy, { userId: args.userId, readAt: now }],
+        readBy: [...readBy, { userId: caller._id, readAt: now }],
       });
     }
 
     // Audit log: conversation marked as read
     await ctx.db.insert('auditLogs', {
       organizationId: membership.organizationId,
-      userId: args.userId,
+      userId: caller._id,
       action: 'chat_conversation_marked_read',
       target: args.conversationId,
       details: JSON.stringify({ messagesRead: recent.length }),
@@ -920,18 +913,18 @@ export const markAsRead = mutation({
 export const markMessageDelivered = mutation({
   args: {
     messageId: v.id('chatMessages'),
-    userId: v.id('users'),
   },
   handler: async (ctx, args) => {
+    const caller = await requireAuthUser(ctx);
     const msg = await ctx.db.get(args.messageId);
-    if (!msg || msg.senderId === args.userId) return;
+    if (!msg || msg.senderId === caller._id) return;
     const readBy: Array<{ userId: Id<'users'>; readAt: number }> =
       (msg.readBy as Array<{ userId: Id<'users'>; readAt: number }> | undefined) ?? [];
-    if (readBy.some((r) => r.userId === args.userId)) return;
+    if (readBy.some((r) => r.userId === caller._id)) return;
     // We reuse readBy array but with readAt = 0 to mean "delivered not yet read"
     // Actually let's use a separate delivered approach: just stamp with readAt = -1
     await ctx.db.patch(args.messageId, {
-      readBy: [...readBy, { userId: args.userId, readAt: -1 }],
+      readBy: [...readBy, { userId: caller._id, readAt: -1 }],
     });
   },
 });
@@ -941,15 +934,15 @@ export const markMessageDelivered = mutation({
 export const setTyping = mutation({
   args: {
     conversationId: v.id('chatConversations'),
-    userId: v.id('users'),
     organizationId: v.optional(v.id('organizations')),
     isTyping: v.boolean(),
   },
   handler: async (ctx, args) => {
+    const caller = await requireAuthUser(ctx);
     const existing = await ctx.db
       .query('chatTyping')
       .withIndex('by_conversation_user', (q) =>
-        q.eq('conversationId', args.conversationId).eq('userId', args.userId),
+        q.eq('conversationId', args.conversationId).eq('userId', caller._id),
       )
       .first();
 
@@ -959,7 +952,7 @@ export const setTyping = mutation({
       } else {
         await ctx.db.insert('chatTyping', {
           conversationId: args.conversationId,
-          userId: args.userId,
+          userId: caller._id,
           organizationId: args.organizationId,
           updatedAt: Date.now(),
         });
@@ -967,7 +960,7 @@ export const setTyping = mutation({
         // Audit log: typing indicator set
         await ctx.db.insert('auditLogs', {
           organizationId: args.organizationId,
-          userId: args.userId,
+          userId: caller._id,
           action: 'chat_typing_started',
           target: args.conversationId,
           details: JSON.stringify({ conversationId: args.conversationId }),
@@ -986,10 +979,10 @@ export const setTyping = mutation({
 export const votePoll = mutation({
   args: {
     messageId: v.id('chatMessages'),
-    userId: v.id('users'),
     optionId: v.string(),
   },
   handler: async (ctx, args) => {
+    const caller = await requireAuthUser(ctx);
     const msg = await ctx.db.get(args.messageId);
     if (!msg?.poll) throw new Error('No poll found');
     const poll = msg.poll as {
@@ -1000,9 +993,9 @@ export const votePoll = mutation({
     if (poll.closedAt && Date.now() > poll.closedAt) throw new Error('Poll closed');
     const options = poll.options.map((opt) => {
       // Remove user's vote from all options first (toggle)
-      const votes = opt.votes.filter((v) => v !== args.userId);
+      const votes = opt.votes.filter((v) => v !== caller._id);
       // Add vote to selected option
-      if (opt.id === args.optionId) votes.push(args.userId);
+      if (opt.id === args.optionId) votes.push(caller._id);
       return { ...opt, votes };
     });
     await ctx.db.patch(args.messageId, { poll: { ...poll, options } });
@@ -1010,7 +1003,7 @@ export const votePoll = mutation({
     // Audit log: poll vote
     await ctx.db.insert('auditLogs', {
       organizationId: msg.organizationId,
-      userId: args.userId,
+      userId: caller._id,
       action: 'chat_poll_voted',
       target: args.messageId,
       details: JSON.stringify({ optionId: args.optionId, poll: poll.question }),
@@ -1021,11 +1014,12 @@ export const votePoll = mutation({
 
 /** Close a poll */
 export const closePoll = mutation({
-  args: { messageId: v.id('chatMessages'), userId: v.id('users') },
+  args: { messageId: v.id('chatMessages') },
   handler: async (ctx, args) => {
+    const caller = await requireAuthUser(ctx);
     const msg = await ctx.db.get(args.messageId);
     if (!msg?.poll) throw new Error('No poll');
-    if (msg.senderId !== args.userId) throw new Error('Not authorized');
+    if (msg.senderId !== caller._id) throw new Error('Not authorized');
     const poll = msg.poll as {
       question: string;
       options: Array<{ id: string; text: string; votes: Id<'users'>[] }>;
@@ -1036,7 +1030,7 @@ export const closePoll = mutation({
     // Audit log: poll closed
     await ctx.db.insert('auditLogs', {
       organizationId: msg.organizationId,
-      userId: args.userId,
+      userId: caller._id,
       action: 'chat_poll_closed',
       target: args.messageId,
       details: JSON.stringify({ poll: poll.question }),
@@ -1052,16 +1046,16 @@ export const sendThreadReply = mutation({
   args: {
     parentMessageId: v.id('chatMessages'),
     conversationId: v.id('chatConversations'),
-    senderId: v.id('users'),
     organizationId: v.optional(v.id('organizations')),
     content: v.string(),
   },
   handler: async (ctx, args) => {
+    const caller = await requireAuthUser(ctx);
     const now = Date.now();
     const replyId = await ctx.db.insert('chatMessages', {
       conversationId: args.conversationId,
       organizationId: args.organizationId,
-      senderId: args.senderId,
+      senderId: caller._id,
       type: 'text',
       content: args.content,
       parentMessageId: args.parentMessageId,
@@ -1079,7 +1073,7 @@ export const sendThreadReply = mutation({
     // Audit log: thread reply sent
     await ctx.db.insert('auditLogs', {
       organizationId: args.organizationId,
-      userId: args.senderId,
+      userId: caller._id,
       action: 'chat_thread_reply',
       target: replyId,
       details: JSON.stringify({
@@ -1099,16 +1093,16 @@ export const sendThreadReply = mutation({
 export const scheduleMessage = mutation({
   args: {
     conversationId: v.id('chatConversations'),
-    senderId: v.id('users'),
     organizationId: v.optional(v.id('organizations')),
     content: v.string(),
     scheduledFor: v.number(),
   },
   handler: async (ctx, args) => {
+    const caller = await requireAuthUser(ctx);
     const scheduledMsgId = await ctx.db.insert('chatMessages', {
       conversationId: args.conversationId,
       organizationId: args.organizationId,
-      senderId: args.senderId,
+      senderId: caller._id,
       type: 'text',
       content: args.content,
       scheduledFor: args.scheduledFor,
@@ -1119,7 +1113,7 @@ export const scheduleMessage = mutation({
     // Audit log: message scheduled
     await ctx.db.insert('auditLogs', {
       organizationId: args.organizationId,
-      userId: args.senderId,
+      userId: caller._id,
       action: 'chat_message_scheduled',
       target: scheduledMsgId,
       details: JSON.stringify({
@@ -1135,16 +1129,17 @@ export const scheduleMessage = mutation({
 
 /** Cancel a scheduled message */
 export const cancelScheduledMessage = mutation({
-  args: { messageId: v.id('chatMessages'), userId: v.id('users') },
+  args: { messageId: v.id('chatMessages') },
   handler: async (ctx, args) => {
+    const caller = await requireAuthUser(ctx);
     const msg = await ctx.db.get(args.messageId);
-    if (!msg || msg.senderId !== args.userId) throw new Error('Not authorized');
+    if (!msg || msg.senderId !== caller._id) throw new Error('Not authorized');
     await ctx.db.delete(args.messageId);
 
     // Audit log: scheduled message cancelled
     await ctx.db.insert('auditLogs', {
       organizationId: msg.organizationId,
-      userId: args.userId,
+      userId: caller._id,
       action: 'chat_scheduled_message_cancelled',
       target: args.messageId,
       details: JSON.stringify({ conversationId: msg.conversationId }),
@@ -1189,16 +1184,16 @@ export const setLinkPreview = mutation({
 export const togglePin = mutation({
   args: {
     conversationId: v.id('chatConversations'),
-    userId: v.id('users'),
   },
   handler: async (ctx, args) => {
+    const caller = await requireAuthUser(ctx);
     const conv = await ctx.db.get(args.conversationId);
     if (!conv) throw new Error('Conversation not found');
 
     const member = await ctx.db
       .query('chatMembers')
       .withIndex('by_conversation', (q) => q.eq('conversationId', args.conversationId))
-      .filter((q) => q.eq(q.field('userId'), args.userId))
+      .filter((q) => q.eq(q.field('userId'), caller._id))
       .first();
 
     if (!member) throw new Error('Not a member of this conversation');
@@ -1211,7 +1206,7 @@ export const togglePin = mutation({
     // Audit log: conversation pinned/unpinned
     await ctx.db.insert('auditLogs', {
       organizationId: conv.organizationId,
-      userId: args.userId,
+      userId: caller._id,
       action: !conv.isPinned ? 'chat_conversation_pinned' : 'chat_conversation_unpinned',
       target: args.conversationId,
       details: JSON.stringify({ conversationName: conv.name, pinned: !conv.isPinned }),
@@ -1226,16 +1221,16 @@ export const togglePin = mutation({
 export const deleteConversation = mutation({
   args: {
     conversationId: v.id('chatConversations'),
-    userId: v.id('users'),
   },
   handler: async (ctx, args) => {
+    const caller = await requireAuthUser(ctx);
     const conv = await ctx.db.get(args.conversationId);
     if (!conv) throw new Error('Conversation not found');
 
     const member = await ctx.db
       .query('chatMembers')
       .withIndex('by_conversation_user', (q) =>
-        q.eq('conversationId', args.conversationId).eq('userId', args.userId),
+        q.eq('conversationId', args.conversationId).eq('userId', caller._id),
       )
       .first();
 
@@ -1267,9 +1262,9 @@ export const deleteConversation = mutation({
       messages.map(async (msg) => {
         const deletedForUsers: Id<'users'>[] =
           (msg.deletedForUsers as Id<'users'>[] | undefined) ?? [];
-        if (!deletedForUsers.includes(args.userId)) {
+        if (!deletedForUsers.includes(caller._id)) {
           await ctx.db.patch(msg._id, {
-            deletedForUsers: [...deletedForUsers, args.userId],
+            deletedForUsers: [...deletedForUsers, caller._id],
           });
         }
       }),
@@ -1278,7 +1273,7 @@ export const deleteConversation = mutation({
     // Audit log: conversation deleted
     await ctx.db.insert('auditLogs', {
       organizationId: conv.organizationId,
-      userId: args.userId,
+      userId: caller._id,
       action: 'chat_conversation_deleted',
       target: args.conversationId,
       details: JSON.stringify({ conversationName: conv.name }),
@@ -1291,16 +1286,16 @@ export const deleteConversation = mutation({
 export const restoreConversation = mutation({
   args: {
     conversationId: v.id('chatConversations'),
-    userId: v.id('users'),
   },
   handler: async (ctx, args) => {
+    const caller = await requireAuthUser(ctx);
     const conv = await ctx.db.get(args.conversationId);
     if (!conv) throw new Error('Conversation not found');
 
     const member = await ctx.db
       .query('chatMembers')
       .withIndex('by_conversation_user', (q) =>
-        q.eq('conversationId', args.conversationId).eq('userId', args.userId),
+        q.eq('conversationId', args.conversationId).eq('userId', caller._id),
       )
       .first();
 
@@ -1323,9 +1318,9 @@ export const restoreConversation = mutation({
       messages.map(async (msg) => {
         const deletedForUsers: Id<'users'>[] =
           (msg.deletedForUsers as Id<'users'>[] | undefined) ?? [];
-        if (deletedForUsers.includes(args.userId)) {
+        if (deletedForUsers.includes(caller._id)) {
           await ctx.db.patch(msg._id, {
-            deletedForUsers: deletedForUsers.filter((id) => id !== args.userId),
+            deletedForUsers: deletedForUsers.filter((id) => id !== caller._id),
           });
         }
       }),
@@ -1334,7 +1329,7 @@ export const restoreConversation = mutation({
     // Audit log: conversation restored
     await ctx.db.insert('auditLogs', {
       organizationId: conv.organizationId,
-      userId: args.userId,
+      userId: caller._id,
       action: 'chat_conversation_restored',
       target: args.conversationId,
       details: JSON.stringify({ conversationName: conv.name }),
@@ -1349,16 +1344,16 @@ export const restoreConversation = mutation({
 export const toggleArchive = mutation({
   args: {
     conversationId: v.id('chatConversations'),
-    userId: v.id('users'),
   },
   handler: async (ctx, args) => {
+    const caller = await requireAuthUser(ctx);
     const conv = await ctx.db.get(args.conversationId);
     if (!conv) throw new Error('Conversation not found');
 
     const member = await ctx.db
       .query('chatMembers')
       .withIndex('by_conversation_user', (q) =>
-        q.eq('conversationId', args.conversationId).eq('userId', args.userId),
+        q.eq('conversationId', args.conversationId).eq('userId', caller._id),
       )
       .first();
 
@@ -1372,7 +1367,7 @@ export const toggleArchive = mutation({
     // Audit log: conversation archived/unarchived
     await ctx.db.insert('auditLogs', {
       organizationId: conv.organizationId,
-      userId: args.userId,
+      userId: caller._id,
       action: newArchived ? 'chat_conversation_archived' : 'chat_conversation_unarchived',
       target: args.conversationId,
       details: JSON.stringify({ conversationName: conv.name, archived: newArchived }),
@@ -1387,16 +1382,16 @@ export const toggleArchive = mutation({
 export const toggleMute = mutation({
   args: {
     conversationId: v.id('chatConversations'),
-    userId: v.id('users'),
   },
   handler: async (ctx, args) => {
+    const caller = await requireAuthUser(ctx);
     const conv = await ctx.db.get(args.conversationId);
     if (!conv) throw new Error('Conversation not found');
 
     const member = await ctx.db
       .query('chatMembers')
       .withIndex('by_conversation', (q) => q.eq('conversationId', args.conversationId))
-      .filter((q) => q.eq(q.field('userId'), args.userId))
+      .filter((q) => q.eq(q.field('userId'), caller._id))
       .first();
 
     if (!member) throw new Error('Not a member of this conversation');
@@ -1408,7 +1403,7 @@ export const toggleMute = mutation({
     // Audit log: conversation muted/unmuted
     await ctx.db.insert('auditLogs', {
       organizationId: conv.organizationId,
-      userId: args.userId,
+      userId: caller._id,
       action: !member.isMuted ? 'chat_conversation_muted' : 'chat_conversation_unmuted',
       target: args.conversationId,
       details: JSON.stringify({ conversationName: conv.name, muted: !member.isMuted }),
@@ -1426,19 +1421,19 @@ export const sendServiceBroadcast = mutation({
   args: {
     organizationId: v.optional(v.id('organizations')),
     conversationId: v.id('chatConversations'),
-    senderId: v.id('users'), // the superadmin user
     title: v.string(), // e.g. "System Maintenance"
     content: v.string(), // the announcement message
     icon: v.optional(v.string()), // emoji or icon, e.g. "⚠️", "ℹ️", "🔧"
   },
   handler: async (ctx, args) => {
+    const caller = await requireAuthUser(ctx);
     const now = Date.now();
 
     // Create the service broadcast message
     const msgId = await ctx.db.insert('chatMessages', {
       conversationId: args.conversationId,
       organizationId: args.organizationId,
-      senderId: args.senderId,
+      senderId: caller._id,
       type: 'system',
       content: args.content,
       isServiceBroadcast: true,
@@ -1452,7 +1447,7 @@ export const sendServiceBroadcast = mutation({
     await ctx.db.patch(args.conversationId, {
       lastMessageAt: now,
       lastMessageText: `[${args.title}] ${preview}`,
-      lastMessageSenderId: args.senderId,
+      lastMessageSenderId: caller._id,
       updatedAt: now,
     });
 
@@ -1464,7 +1459,7 @@ export const sendServiceBroadcast = mutation({
       .take(DEFAULT_LIST_CAP);
 
     for (const member of members) {
-      if (member.userId !== args.senderId) {
+      if (member.userId !== caller._id) {
         await ctx.db.patch(member._id, {
           unreadCount: (member.unreadCount || 0) + 1,
         });
@@ -1474,7 +1469,7 @@ export const sendServiceBroadcast = mutation({
     // Audit log: service broadcast sent
     await ctx.db.insert('auditLogs', {
       organizationId: args.organizationId,
-      userId: args.senderId,
+      userId: caller._id,
       action: 'chat_service_broadcast',
       target: msgId,
       details: JSON.stringify({

@@ -53,7 +53,6 @@ export const POST = withCsrfProtection(async (req: Request) => {
 
     await fetchMutation(api.leaves.updateLeave, {
       leaveId: leaveId as Id<'leaveRequests'>,
-      requesterId: requesterId as Id<'users'>,
       ...(startDate && { startDate }),
       ...(endDate && { endDate }),
       ...(days && { days }),

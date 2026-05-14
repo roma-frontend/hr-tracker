@@ -94,7 +94,6 @@ export default function ManageAdminsPage() {
     setIsLoading(true);
     try {
       await assignAdminMutation({
-        superadminUserId: user?.id as any,
         userId: selectedMemberId as any,
         organizationId: orgId as any,
       });
@@ -117,7 +116,6 @@ export default function ManageAdminsPage() {
     setIsLoading(true);
     try {
       await removeAdminMutation({
-        superadminUserId: user?.id as any,
         userId: selectedMemberId as any,
       });
 

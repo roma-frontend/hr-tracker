@@ -1,17 +1,16 @@
 import { v } from 'convex/values';
 import { mutation } from '../_generated/server';
 import type { MutationCtx } from '../_generated/server';
-import type { Id, Doc } from '../_generated/dataModel';
+import type { Id } from '../_generated/dataModel';
 import type { QueryCtx } from '../_generated/server';
 import { MAX_PAGE_SIZE } from '../pagination';
-import { SUPERADMIN_EMAIL, isSuperadmin } from '../lib/auth';
+import { SUPERADMIN_EMAIL, isSuperadmin, requireAuthUser } from '../lib/auth';
 import { withAuth } from '../lib/withAuth';
 
 // ── Security helpers ──────────────────────────────────────────────────────────
-/** Verify caller has admin/superadmin role and return their organizationId */
-async function requireAdmin(ctx: QueryCtx, adminId: Id<'users'>) {
-  const admin = (await ctx.db.get(adminId)) as Doc<'users'> | null;
-  if (!admin) throw new Error('Admin not found');
+/** Verify caller has admin/superadmin role via auth context */
+async function requireAdmin(ctx: QueryCtx | MutationCtx) {
+  const admin = await requireAuthUser(ctx);
   if (admin.role !== 'admin' && admin.role !== 'superadmin') {
     throw new Error('Only org admins can perform this action');
   }
@@ -23,18 +22,16 @@ async function requireAdmin(ctx: QueryCtx, adminId: Id<'users'>) {
 // ─────────────────────────────────────────────────────────────────────────────
 export const logAudit = mutation({
   args: {
-    userId: v.id('users'),
     action: v.string(),
     target: v.optional(v.string()),
     details: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const user = await ctx.db.get(args.userId);
-    if (!user) throw new Error('User not found');
+    const user = await requireAuthUser(ctx);
 
     await ctx.db.insert('auditLogs', {
       organizationId: user.organizationId,
-      userId: args.userId,
+      userId: user._id,
       action: args.action,
       target: args.target,
       details: args.details,
@@ -86,13 +83,12 @@ export const seedAdmin = mutation({
 // ─────────────────────────────────────────────────────────────────────────────
 export const suspendUser = mutation({
   args: {
-    adminId: v.id('users'),
     userId: v.id('users'),
     reason: v.string(),
     duration: v.optional(v.number()), // in hours, default 24
   },
-  handler: async (ctx, { adminId, userId, reason, duration = 24 }) => {
-    const admin = await requireAdmin(ctx, adminId);
+  handler: async (ctx, { userId, reason, duration = 24 }) => {
+    const admin = await requireAdmin(ctx);
     const user = await ctx.db.get(userId);
 
     if (!user) {
@@ -101,8 +97,8 @@ export const suspendUser = mutation({
 
     // Verify same organization (unless superadmin)
     if (
-      (admin as Doc<'users'>).organizationId !== user.organizationId &&
-      !isSuperadmin(admin as Doc<'users'>)
+      admin.organizationId !== user.organizationId &&
+      !isSuperadmin(admin)
     ) {
       throw new Error('Access denied: cannot suspend users from another organization');
     }
@@ -113,14 +109,14 @@ export const suspendUser = mutation({
       isSuspended: true,
       suspendedUntil,
       suspendedReason: reason,
-      suspendedBy: adminId,
+      suspendedBy: admin._id,
       suspendedAt: Date.now(),
     });
 
     // Create audit log
     await ctx.db.insert('auditLogs', {
       organizationId: user.organizationId,
-      userId: adminId,
+      userId: admin._id,
       action: 'user_suspended',
       target: user.email,
       details: `User suspended for ${duration}h. Reason: ${reason}`,
@@ -148,11 +144,10 @@ export const suspendUser = mutation({
 // ─────────────────────────────────────────────────────────────────────────────
 export const unsuspendUser = mutation({
   args: {
-    adminId: v.id('users'),
     userId: v.id('users'),
   },
-  handler: async (ctx, { adminId, userId }) => {
-    const admin = await requireAdmin(ctx, adminId);
+  handler: async (ctx, { userId }) => {
+    const admin = await requireAdmin(ctx);
     const user = await ctx.db.get(userId);
 
     if (!user) {
@@ -161,8 +156,8 @@ export const unsuspendUser = mutation({
 
     // Verify same organization (unless superadmin)
     if (
-      (admin as Doc<'users'>).organizationId !== user.organizationId &&
-      !isSuperadmin(admin as Doc<'users'>)
+      admin.organizationId !== user.organizationId &&
+      !isSuperadmin(admin)
     ) {
       throw new Error('Access denied: cannot unsuspend users from another organization');
     }
@@ -178,10 +173,10 @@ export const unsuspendUser = mutation({
     // Create audit log
     await ctx.db.insert('auditLogs', {
       organizationId: user.organizationId,
-      userId: adminId,
+      userId: admin._id,
       action: 'user_unsuspended',
       target: user.email,
-      details: `User unsuspended by ${(admin as Doc<'users'>).name}`,
+      details: `User unsuspended by ${admin.name}`,
       createdAt: Date.now(),
     });
 
@@ -191,7 +186,7 @@ export const unsuspendUser = mutation({
       userId,
       type: 'system',
       title: '✅ Account Unsuspended',
-      message: `Your account has been reactivated by ${(admin as Doc<'users'>).name}. You can now log in again.`,
+      message: `Your account has been reactivated by ${admin.name}. You can now log in again.`,
       isRead: false,
       route: '/security',
       createdAt: Date.now(),

@@ -1,7 +1,7 @@
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
 import { Id } from './_generated/dataModel';
-import { isSuperadmin } from './lib/auth';
+import { isSuperadmin, requireAuthUser } from './lib/auth';
 import { DEFAULT_LIST_CAP, XLARGE_LIST_CAP } from './lib/limits';
 
 // Armenia timezone offset: UTC+4
@@ -40,17 +40,16 @@ function getScheduledTimestamps(dateStr: string, startTime: string, endTime: str
 
 // ── Check In (Employee arrives at work) ──────────────────────────────────
 export const checkIn = mutation({
-  args: {
-    userId: v.id('users'),
-  },
+  args: {},
   handler: async (ctx, args) => {
+    const caller = await requireAuthUser(ctx);
     const now = Date.now();
     const today = getTodayDate();
 
     // Check if already checked in today
     const existing = await ctx.db
       .query('timeTracking')
-      .withIndex('by_user_date', (q) => q.eq('userId', args.userId).eq('date', today))
+      .withIndex('by_user_date', (q) => q.eq('userId', caller._id).eq('date', today))
       .first();
 
     if (existing && existing.status === 'checked_in') {
@@ -60,7 +59,7 @@ export const checkIn = mutation({
     // Get work schedule (default 9:00-18:00)
     const schedule = await ctx.db
       .query('workSchedule')
-      .withIndex('by_user', (q) => q.eq('userId', args.userId))
+      .withIndex('by_user', (q) => q.eq('userId', caller._id))
       .first();
 
     const startTime = schedule?.startTime || '09:00';
@@ -88,7 +87,7 @@ export const checkIn = mutation({
     } else {
       // Create new record
       recordId = await ctx.db.insert('timeTracking', {
-        userId: args.userId,
+        userId: caller._id,
         checkInTime: now,
         scheduledStartTime: scheduledStart,
         scheduledEndTime: scheduledEnd,
@@ -103,16 +102,15 @@ export const checkIn = mutation({
     }
 
     // Award attendance points (+1)
-    const user = await ctx.db.get(args.userId);
-    if (user?.organizationId) {
-      const orgId = user.organizationId;
+    if (caller.organizationId) {
+      const orgId = caller.organizationId;
       const todayObj = new Date();
       todayObj.setHours(0, 0, 0, 0);
       const todayStart = todayObj.getTime();
       const existingPointsToday = await ctx.db
         .query('pointTransactions')
         .withIndex('by_org_user_created', (q) =>
-          q.eq('organizationId', orgId).eq('userId', args.userId).gte('createdAt', todayStart),
+          q.eq('organizationId', orgId).eq('userId', caller._id).gte('createdAt', todayStart),
         )
         .filter((q) => q.eq(q.field('type'), 'earned_attendance'))
         .first();
@@ -120,7 +118,7 @@ export const checkIn = mutation({
       if (!existingPointsToday) {
         const userPointsRecord = await ctx.db
           .query('userPoints')
-          .withIndex('by_org_user', (q) => q.eq('organizationId', orgId).eq('userId', args.userId))
+          .withIndex('by_org_user', (q) => q.eq('organizationId', orgId).eq('userId', caller._id))
           .first();
 
         if (userPointsRecord) {
@@ -132,7 +130,7 @@ export const checkIn = mutation({
         } else {
           await ctx.db.insert('userPoints', {
             organizationId: orgId,
-            userId: args.userId,
+            userId: caller._id,
             balance: 1,
             totalEarned: 1,
             totalSpent: 0,
@@ -142,7 +140,7 @@ export const checkIn = mutation({
 
         await ctx.db.insert('pointTransactions', {
           organizationId: orgId,
-          userId: args.userId,
+          userId: caller._id,
           amount: 1,
           type: 'earned_attendance',
           description: 'Daily attendance',
@@ -158,17 +156,17 @@ export const checkIn = mutation({
 // ── Check Out (Employee leaves work) ─────────────────────────────────────
 export const checkOut = mutation({
   args: {
-    userId: v.id('users'),
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    const caller = await requireAuthUser(ctx);
     const now = Date.now();
     const today = getTodayDate();
 
     // Find today's check-in record
     const record = await ctx.db
       .query('timeTracking')
-      .withIndex('by_user_date', (q) => q.eq('userId', args.userId).eq('date', today))
+      .withIndex('by_user_date', (q) => q.eq('userId', caller._id).eq('date', today))
       .first();
 
     if (!record) {
@@ -182,7 +180,7 @@ export const checkOut = mutation({
     // Recalculate scheduled end fresh (correct Armenia UTC+4 timezone)
     const scheduleForOut = await ctx.db
       .query('workSchedule')
-      .withIndex('by_user', (q) => q.eq('userId', args.userId))
+      .withIndex('by_user', (q) => q.eq('userId', caller._id))
       .first();
     const endTime = scheduleForOut?.endTime || '18:00';
     const startTime = scheduleForOut?.startTime || '09:00';

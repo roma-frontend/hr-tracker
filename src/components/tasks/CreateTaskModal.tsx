@@ -81,7 +81,6 @@ export function CreateTaskModal({ currentUserId, userRole, onClose }: Props) {
         title: title.trim(),
         description: description.trim() || undefined,
         assignedTo: assignedTo as Id<'users'>,
-        assignedBy: currentUserId,
         priority,
         deadline: deadline ? new Date(deadline).getTime() : undefined,
         tags: tags.length > 0 ? tags : undefined,
@@ -106,7 +105,6 @@ export function CreateTaskModal({ currentUserId, userRole, onClose }: Props) {
               name: file.name,
               type: file.type,
               size: file.size,
-              uploadedBy: currentUserId,
             });
             uploaded++;
             setUploadProgress({ uploaded, total: files.length });

@@ -107,7 +107,6 @@ export function useOptimisticSendMessage(
 
         await sendMessage({
           conversationId,
-          senderId: userId,
           organizationId,
           type: msgType,
           content,
@@ -191,7 +190,6 @@ export function useOptimisticThreadReply(
         await sendReply({
           parentMessageId,
           conversationId,
-          senderId: userId,
           organizationId,
           content: content.trim(),
         });
@@ -269,7 +267,6 @@ export function useOptimisticReaction(messageId: Id<'chatMessages'>, userId: Id<
 
         await toggleReaction({
           messageId,
-          userId,
           emoji: sanitizedEmoji,
         });
 
@@ -322,7 +319,7 @@ export function useOptimisticTaskStatus() {
       try {
         startTransition(() => setOptimisticUpdate({ taskId, newStatus: status, oldStatus }));
 
-        await updateTaskStatus({ taskId, status, userId });
+        await updateTaskStatus({ taskId, status });
 
         setError(null);
         return true;
@@ -367,13 +364,13 @@ export function useOptimisticLeaveActions() {
   });
 
   const approveOptimistic = useCallback(
-    async (leaveId: Id<'leaveRequests'>, reviewerId: Id<'users'>, comment?: string) => {
+    async (leaveId: Id<'leaveRequests'>, comment?: string) => {
       try {
         startTransition(() =>
           setOptimisticAction({ leaveId, action: 'approve', previousStatus: 'pending' }),
         );
 
-        await approveLeave({ leaveId, reviewerId, comment });
+        await approveLeave({ leaveId, comment });
 
         setError(null);
         return true;
@@ -386,13 +383,13 @@ export function useOptimisticLeaveActions() {
   );
 
   const rejectOptimistic = useCallback(
-    async (leaveId: Id<'leaveRequests'>, reviewerId: Id<'users'>, comment?: string) => {
+    async (leaveId: Id<'leaveRequests'>, comment?: string) => {
       try {
         startTransition(() =>
           setOptimisticAction({ leaveId, action: 'reject', previousStatus: 'pending' }),
         );
 
-        await rejectLeave({ leaveId, reviewerId, comment });
+        await rejectLeave({ leaveId, comment });
 
         setError(null);
         return true;
@@ -405,11 +402,11 @@ export function useOptimisticLeaveActions() {
   );
 
   const deleteOptimistic = useCallback(
-    async (leaveId: Id<'leaveRequests'>, requesterId: Id<'users'>) => {
+    async (leaveId: Id<'leaveRequests'>) => {
       try {
         startTransition(() => setOptimisticAction({ leaveId, action: 'delete' }));
 
-        await deleteLeave({ leaveId, requesterId });
+        await deleteLeave({ leaveId });
 
         setError(null);
         return true;

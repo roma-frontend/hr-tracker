@@ -31,7 +31,7 @@ export function SavedMessagesPanel({ userId, organizationId, onClose, onSelectMe
   const handleUnsave = async (e: React.MouseEvent, messageId: Id<'chatMessages'>) => {
     e.stopPropagation();
     if (!user?.id) return;
-    await unsaveMessage({ conversationId: messageId as any, userId: user.id as Id<'users'> });
+    await unsaveMessage({ conversationId: messageId as any });
   };
 
   return (

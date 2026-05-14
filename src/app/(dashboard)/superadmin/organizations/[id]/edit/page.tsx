@@ -121,7 +121,6 @@ export default function EditOrganizationPage() {
 
     try {
       await updateOrg({
-        superadminUserId: user.id as any,
         organizationId: orgId as any,
         name: formData.name,
         plan: formData.plan,

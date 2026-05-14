@@ -121,12 +121,10 @@ export function MessageTemplates({
       try {
         const conversationId = await getOrCreateDM({
           organizationId: organizationId!,
-          currentUserId: driverUserId!,
           targetUserId: passengerUserId!,
         });
         await sendChatMessage({
           conversationId,
-          senderId: driverUserId!,
           organizationId: organizationId!,
           type: 'text',
           content: message,
@@ -182,7 +180,6 @@ export function MessageTemplates({
       try {
         const conversationId = await getOrCreateDM({
           organizationId: organizationId!,
-          currentUserId: driverUserId!,
           targetUserId: passengerUserId!,
         });
         const callId = await initiateCallMutation({

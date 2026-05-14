@@ -117,7 +117,6 @@ export default function JoinRequestsPage() {
     setApproving(inviteId);
     try {
       await approveRequest({
-        adminId: userId,
         inviteId,
         role: 'employee',
         passwordHash: crypto.randomUUID().replace(/-/g, '') + Date.now().toString(36),
@@ -134,7 +133,7 @@ export default function JoinRequestsPage() {
     if (!userId) return;
     setRejecting(inviteId);
     try {
-      await rejectRequest({ adminId: userId, inviteId, reason: rejectReason || undefined });
+      await rejectRequest({ inviteId, reason: rejectReason || undefined });
       toast.success(t('joinRequestsPage.requestRejected'));
       setRejectingId(null);
       setRejectReason('');
@@ -149,7 +148,7 @@ export default function JoinRequestsPage() {
     if (!userId) return;
     setGeneratingLink(true);
     try {
-      const result = await generateToken({ adminId: userId, expiryHours: 72 });
+      const result = await generateToken({ expiryHours: 72 });
       const link = `${window.location.origin}/register?invite=${result.token}`;
       setInviteLink(link);
     } catch (e) {

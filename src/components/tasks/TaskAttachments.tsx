@@ -99,7 +99,6 @@ export function TaskAttachments({ taskId, attachments, currentUserId, canUpload 
             name: file.name,
             type: file.type,
             size: file.size,
-            uploadedBy: currentUserId,
           });
         }),
       );

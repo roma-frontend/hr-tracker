@@ -190,7 +190,7 @@ export function EmployeesClient() {
       return;
     }
     try {
-      await deleteUser({ adminId: user.id as Id<'users'>, userId: userId as Id<'users'> });
+      await deleteUser({ userId: userId as Id<'users'> });
       toast.success(t('employees.deactivated'));
       setDeleteConfirm(null);
     } catch (err) {

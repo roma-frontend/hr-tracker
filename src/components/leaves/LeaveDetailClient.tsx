@@ -87,7 +87,7 @@ export default function LeaveDetailClient() {
     if (!currentUser) return;
     setIsApproving(true);
     try {
-      await approveLeave({ leaveId, reviewerId: currentUser._id });
+      await approveLeave({ leaveId });
       toast.success(t('leave.approvedSuccess'));
       router.push('/leaves');
     } catch {
@@ -101,7 +101,7 @@ export default function LeaveDetailClient() {
     if (!currentUser) return;
     setIsRejecting(true);
     try {
-      await rejectLeave({ leaveId, reviewerId: currentUser._id });
+      await rejectLeave({ leaveId });
       toast.success(t('leave.rejectedSuccess'));
       router.push('/leaves');
     } catch {
@@ -115,7 +115,7 @@ export default function LeaveDetailClient() {
     if (!currentUser) return;
     setIsDeleting(true);
     try {
-      await deleteLeave({ leaveId, requesterId: currentUser._id });
+      await deleteLeave({ leaveId });
       toast.success(t('leave.deletedSuccess'));
       router.push('/leaves');
     } catch {

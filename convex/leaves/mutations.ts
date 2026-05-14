@@ -2,7 +2,7 @@ import { v } from 'convex/values';
 import { mutation } from '../_generated/server';
 import type { MutationCtx } from '../_generated/server';
 import type { Id } from '../_generated/dataModel';
-import { isSuperadmin, isSuperadminEmail } from '../lib/auth';
+import { isSuperadmin, isSuperadminEmail, requireAuthUser } from '../lib/auth';
 import { withAuth } from '../lib/withAuth';
 import { MAX_PAGE_SIZE } from '../pagination';
 
@@ -11,7 +11,7 @@ import { MAX_PAGE_SIZE } from '../pagination';
 // ─────────────────────────────────────────────────────────────────────────────
 export const createLeave = mutation({
   args: {
-    userId: v.id('users'),
+    userId: v.optional(v.id('users')),
     type: v.union(
       v.literal('paid'),
       v.literal('unpaid'),
@@ -26,14 +26,16 @@ export const createLeave = mutation({
     comment: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const user = await ctx.db.get(args.userId);
+    const caller = await requireAuthUser(ctx);
+    const targetUserId = args.userId ?? caller._id;
+    const user = targetUserId === caller._id ? caller : await ctx.db.get(targetUserId);
     if (!user) throw new Error('User not found');
     if (!user.isApproved) throw new Error('Account pending approval');
     if (!user.organizationId) throw new Error('User does not belong to an organization');
 
     const leaveId = await ctx.db.insert('leaveRequests', {
       organizationId: user.organizationId, // ← tenant isolation
-      userId: args.userId,
+      userId: targetUserId,
       type: args.type,
       startDate: args.startDate,
       endDate: args.endDate,
@@ -78,7 +80,7 @@ export const createLeave = mutation({
 
     await ctx.db.insert('notifications', {
       organizationId: user.organizationId,
-      userId: args.userId,
+      userId: targetUserId,
       type: 'system',
       title: '📋 Заявка получена',
       message: autoReplyMessage,
@@ -89,7 +91,7 @@ export const createLeave = mutation({
     });
 
     for (const recipient of admins) {
-      if (recipient._id === args.userId) continue;
+      if (recipient._id === targetUserId) continue;
       await ctx.db.insert('notifications', {
         organizationId: user.organizationId,
         userId: recipient._id,
@@ -118,7 +120,7 @@ export const createLeave = mutation({
     // Audit log: leave request created
     await ctx.db.insert('auditLogs', {
       organizationId: user.organizationId,
-      userId: args.userId,
+      userId: caller._id,
       action: 'leave_created',
       target: leaveId,
       details: JSON.stringify({
@@ -141,16 +143,14 @@ export const createLeave = mutation({
 export const approveLeave = mutation({
   args: {
     leaveId: v.id('leaveRequests'),
-    reviewerId: v.id('users'),
     comment: v.optional(v.string()),
   },
-  handler: async (ctx, { leaveId, reviewerId, comment }) => {
+  handler: async (ctx, { leaveId, comment }) => {
+    const reviewer = await requireAuthUser(ctx);
+    const reviewerId = reviewer._id;
     const leave = await ctx.db.get(leaveId);
     if (!leave) throw new Error('Leave request not found');
     if (leave.status !== 'pending') throw new Error('Leave is not pending');
-
-    const reviewer = await ctx.db.get(reviewerId);
-    if (!reviewer) throw new Error('Reviewer not found');
 
     // Cross-org protection
     if (reviewer.organizationId !== leave.organizationId) {
@@ -254,16 +254,14 @@ export const approveLeave = mutation({
 export const rejectLeave = mutation({
   args: {
     leaveId: v.id('leaveRequests'),
-    reviewerId: v.id('users'),
     comment: v.optional(v.string()),
   },
-  handler: async (ctx, { leaveId, reviewerId, comment }) => {
+  handler: async (ctx, { leaveId, comment }) => {
+    const reviewer = await requireAuthUser(ctx);
+    const reviewerId = reviewer._id;
     const leave = await ctx.db.get(leaveId);
     if (!leave) throw new Error('Leave request not found');
     if (leave.status !== 'pending') throw new Error('Leave is not pending');
-
-    const reviewer = await ctx.db.get(reviewerId);
-    if (!reviewer) throw new Error('Reviewer not found');
 
     if (reviewer.organizationId !== leave.organizationId) {
       throw new Error('Access denied: cross-organization operation');
@@ -347,7 +345,6 @@ export const rejectLeave = mutation({
 export const updateLeave = mutation({
   args: {
     leaveId: v.id('leaveRequests'),
-    requesterId: v.id('users'),
     startDate: v.optional(v.string()),
     endDate: v.optional(v.string()),
     days: v.optional(v.number()),
@@ -362,12 +359,11 @@ export const updateLeave = mutation({
       ),
     ),
   },
-  handler: async (ctx, { leaveId, requesterId, ...updates }) => {
+  handler: async (ctx, { leaveId, ...updates }) => {
+    const requester = await requireAuthUser(ctx);
+    const requesterId = requester._id;
     const leave = await ctx.db.get(leaveId);
     if (!leave) throw new Error('Leave request not found');
-
-    const requester = await ctx.db.get(requesterId);
-    if (!requester) throw new Error('Requester not found');
 
     // Cross-org protection
     if (requester.organizationId !== leave.organizationId) {
@@ -422,14 +418,12 @@ export const updateLeave = mutation({
 export const deleteLeave = mutation({
   args: {
     leaveId: v.id('leaveRequests'),
-    requesterId: v.id('users'),
   },
-  handler: async (ctx, { leaveId, requesterId }) => {
+  handler: async (ctx, { leaveId }) => {
+    const requester = await requireAuthUser(ctx);
+    const requesterId = requester._id;
     const leave = await ctx.db.get(leaveId);
     if (!leave) throw new Error('Leave request not found');
-
-    const requester = await ctx.db.get(requesterId);
-    if (!requester) throw new Error('Requester not found');
 
     if (requester.organizationId !== leave.organizationId) {
       throw new Error('Access denied: cross-organization operation');
@@ -500,14 +494,12 @@ export const deleteLeave = mutation({
 export const forceDeleteLeave = mutation({
   args: {
     leaveId: v.id('leaveRequests'),
-    requesterId: v.id('users'),
   },
-  handler: async (ctx, { leaveId, requesterId }) => {
+  handler: async (ctx, { leaveId }) => {
+    const requester = await requireAuthUser(ctx);
+    const requesterId = requester._id;
     const leave = await ctx.db.get(leaveId);
     if (!leave) throw new Error('Leave request not found');
-
-    const requester = await ctx.db.get(requesterId);
-    if (!requester) throw new Error('Requester not found');
 
     // Only superadmin can force delete
     if (!isSuperadmin(requester)) {
@@ -563,10 +555,10 @@ export const markLeaveAsRead = mutation({
 // MARK ALL LEAVE REQUESTS AS READ (for an organization)
 // ─────────────────────────────────────────────────────────────────────────────
 export const markAllLeavesAsRead = mutation({
-  args: { requesterId: v.id('users') },
-  handler: async (ctx, { requesterId }) => {
-    const requester = await ctx.db.get(requesterId);
-    if (!requester) throw new Error('Requester not found');
+  args: {},
+  handler: async (ctx) => {
+    const requester = await requireAuthUser(ctx);
+    const requesterId = requester._id;
     if (!requester.organizationId && !isSuperadminEmail(requester.email)) {
       throw new Error('User does not belong to an organization');
     }
@@ -610,12 +602,11 @@ export const markAllLeavesAsRead = mutation({
 export const bulkApproveLeaves = mutation({
   args: {
     leaveIds: v.array(v.id('leaveRequests')),
-    reviewerId: v.id('users'),
     comment: v.optional(v.string()),
   },
-  handler: async (ctx, { leaveIds, reviewerId, comment }) => {
-    const reviewer = await ctx.db.get(reviewerId);
-    if (!reviewer) throw new Error('Reviewer not found');
+  handler: async (ctx, { leaveIds, comment }) => {
+    const reviewer = await requireAuthUser(ctx);
+    const reviewerId = reviewer._id;
     if (
       reviewer.role !== 'admin' &&
       reviewer.role !== 'supervisor' &&
@@ -753,12 +744,11 @@ export const bulkApproveLeaves = mutation({
 export const bulkRejectLeaves = mutation({
   args: {
     leaveIds: v.array(v.id('leaveRequests')),
-    reviewerId: v.id('users'),
     comment: v.string(),
   },
-  handler: async (ctx, { leaveIds, reviewerId, comment }) => {
-    const reviewer = await ctx.db.get(reviewerId);
-    if (!reviewer) throw new Error('Reviewer not found');
+  handler: async (ctx, { leaveIds, comment }) => {
+    const reviewer = await requireAuthUser(ctx);
+    const reviewerId = reviewer._id;
     if (
       reviewer.role !== 'admin' &&
       reviewer.role !== 'supervisor' &&

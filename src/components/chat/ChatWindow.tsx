@@ -194,7 +194,7 @@ export const ChatWindow = React.memo(function ChatWindow({
     if (conversationId) {
       // Mark conversation as read with a small debounce to avoid duplicate calls
       const timer = setTimeout(() => {
-        markAsRead({ conversationId, userId: currentUserId });
+        markAsRead({ conversationId });
       }, 100);
       return () => clearTimeout(timer);
     }
@@ -235,10 +235,10 @@ export const ChatWindow = React.memo(function ChatWindow({
   }, [allMessages]);
 
   const handleTyping = useCallback(() => {
-    setTyping({ conversationId, userId: currentUserId, organizationId, isTyping: true });
+    setTyping({ conversationId, organizationId, isTyping: true });
     if (isTypingTimeout) clearTimeout(isTypingTimeout);
     const t = setTimeout(() => {
-      setTyping({ conversationId, userId: currentUserId, organizationId, isTyping: false });
+      setTyping({ conversationId, organizationId, isTyping: false });
     }, 3000);
     setIsTypingTimeout(t);
   }, [conversationId, currentUserId, organizationId, isTypingTimeout, setTyping]);
@@ -315,7 +315,7 @@ export const ChatWindow = React.memo(function ChatWindow({
       setShowSchedule(false);
       setShowPollCreator(false);
       if (isTypingTimeout) clearTimeout(isTypingTimeout);
-      await setTyping({ conversationId, userId: currentUserId, organizationId, isTyping: false });
+      await setTyping({ conversationId, organizationId, isTyping: false });
 
       // Scheduled send
       if (scheduledFor) {
@@ -323,7 +323,6 @@ export const ChatWindow = React.memo(function ChatWindow({
         if (scheduledTs > Date.now()) {
           await scheduleMessage({
             conversationId,
-            senderId: currentUserId,
             organizationId,
             content: text,
             scheduledFor: scheduledTs,
@@ -357,7 +356,6 @@ export const ChatWindow = React.memo(function ChatWindow({
 
       await sendMessage({
         conversationId,
-        senderId: currentUserId,
         organizationId,
         type: msgType,
         content: text || (uploadedAttachments.length > 0 ? '' : ''),
@@ -479,7 +477,6 @@ export const ChatWindow = React.memo(function ChatWindow({
         // Send voice message with attachments array
         await sendMessage({
           conversationId,
-          senderId: currentUserId,
           organizationId,
           type: 'audio',
           content: t('chat.voiceMessage', 'Voice message') + ` (${duration}s)`,
@@ -516,9 +513,9 @@ export const ChatWindow = React.memo(function ChatWindow({
 
     // Send typing indicator only once when user starts typing after pause
     if (value.trim() && !isTypingTimeout) {
-      setTyping({ conversationId, userId: currentUserId, organizationId, isTyping: true });
+      setTyping({ conversationId, organizationId, isTyping: true });
       const t = setTimeout(() => {
-        setTyping({ conversationId, userId: currentUserId, organizationId, isTyping: false });
+        setTyping({ conversationId, organizationId, isTyping: false });
         setIsTypingTimeout(null);
       }, 3000);
       setIsTypingTimeout(t);
@@ -561,7 +558,6 @@ export const ChatWindow = React.memo(function ChatWindow({
     try {
       await sendMessage({
         conversationId,
-        senderId: currentUserId,
         organizationId,
         type: 'text',
         content: `📊 ${q}`,
@@ -609,7 +605,7 @@ export const ChatWindow = React.memo(function ChatWindow({
     // If chat is active (tab focused) — mark as read immediately, play sound
     if (document.hasFocus()) {
       // Ensure this call completes by using Promise handling
-      void markAsRead({ conversationId, userId: currentUserId });
+      void markAsRead({ conversationId });
       playChatMessageSound();
       return;
     }
@@ -906,7 +902,6 @@ export const ChatWindow = React.memo(function ChatWindow({
                         onSendMessage={async (text) => {
                           await sendMessage({
                             conversationId,
-                            senderId: currentUserId,
                             organizationId,
                             type: 'text',
                             content: text,

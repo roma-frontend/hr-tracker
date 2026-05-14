@@ -79,7 +79,6 @@ export default function BulkActionsClient() {
     try {
       const result = await bulkApprove({
         leaveIds: Array.from(selectedLeaves) as Id<'leaveRequests'>[],
-        reviewerId: user!.id as Id<'users'>,
         comment: comment || undefined,
       });
 
@@ -108,7 +107,6 @@ export default function BulkActionsClient() {
     try {
       const result = await bulkReject({
         leaveIds: Array.from(selectedLeaves) as Id<'leaveRequests'>[],
-        reviewerId: user!.id as Id<'users'>,
         comment: comment || t('superadmin.bulkActions.rejectedInBulk'),
       });
 
