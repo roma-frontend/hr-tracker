@@ -339,6 +339,7 @@ export function EditEmployeeModal({ employee, open, onClose }: EditEmployeeModal
       }
 
       await updateUser({
+        adminId: user.id as Id<'users'>,
         userId: employee._id as Id<'users'>,
         name: form.name,
         role: form.role as 'admin' | 'supervisor' | 'employee' | 'driver',

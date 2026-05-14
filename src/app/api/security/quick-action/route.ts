@@ -12,11 +12,11 @@ const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
  */
 export const POST = withCsrfProtection(async (req: NextRequest) => {
   try {
-    const { action, userId, reason, duration } = await req.json();
+    const { action, userId, adminId, reason, duration } = await req.json();
 
-    if (!action || !userId) {
+    if (!action || !userId || !adminId) {
       return NextResponse.json(
-        { error: 'Missing required fields: action, userId' },
+        { error: 'Missing required fields: action, userId, adminId' },
         { status: 400 },
       );
     }
@@ -37,6 +37,7 @@ export const POST = withCsrfProtection(async (req: NextRequest) => {
       }
 
       result = await convex.mutation(api.users.admin.suspendUser, {
+        adminId: adminId as Id<'users'>,
         userId: userId as Id<'users'>,
         reason,
         duration: duration || 24, // Default 24 hours
@@ -50,6 +51,7 @@ export const POST = withCsrfProtection(async (req: NextRequest) => {
     } else {
       // unsuspend
       result = await convex.mutation(api.users.admin.unsuspendUser, {
+        adminId: adminId as Id<'users'>,
         userId: userId as Id<'users'>,
       });
 

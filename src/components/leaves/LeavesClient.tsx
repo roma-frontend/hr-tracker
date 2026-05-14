@@ -180,7 +180,7 @@ export function LeavesClient() {
       // Mark as read first
       await markLeaveAsRead({ leaveId: id });
 
-      await approveOptimistic(id, comment);
+      await approveOptimistic(id, user.id as Id<'users'>, comment);
 
       playNotificationSound('approved');
       toast.success(t('leave.approvedSuccess'));
@@ -199,7 +199,7 @@ export function LeavesClient() {
       // Mark as read first
       await markLeaveAsRead({ leaveId: id });
 
-      await rejectOptimistic(id, comment);
+      await rejectOptimistic(id, user.id as Id<'users'>, comment);
 
       playNotificationSound('rejected');
       toast.success(t('leave.rejectedSuccess'));
@@ -215,7 +215,7 @@ export function LeavesClient() {
       return;
     }
     try {
-      await deleteOptimistic(id);
+      await deleteOptimistic(id, user.id as Id<'users'>);
       toast.success(t('leave.deletedSuccess'));
     } catch (err) {
       console.error('Delete error:', err);

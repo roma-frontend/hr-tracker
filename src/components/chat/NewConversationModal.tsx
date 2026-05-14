@@ -151,6 +151,7 @@ export function NewConversationModal({
 
         const convId = await getOrCreateDM({
           organizationId: dmOrgId as any,
+          currentUserId,
           targetUserId: targetId,
         });
         onCreated(convId);
@@ -182,6 +183,7 @@ export function NewConversationModal({
 
         const convId = await createGroup({
           organizationId: groupOrgId as any,
+          createdBy: currentUserId,
           name: groupName.trim(),
           memberIds: selectedUsers,
         });

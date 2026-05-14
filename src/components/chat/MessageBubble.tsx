@@ -543,25 +543,26 @@ export const MessageBubble = React.memo(function MessageBubble({
     }
     await editMessage({
       messageId: message._id,
+      userId: currentUserId,
       content: editContent.trim(),
     });
     setEditing(false);
   };
 
   const handleDeleteForEveryone = async () => {
-    await deleteMessage({ messageId: message._id, deleteForEveryone: true });
+    await deleteMessage({ messageId: message._id, userId: currentUserId, deleteForEveryone: true });
     setShowDeleteDialog(false);
     setShowMenu(false);
   };
 
   const handleDeleteForMe = async () => {
-    await deleteMessage({ messageId: message._id });
+    await deleteMessage({ messageId: message._id, userId: currentUserId });
     setShowDeleteDialog(false);
     setShowMenu(false);
   };
 
   const handlePin = () => {
-    pinMessage({ messageId: message._id, pin: !message.isPinned });
+    pinMessage({ messageId: message._id, userId: currentUserId, pin: !message.isPinned });
     setShowMenu(false);
   };
 
@@ -1008,6 +1009,7 @@ export const MessageBubble = React.memo(function MessageBubble({
                         onClick={() =>
                           votePoll({
                             messageId: message._id,
+                            userId: currentUserId,
                             optionId: opt.id,
                           })
                         }
@@ -1060,7 +1062,7 @@ export const MessageBubble = React.memo(function MessageBubble({
                 </span>
                 {isOwn && !message.poll.closedAt && (
                   <button
-                    onClick={() => closePoll({ messageId: message._id })}
+                    onClick={() => closePoll({ messageId: message._id, userId: currentUserId })}
                     className="text-[9px] xs:text-[10px] hover:opacity-70 transition-opacity py-0.5 px-1.5 hover:bg-opacity-50 rounded"
                     style={{ color: 'var(--primary)' }}
                   >

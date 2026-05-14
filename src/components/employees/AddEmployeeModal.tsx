@@ -161,6 +161,7 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
     setSubmitting(true);
     try {
       await createUser({
+        adminId: currentUser.id as any,
         name,
         email,
         passwordHash: 'temp-password-will-be-changed',

@@ -41,7 +41,7 @@ export default function ApprovalsClient() {
       return;
     }
     try {
-      await approveUser({ userId });
+      await approveUser({ userId, adminId: user.id as Id<'users'> });
       toast.success(t('ui.userApproved', { name: userName }));
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t('ui.failedToApproveUser'));
@@ -53,7 +53,7 @@ export default function ApprovalsClient() {
     const message = t('ui.confirmRejectUser', { name: userName });
     if (!confirm(message)) return;
     try {
-      await rejectUser({ userId });
+      await rejectUser({ userId, adminId: user.id as Id<'users'> });
       toast.success(t('ui.userRejected', { name: userName }));
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t('ui.failedToRejectUser'));

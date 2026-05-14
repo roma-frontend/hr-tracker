@@ -2,9 +2,9 @@ import { v } from 'convex/values';
 import { mutation } from '../_generated/server';
 import type { MutationCtx } from '../_generated/server';
 import type { Id } from '../_generated/dataModel';
-import { requireOrgAdmin, requireUser } from '../lib/rbac';
+import { requireRole, requireOrgAdmin, requireUser } from '../lib/rbac';
 import { withAuth } from '../lib/withAuth';
-import { isSuperadminEmail, requireAuthUser } from '../lib/auth';
+import { isSuperadminEmail } from '../lib/auth';
 import { MAX_PAGE_SIZE } from '../pagination';
 import { DEFAULT_LIST_CAP, SMALL_LIST_CAP } from '../lib/limits';
 
@@ -13,6 +13,7 @@ import { DEFAULT_LIST_CAP, SMALL_LIST_CAP } from '../lib/limits';
 // ─────────────────────────────────────────────────────────────────────────────
 export const createUser = mutation({
   args: {
+    adminId: v.id('users'),
     name: v.string(),
     email: v.string(),
     passwordHash: v.string(),
@@ -29,9 +30,9 @@ export const createUser = mutation({
     supervisorId: v.optional(v.id('users')),
     organizationId: v.optional(v.id('organizations')),
   },
-  handler: async (ctx, { organizationId, ...args }) => {
+  handler: async (ctx, { adminId, organizationId, ...args }) => {
     // RBAC: require org admin access (superadmin can create in any org)
-    const caller = await requireAuthUser(ctx);
+    const caller = await requireUser(ctx, adminId);
     const isSuperadmin = isSuperadminEmail(caller.email);
 
     const email = args.email.toLowerCase().trim();
@@ -56,7 +57,7 @@ export const createUser = mutation({
 
     // RBAC: verify caller has admin access to the target org
     if (!isSuperadmin) {
-      await requireOrgAdmin(ctx, caller._id, targetOrgId);
+      await requireOrgAdmin(ctx, adminId, targetOrgId);
     }
 
     const org = await ctx.db.get(targetOrgId);
@@ -89,7 +90,7 @@ export const createUser = mutation({
       supervisorId: args.supervisorId,
       isActive: true,
       isApproved: true,
-      approvedBy: caller._id,
+      approvedBy: adminId,
       approvedAt: Date.now(),
       travelAllowance,
       paidLeaveBalance: 24,
@@ -121,7 +122,7 @@ export const createUser = mutation({
     // Audit log: user created
     await ctx.db.insert('auditLogs', {
       organizationId: targetOrgId,
-      userId: caller._id,
+      userId: adminId,
       action: 'user_created',
       target: userId,
       details: JSON.stringify({
@@ -143,6 +144,7 @@ export const createUser = mutation({
 // ─────────────────────────────────────────────────────────────────────────────
 export const updateUser = mutation({
   args: {
+    adminId: v.id('users'),
     userId: v.id('users'),
     name: v.optional(v.string()),
     email: v.optional(v.string()),
@@ -166,9 +168,9 @@ export const updateUser = mutation({
     sickLeaveBalance: v.optional(v.number()),
     familyLeaveBalance: v.optional(v.number()),
   },
-  handler: async (ctx, { userId, ...updates }) => {
+  handler: async (ctx, { adminId, userId, ...updates }) => {
     // RBAC: require org admin access
-    const caller = await requireAuthUser(ctx);
+    const caller = await requireUser(ctx, adminId);
     const isSuperadmin = isSuperadminEmail(caller.email);
 
     const user = await ctx.db.get(userId);
@@ -176,7 +178,7 @@ export const updateUser = mutation({
 
     // RBAC: verify same organization (superadmin can update any org)
     if (!isSuperadmin) {
-      await requireOrgAdmin(ctx, caller._id, user.organizationId as Id<'organizations'>);
+      await requireOrgAdmin(ctx, adminId, user.organizationId as Id<'organizations'>);
     }
 
     const employeeType = updates.employeeType ?? user.employeeType;
@@ -187,7 +189,7 @@ export const updateUser = mutation({
     // Audit log: user updated
     await ctx.db.insert('auditLogs', {
       organizationId: caller.organizationId,
-      userId: caller._id,
+      userId: adminId,
       action: 'user_updated',
       target: userId,
       details: JSON.stringify({
@@ -207,11 +209,12 @@ export const updateUser = mutation({
 // ─────────────────────────────────────────────────────────────────────────────
 export const deleteUser = mutation({
   args: {
+    adminId: v.id('users'),
     userId: v.id('users'),
   },
-  handler: async (ctx, { userId }) => {
+  handler: async (ctx, { adminId, userId }) => {
     // RBAC: require org admin access
-    const caller = await requireAuthUser(ctx);
+    const caller = await requireUser(ctx, adminId);
     const isSuperadmin = isSuperadminEmail(caller.email);
 
     const user = await ctx.db.get(userId);
@@ -219,7 +222,7 @@ export const deleteUser = mutation({
 
     // RBAC: cross-org protection (superadmin can delete from any org)
     if (!isSuperadmin) {
-      await requireOrgAdmin(ctx, caller._id, user.organizationId as Id<'organizations'>);
+      await requireOrgAdmin(ctx, adminId, user.organizationId as Id<'organizations'>);
     }
 
     // Protect superadmin
@@ -241,7 +244,7 @@ export const deleteUser = mutation({
     // Audit log: user deleted (soft)
     await ctx.db.insert('auditLogs', {
       organizationId: caller.organizationId,
-      userId: caller._id,
+      userId: adminId,
       action: 'user_deleted',
       target: userId,
       details: JSON.stringify({ name: user.name, email: user.email, role: user.role }),
@@ -257,14 +260,12 @@ export const deleteUser = mutation({
 // ─────────────────────────────────────────────────────────────────────────────
 export const hardDeleteUser = mutation({
   args: {
+    adminId: v.id('users'),
     userId: v.id('users'),
   },
-  handler: async (ctx, { userId }) => {
+  handler: async (ctx, { adminId, userId }) => {
     // RBAC: require superadmin role
-    const caller = await requireAuthUser(ctx);
-    if (caller.role !== 'superadmin' && !isSuperadminEmail(caller.email)) {
-      throw new Error('Insufficient permissions. Required role: superadmin');
-    }
+    await requireRole(ctx, adminId, 'superadmin');
 
     const user = await ctx.db.get(userId);
     if (!user) throw new Error('User not found');
@@ -275,7 +276,7 @@ export const hardDeleteUser = mutation({
     // Audit log: user hard deleted
     await ctx.db.insert('auditLogs', {
       organizationId: user.organizationId,
-      userId: caller._id,
+      userId: adminId,
       action: 'user_hard_deleted',
       target: userId,
       details: JSON.stringify({ name: user.name, email: user.email, role: user.role }),
@@ -291,11 +292,12 @@ export const hardDeleteUser = mutation({
 // ─────────────────────────────────────────────────────────────────────────────
 export const approveUser = mutation({
   args: {
+    adminId: v.id('users'),
     userId: v.id('users'),
   },
-  handler: async (ctx, { userId }) => {
+  handler: async (ctx, { adminId, userId }) => {
     // RBAC: require org admin access
-    const caller = await requireAuthUser(ctx);
+    const caller = await requireUser(ctx, adminId);
     const isSuperadmin = isSuperadminEmail(caller.email);
 
     const user = await ctx.db.get(userId);
@@ -303,7 +305,7 @@ export const approveUser = mutation({
 
     // RBAC: cross-org protection
     if (!isSuperadmin) {
-      await requireOrgAdmin(ctx, caller._id, user.organizationId as Id<'organizations'>);
+      await requireOrgAdmin(ctx, adminId, user.organizationId as Id<'organizations'>);
     }
 
     if (user.isApproved) throw new Error('User already approved');
@@ -313,9 +315,11 @@ export const approveUser = mutation({
       org = await ctx.db.get(user.organizationId);
     }
 
+    const callerUser = await ctx.db.get(adminId);
+
     await ctx.db.patch(userId, {
       isApproved: true,
-      approvedBy: caller._id,
+      approvedBy: adminId,
       approvedAt: Date.now(),
     });
 
@@ -324,7 +328,7 @@ export const approveUser = mutation({
       userId,
       type: 'join_approved',
       title: '✅ Account Approved',
-      message: `Your account has been approved by ${caller.name ?? 'admin'}. Welcome to ${org?.name ?? 'the team'}!`,
+      message: `Your account has been approved by ${callerUser?.name ?? 'admin'}. Welcome to ${org?.name ?? 'the team'}!`,
       isRead: false,
       route: '/organization',
       createdAt: Date.now(),
@@ -333,7 +337,7 @@ export const approveUser = mutation({
     // Audit log: user approved
     await ctx.db.insert('auditLogs', {
       organizationId: user.organizationId,
-      userId: caller._id,
+      userId: adminId,
       action: 'user_approved',
       target: userId,
       details: JSON.stringify({ name: user.name, email: user.email }),
@@ -349,11 +353,12 @@ export const approveUser = mutation({
 // ─────────────────────────────────────────────────────────────────────────────
 export const rejectUser = mutation({
   args: {
+    adminId: v.id('users'),
     userId: v.id('users'),
   },
-  handler: async (ctx, { userId }) => {
+  handler: async (ctx, { adminId, userId }) => {
     // RBAC: require org admin access
-    const caller = await requireAuthUser(ctx);
+    const caller = await requireUser(ctx, adminId);
     const isSuperadmin = isSuperadminEmail(caller.email);
 
     const user = await ctx.db.get(userId);
@@ -361,13 +366,13 @@ export const rejectUser = mutation({
 
     // RBAC: cross-org protection
     if (!isSuperadmin) {
-      await requireOrgAdmin(ctx, caller._id, user.organizationId as Id<'organizations'>);
+      await requireOrgAdmin(ctx, adminId, user.organizationId as Id<'organizations'>);
     }
 
     // Audit log: user rejected
     await ctx.db.insert('auditLogs', {
       organizationId: caller.organizationId,
-      userId: caller._id,
+      userId: adminId,
       action: 'user_rejected',
       target: userId,
       details: JSON.stringify({ name: user.name, email: user.email, role: user.role }),

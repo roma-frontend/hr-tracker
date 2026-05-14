@@ -95,6 +95,7 @@ export const POST = withCsrfProtection(async (req: NextRequest) => {
       title,
       description: description || '',
       assignedTo: assignedTo as Id<'users'>,
+      assignedBy: assignedBy as Id<'users'>,
       priority: priority as 'low' | 'medium' | 'high' | 'urgent',
       deadline: deadline ? new Date(deadline).getTime() : undefined,
       tags: tags || [],

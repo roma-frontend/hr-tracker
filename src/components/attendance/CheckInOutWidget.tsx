@@ -36,7 +36,7 @@ export function CheckInOutWidget() {
   const handleCheckIn = async () => {
     if (!user?.id) return;
     try {
-      await checkIn({});
+      await checkIn({ userId: user.id as any });
       toast.success(t('toasts.checkedInSuccess'));
     } catch (error: any) {
       toast.error(error.message || t('attendance.failedCheckIn'));
@@ -46,7 +46,7 @@ export function CheckInOutWidget() {
   const handleCheckOut = async () => {
     if (!user?.id) return;
     try {
-      await checkOut({});
+      await checkOut({ userId: user.id as any });
       toast.success(t('toasts.checkedOutSuccess'));
     } catch (error: any) {
       toast.error(error.message || t('attendance.failedCheckOut'));

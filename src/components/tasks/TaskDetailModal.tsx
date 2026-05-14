@@ -179,7 +179,7 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
     : EMPLOYEE_TRANSITIONS[taskData.status as Status];
 
   const handleStatusChange = async (newStatus: Status) => {
-    await updateStatus({ taskId: task._id, status: newStatus });
+    await updateStatus({ taskId: task._id, status: newStatus, userId: currentUserId });
     onClose();
   };
 
@@ -209,7 +209,7 @@ export function TaskDetailModal({ task, currentUserId, userRole, onClose }: Prop
     e.preventDefault();
     if (!comment.trim()) return;
     setSubmitting(true);
-    await addComment({ taskId: task._id, content: comment.trim() });
+    await addComment({ taskId: task._id, authorId: currentUserId, content: comment.trim() });
     setComment('');
     setSubmitting(false);
   };

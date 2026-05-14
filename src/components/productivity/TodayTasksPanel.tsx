@@ -22,7 +22,7 @@ export function TodayTasksPanel() {
   const handleToggleTask = async (taskId: Id<'tasks'>, currentStatus: string) => {
     try {
       const newStatus = currentStatus === 'completed' ? 'in_progress' : 'completed';
-      await updateTaskStatus({ taskId, status: newStatus });
+      await updateTaskStatus({ taskId, status: newStatus, userId: user!.id as Id<'users'> });
       toast.success(newStatus === 'completed' ? t('tasks.taskCompleted') : t('tasks.taskReopened'));
     } catch (error) {
       toast.error(t('errors.taskUpdateFailed'));

@@ -260,10 +260,10 @@ export default function ChatClient({
               setShowNewConv(true);
             }}
             onTogglePin={async (convId) => {
-              await togglePinMutation({ conversationId: convId });
+              await togglePinMutation({ conversationId: convId, userId: uid });
             }}
             onDelete={async (convId) => {
-              await deleteConversationMutation({ conversationId: convId });
+              await deleteConversationMutation({ conversationId: convId, userId: uid });
               // Clear selected conversation to show initial empty state
               if (selectedConvId === convId) {
                 setSelectedConvId(null);
@@ -271,13 +271,13 @@ export default function ChatClient({
               }
             }}
             onRestore={async (convId) => {
-              await restoreConversationMutation({ conversationId: convId });
+              await restoreConversationMutation({ conversationId: convId, userId: uid });
             }}
             onToggleArchive={async (convId) => {
-              await toggleArchiveMutation({ conversationId: convId });
+              await toggleArchiveMutation({ conversationId: convId, userId: uid });
             }}
             onToggleMute={async (convId) => {
-              await toggleMuteMutation({ conversationId: convId });
+              await toggleMuteMutation({ conversationId: convId, userId: uid });
             }}
           />
         </div>

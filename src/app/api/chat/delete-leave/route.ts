@@ -78,6 +78,7 @@ export const POST = withCsrfProtection(async (req: Request) => {
 
     await fetchMutation(api.leaves.deleteLeave, {
       leaveId: targetLeave._id as Id<'leaveRequests'>,
+      requesterId: requesterId as Id<'users'>,
     });
 
     return NextResponse.json({

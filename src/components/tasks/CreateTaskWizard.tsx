@@ -171,6 +171,7 @@ export function CreateTaskWizard({
 
       const taskId = await createTask({
         assignedTo: String(data.assigneeId) as Id<'users'>,
+        assignedBy: currentUserId,
         title: String(data.title).trim(),
         description: data.description ? String(data.description).trim() : undefined,
         priority: (String(data.priority) || 'medium') as 'low' | 'medium' | 'high' | 'urgent',
@@ -188,6 +189,7 @@ export function CreateTaskWizard({
             name: attachment.name,
             type: attachment.type,
             size: attachment.size,
+            uploadedBy: currentUserId,
           });
         }
       }

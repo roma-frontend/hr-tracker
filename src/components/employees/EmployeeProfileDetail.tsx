@@ -87,6 +87,7 @@ export default function EmployeeProfileDetail({ employeeId }: EmployeeProfileDet
       }
       await deleteUser({
         userId: employeeId as Id<'users'>,
+        adminId: currentUser.id as Id<'users'>,
       });
       toast.success(t('employees.employeeDeleted', 'Employee deleted successfully'));
       window.history.back();

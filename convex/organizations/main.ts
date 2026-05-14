@@ -15,6 +15,7 @@ const PLAN_EMPLOYEE_LIMITS: Record<string, number> = {
 // ─────────────────────────────────────────────────────────────────────────────
 export const createOrganization = mutation({
   args: {
+    superadminUserId: v.id('users'),
     name: v.string(),
     slug: v.string(),
     plan: v.union(v.literal('starter'), v.literal('professional'), v.literal('enterprise')),
@@ -24,8 +25,8 @@ export const createOrganization = mutation({
   },
   handler: async (ctx, args) => {
     // Verify caller is superadmin
-    const caller = await requireAuthUser(ctx);
-    if (!isSuperadmin(caller)) {
+    const caller = await ctx.db.get(args.superadminUserId);
+    if (!caller || !isSuperadmin(caller)) {
       throw new Error('Only the superadmin can create organizations');
     }
 
@@ -61,7 +62,7 @@ export const createOrganization = mutation({
     // Audit log: organization created
     await ctx.db.insert('auditLogs', {
       organizationId: orgId,
-      userId: caller._id,
+      userId: args.superadminUserId,
       action: 'organization_created',
       target: orgId,
       details: JSON.stringify({
@@ -164,6 +165,7 @@ export const getAllOrganizations = query({
 // ─────────────────────────────────────────────────────────────────────────────
 export const updateOrganization = mutation({
   args: {
+    superadminUserId: v.id('users'),
     organizationId: v.id('organizations'),
     name: v.optional(v.string()),
     plan: v.optional(
@@ -174,9 +176,9 @@ export const updateOrganization = mutation({
     country: v.optional(v.string()),
     industry: v.optional(v.string()),
   },
-  handler: async (ctx, { organizationId, ...updates }) => {
-    const caller = await requireAuthUser(ctx);
-    if (!isSuperadmin(caller)) {
+  handler: async (ctx, { superadminUserId, organizationId, ...updates }) => {
+    const caller = await ctx.db.get(superadminUserId);
+    if (!caller || !isSuperadmin(caller)) {
       throw new Error('Only the superadmin can update organizations');
     }
 
@@ -190,7 +192,7 @@ export const updateOrganization = mutation({
     // Audit log: organization updated
     await ctx.db.insert('auditLogs', {
       organizationId: organizationId,
-      userId: caller._id,
+      userId: superadminUserId,
       action: 'organization_updated',
       target: organizationId,
       details: JSON.stringify({ updatedFields: Object.keys(updates) }),
@@ -206,12 +208,13 @@ export const updateOrganization = mutation({
 // ─────────────────────────────────────────────────────────────────────────────
 export const assignOrgAdmin = mutation({
   args: {
+    superadminUserId: v.id('users'),
     userId: v.id('users'),
     organizationId: v.id('organizations'),
   },
-  handler: async (ctx, { userId, organizationId }) => {
-    const caller = await requireAuthUser(ctx);
-    if (!isSuperadmin(caller)) {
+  handler: async (ctx, { superadminUserId, userId, organizationId }) => {
+    const caller = await ctx.db.get(superadminUserId);
+    if (!caller || !isSuperadmin(caller)) {
       throw new Error('Only the superadmin can assign org admins');
     }
 
@@ -228,7 +231,7 @@ export const assignOrgAdmin = mutation({
     // Audit log: org admin assigned
     await ctx.db.insert('auditLogs', {
       organizationId: organizationId,
-      userId: caller._id,
+      userId: superadminUserId,
       action: 'org_admin_assigned',
       target: userId,
       details: JSON.stringify({ assignedUserId: userId, assignedUserName: user.name }),
@@ -346,11 +349,12 @@ export const getOrgMembers = query({
 // ─────────────────────────────────────────────────────────────────────────────
 export const removeOrgAdmin = mutation({
   args: {
+    superadminUserId: v.id('users'),
     userId: v.id('users'),
   },
-  handler: async (ctx, { userId }) => {
-    const caller = await requireAuthUser(ctx);
-    if (!isSuperadmin(caller)) {
+  handler: async (ctx, { superadminUserId, userId }) => {
+    const caller = await ctx.db.get(superadminUserId);
+    if (!caller || !isSuperadmin(caller)) {
       throw new Error('Only the superadmin can remove org admins');
     }
 
@@ -365,7 +369,7 @@ export const removeOrgAdmin = mutation({
     // Audit log: org admin removed
     await ctx.db.insert('auditLogs', {
       organizationId: user.organizationId,
-      userId: caller._id,
+      userId: superadminUserId,
       action: 'org_admin_removed',
       target: userId,
       details: JSON.stringify({
@@ -590,6 +594,7 @@ export const getJoinRequests = query({
 // ─────────────────────────────────────────────────────────────────────────────
 export const approveJoinRequest = mutation({
   args: {
+    adminId: v.id('users'),
     inviteId: v.id('organizationInvites'),
     role: v.union(v.literal('employee'), v.literal('supervisor')),
     department: v.optional(v.string()),
@@ -597,8 +602,8 @@ export const approveJoinRequest = mutation({
     passwordHash: v.string(), // admin sets temp password; user changes on first login
   },
   handler: async (ctx, args) => {
-    const admin = await requireAuthUser(ctx);
-    if (admin.role !== 'admin' && !isSuperadmin(admin)) {
+    const admin = await ctx.db.get(args.adminId);
+    if (!admin || (admin.role !== 'admin' && !isSuperadmin(admin))) {
       throw new Error('Only org admins can approve join requests');
     }
 
@@ -655,7 +660,7 @@ export const approveJoinRequest = mutation({
         position: args.position,
         isActive: true,
         isApproved: true,
-        approvedBy: admin._id,
+        approvedBy: args.adminId,
         approvedAt: Date.now(),
         travelAllowance: 20000,
         paidLeaveBalance: 24,
@@ -677,7 +682,7 @@ export const approveJoinRequest = mutation({
         position: args.position,
         isActive: true,
         isApproved: true,
-        approvedBy: admin._id,
+        approvedBy: args.adminId,
         approvedAt: Date.now(),
         travelAllowance: 20000,
         paidLeaveBalance: 24,
@@ -690,7 +695,7 @@ export const approveJoinRequest = mutation({
     // Update invite record
     await ctx.db.patch(args.inviteId, {
       status: 'approved',
-      reviewedBy: admin._id,
+      reviewedBy: args.adminId,
       reviewedAt: Date.now(),
       userId,
     });
@@ -713,7 +718,7 @@ export const approveJoinRequest = mutation({
     // Audit log: join request approved
     await ctx.db.insert('auditLogs', {
       organizationId: invite.organizationId,
-      userId: admin._id,
+      userId: args.adminId,
       action: 'join_request_approved',
       target: userId,
       details: JSON.stringify({
@@ -734,12 +739,13 @@ export const approveJoinRequest = mutation({
 // ─────────────────────────────────────────────────────────────────────────────
 export const rejectJoinRequest = mutation({
   args: {
+    adminId: v.id('users'),
     inviteId: v.id('organizationInvites'),
     reason: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const admin = await requireAuthUser(ctx);
-    if (admin.role !== 'admin' && !isSuperadmin(admin)) {
+    const admin = await ctx.db.get(args.adminId);
+    if (!admin || (admin.role !== 'admin' && !isSuperadmin(admin))) {
       throw new Error('Only org admins can reject join requests');
     }
 
@@ -757,7 +763,7 @@ export const rejectJoinRequest = mutation({
 
     await ctx.db.patch(args.inviteId, {
       status: 'rejected',
-      reviewedBy: admin._id,
+      reviewedBy: args.adminId,
       reviewedAt: Date.now(),
       rejectionReason: args.reason,
     });
@@ -765,7 +771,7 @@ export const rejectJoinRequest = mutation({
     // Audit log: join request rejected
     await ctx.db.insert('auditLogs', {
       organizationId: invite.organizationId,
-      userId: admin._id,
+      userId: args.adminId,
       action: 'join_request_rejected',
       target: args.inviteId,
       details: JSON.stringify({
@@ -785,12 +791,13 @@ export const rejectJoinRequest = mutation({
 // ─────────────────────────────────────────────────────────────────────────────
 export const generateInviteToken = mutation({
   args: {
+    adminId: v.id('users'),
     inviteEmail: v.optional(v.string()),
     expiryHours: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const admin = await requireAuthUser(ctx);
-    if (admin.role !== 'admin' && !isSuperadmin(admin)) {
+    const admin = await ctx.db.get(args.adminId);
+    if (!admin || (admin.role !== 'admin' && !isSuperadmin(admin))) {
       throw new Error('Only org admins can generate invite links');
     }
 
@@ -819,7 +826,7 @@ export const generateInviteToken = mutation({
     // Audit log: invite token generated
     await ctx.db.insert('auditLogs', {
       organizationId: admin.organizationId,
-      userId: admin._id,
+      userId: args.adminId,
       action: 'invite_token_generated',
       target: inviteId,
       details: JSON.stringify({ inviteEmail: args.inviteEmail, expiryHours: expiryHours }),
@@ -907,11 +914,12 @@ export const getPendingJoinRequestCount = query({
 // ─────────────────────────────────────────────────────────────────────────────
 export const removeMemberFromOrganization = mutation({
   args: {
+    superadminUserId: v.id('users'),
     userId: v.id('users'),
   },
-  handler: async (ctx, { userId }) => {
-    const caller = await requireAuthUser(ctx);
-    if (!isSuperadmin(caller)) {
+  handler: async (ctx, { superadminUserId, userId }) => {
+    const caller = await ctx.db.get(superadminUserId);
+    if (!caller || !isSuperadmin(caller)) {
       throw new Error('Only the superadmin can remove members from organizations');
     }
 
@@ -932,7 +940,7 @@ export const removeMemberFromOrganization = mutation({
     // Audit log: member removed from organization
     await ctx.db.insert('auditLogs', {
       organizationId: user.organizationId,
-      userId: caller._id,
+      userId: superadminUserId,
       action: 'member_removed_from_org',
       target: userId,
       details: JSON.stringify({

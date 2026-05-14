@@ -232,10 +232,12 @@ export function DriverQuickMessage({
     try {
       const conversationId = await getOrCreateDM({
         organizationId,
+        currentUserId: driverUserId,
         targetUserId: passengerUserId,
       });
       await sendMessage({
         conversationId,
+        senderId: driverUserId,
         organizationId,
         type: 'text',
         content: message,
@@ -325,10 +327,12 @@ export function PassengerQuickMessage({
     try {
       const conversationId = await getOrCreateDM({
         organizationId,
+        currentUserId: passengerUserId,
         targetUserId: driverUserId,
       });
       await sendMessage({
         conversationId,
+        senderId: passengerUserId,
         organizationId,
         type: 'text',
         content: message,
