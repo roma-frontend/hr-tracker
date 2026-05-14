@@ -17,7 +17,7 @@ if (missingVars.length > 0) {
   }
 }
 
-const CONVEX_SITE_URL = process.env.NEXT_PUBLIC_CONVEX_URL!.replace(/\.cloud\/api$/, '.site');
+const CONVEX_SITE_URL = process.env.NEXT_PUBLIC_CONVEX_URL!.replace('.convex.cloud', '.convex.site');
 
 export const authConfig: NextAuthConfig = {
   providers: [
