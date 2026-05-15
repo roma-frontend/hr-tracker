@@ -1628,6 +1628,8 @@
     "templateFields": "Поля шаблона",
     "noTemplates": "Шаблоны отсутствуют",
     "noTemplatesDesc": "Создайте свой первый шаблон",
+    "templatesDesc": "Многоразовые шаблоны для подписания документов",
+    "createFirstTemplate": "Создать первый шаблон",
     "templateCreated": "Шаблон успешно создан",
     "templateCreateError": "Ошибка создания шаблона",
     "templateDeleted": "Шаблон удален",

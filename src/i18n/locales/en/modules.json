@@ -1632,6 +1632,8 @@
     "templateFields": "Template Fields",
     "noTemplates": "No templates available",
     "noTemplatesDesc": "Create your first template to get started",
+    "templatesDesc": "Reusable templates for document signing",
+    "createFirstTemplate": "Create your first template",
     "templateCreated": "Template created successfully",
     "templateCreateError": "Failed to create template",
     "templateDeleted": "Template deleted successfully",
