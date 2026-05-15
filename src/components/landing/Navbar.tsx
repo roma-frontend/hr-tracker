@@ -83,8 +83,7 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     await logoutAction();
-    router.push('/');
-    logout();
+    window.location.href = '/';
   };
 
   const getInitials = (name: string) => {
