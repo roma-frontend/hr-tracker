@@ -1,6 +1,6 @@
 # Plan: HR Office — техдолг и оптимизация
 
-**Статус:** Активный. Paginate + RBAC mutations завершены. Следующий этап — производительность.
+**Статус:** Активный. Все задачи из «СЛЕДУЮЩИЕ ЗАДАЧИ» завершены кроме Queries RBAC (отложено).
 **Baseline:** `npx tsc --noEmit` = 0 ошибок, clean.
 **Ветка:** main.
 **Дата:** 2026-05-12 → обновлено 2026-05-15.
@@ -10,6 +10,7 @@
 ## ТЕКУЩИЙ СТАТУС (15 мая 2026)
 
 ### ✅ Завершено:
+
 1. **Paginate миграция** — все 375 `.collect()` обработаны
 2. **isSuperadmin() миграция** — все runtime-проверки через role в БД
 3. **RBAC mutations** — 39 mutations используют `requireAuthUser(ctx)` (ctx.auth JWT)
@@ -18,17 +19,31 @@
    - JWT signing в NextAuth session callback (RS256)
    - `convex/lib/auth.ts` — `requireAuthUser()`, `getAuthUser()`
    - JWKS в Convex dashboard, private key в `.env.local`
-5. **rbac.ts** — `isSuperadminEmail` → `isSuperadmin(role)` 
+5. **rbac.ts** — `isSuperadminEmail` → `isSuperadmin(role)`
 6. **backups.ts** — `identity.subject` → email lookup
 7. **bcrypt** — async → sync (Convex runtime совместимость)
 8. **Vercel deployment** — env vars настроены, auth работает
 9. **566 unused imports/variables** удалены
 10. **Navbar** — logout fix, avatar initials only
+11. **Lazy i18n namespaces** — ~305KB убрано из JS bundle (только common бандлен, остальные через HttpBackend)
+12. **Dashboard aggregated queries** — getDashboardStats + getRecentLeaves вместо загрузки 100 записей
+13. **RSC для статических страниц** — privacy/terms полный RSC, contact/features/careers через RSC wrapper + dynamic client
+14. **Account lockout** — 5 неудачных попыток → блокировка на 15 мин
+15. **Error boundaries** — уже были на месте (dashboard, auth, root, analytics)
+16. **Optimistic updates** — chat sendMessage (уже был), добавлен useOptimisticCreateTask
+17. **Split users таблицы:**
+    - `userSettings` — preferences вынесены, settings.ts переписан с lazy migration
+    - `userProfiles` — schema + patchProfile dual-write helper + bulk migration
+    - Key mutations обновлены: leaves/mutations, users/mutations, messenger/calls
+    - 50+ read-only файлов работают через backward compat (поля остаются в users)
+18. **Типизация reactions** — chatMessages.reactions уже типизирован в schema, fix `any` в recognition
 
 ### ⚠️ Известные ограничения:
+
 - **Queries НЕ мигрированы на ctx.auth** — используют `requesterId` arg (клиент может подменить)
 - **ConvexProviderWithAuth** вызывает infinite session refresh loop — откатили на plain `ConvexProvider`
 - **Решение для queries:** нужен другой подход (server-side middleware или кэширование token)
+- **userProfiles reads** — 50+ файлов всё ещё читают profile поля из users (backward compat, мигрировать постепенно)
 
 ---
 
@@ -37,20 +52,24 @@
 ### 🔴 Производительность (высокий приоритет)
 
 #### 1. Lazy i18n namespaces (~1-2ч)
+
 **Проблема:** Все 12 EN namespaces (~333KB) бандлятся в JS и грузятся на каждой странице.
 **Решение:** Загружать только `common` сразу, остальные лениво по route.
 **Файл:** `src/i18n/config.ts`
 **Рецепт:**
+
 - Оставить в `resources` только `common` namespace
 - Остальные грузить через `HttpBackend` (уже настроен для RU/HY)
 - В компонентах использовать `useTranslation('dashboard')` — загрузит namespace по требованию
 
 #### 2. Dashboard aggregated queries (~2-3ч)
+
 **Проблема:** `getAllUsers`, `getAllLeaves` загружают до 2000 записей на dashboard.
 **Решение:** Создать специальные queries для dashboard: `getDashboardStats` (counts), `getRecentLeaves` (last 5).
 **Файлы:** `convex/analytics.ts`, `src/components/dashboard/DashboardClient.tsx`
 
 #### 3. RSC для статических страниц (~2-3ч)
+
 **Проблема:** Privacy, Terms, Features, Careers, Contact — рендерятся на клиенте.
 **Решение:** Убрать `'use client'`, использовать серверный i18n или статические тексты.
 **Файлы:** `src/app/privacy/page.tsx`, `src/app/terms/page.tsx`, `src/app/contact/page.tsx`, `src/app/features/page.tsx`, `src/app/careers/page.tsx`
@@ -58,13 +77,16 @@
 ### 🟡 Безопасность (средний приоритет)
 
 #### 4. Account lockout после brute force (~1ч)
+
 **Проблема:** `auth:login` не имеет лимита попыток на уровне Convex.
 **Решение:** Добавить counter в user doc, блокировать после 5 неудачных попыток на 15 мин.
 **Файл:** `convex/auth_module/main.ts`
 
 #### 5. Queries RBAC (отложено — нужен другой подход)
+
 **Проблема:** `ConvexProviderWithAuth` вызывает infinite loop.
 **Варианты решения:**
+
 - A) Кэшировать token в localStorage, передавать через custom header
 - B) Использовать Convex Auth library (labs.convex.dev/auth) вместо ручной интеграции
 - C) Оставить как есть — queries защищены на уровне org membership (не критично)
@@ -72,15 +94,19 @@
 ### 🟢 Качество (низкий приоритет)
 
 #### 6. Error boundaries per route (~1ч)
+
 **Решение:** Добавить `error.tsx` в `app/(dashboard)/`, `app/(auth)/`
 
 #### 7. Optimistic updates для chat/tasks (~2ч)
+
 **Решение:** Использовать Convex optimistic updates для `sendMessage`, `createTask`
 
 #### 8. Split `users` таблицы (большой рефакторинг)
+
 **Решение:** Разделить на `users` (auth), `profiles` (data), `preferences` (settings)
 
 #### 9. Типизация `chatMessages.reactions`
+
 **Решение:** Добавить proper type вместо `any`
 
 ---
