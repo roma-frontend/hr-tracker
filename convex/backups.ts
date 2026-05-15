@@ -253,8 +253,10 @@ export const restoreEmployeeBackup = mutation({
       throw new Error('Not authenticated');
     }
 
-    const adminUserId = identity.subject as string;
-    const adminUser = await ctx.db.get(adminUserId as Id<'users'>);
+    const adminUser = await ctx.db
+      .query('users')
+      .withIndex('by_email', (q) => q.eq('email', identity.email!.toLowerCase()))
+      .unique();
 
     if (!adminUser || adminUser.role !== 'superadmin') {
       throw new Error('Only superadmins can restore backups');
@@ -389,8 +391,10 @@ export const getBackupStats = query({
       return { totalBackups: 0, totalSize: 0, orgsBackedUp: 0 };
     }
 
-    const adminUserId = identity.subject as string;
-    const adminUser = await ctx.db.get(adminUserId as Id<'users'>);
+    const adminUser = await ctx.db
+      .query('users')
+      .withIndex('by_email', (q) => q.eq('email', identity.email!.toLowerCase()))
+      .unique();
 
     if (!adminUser || adminUser.role !== 'superadmin') {
       return { totalBackups: 0, totalSize: 0, orgsBackedUp: 0 };
