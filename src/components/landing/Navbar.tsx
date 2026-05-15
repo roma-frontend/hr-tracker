@@ -83,8 +83,8 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     await logoutAction();
-    logout();
     router.push('/');
+    logout();
   };
 
   const getInitials = (name: string) => {
@@ -251,15 +251,6 @@ export default function Navbar() {
                       {getInitials(user.name)}
                     </AvatarFallback>
                   </Avatar>
-                  <svg
-                    className="w-3 h-3 text-(--text-muted) shrink-0"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <polyline points="6 9 12 15 18 9" />
-                  </svg>
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" sideOffset={8} asChild>
