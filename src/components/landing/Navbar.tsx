@@ -253,7 +253,7 @@ export default function Navbar() {
                   </Avatar>
                   <div className="text-left max-w-[100px] md:max-w-none">
                     <p className="text-xs font-semibold text-(--text-primary) leading-tight truncate">
-                      {user.name}
+                      {getInitials(user.name)}
                     </p>
                     <p className="text-[10px] text-(--text-muted) capitalize hidden md:block">
                       {user.role}
