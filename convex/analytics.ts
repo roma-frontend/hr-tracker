@@ -289,7 +289,7 @@ export const getDashboardStats = query({
     if (!requester) throw new Error('User not found');
 
     const isSuperadminUser = requester.role === 'superadmin';
-    const orgId = organizationId ?? requester.organizationId;
+    const orgId = isSuperadminUser ? organizationId : (organizationId ?? requester.organizationId);
 
     if (!isSuperadminUser && !orgId) {
       return {
@@ -376,7 +376,7 @@ export const getRecentLeaves = query({
     if (!requester) throw new Error('User not found');
 
     const isSuperadminUser = requester.role === 'superadmin';
-    const orgId = organizationId ?? requester.organizationId;
+    const orgId = isSuperadminUser ? organizationId : (organizationId ?? requester.organizationId);
 
     if (!isSuperadminUser && !orgId) return [];
 
