@@ -85,6 +85,7 @@ export default function Navbar() {
   const handleLogout = async () => {
     setIsLoggingOut(true);
     await logoutAction();
+    logout();
     router.push('/');
   };
 
@@ -247,9 +248,9 @@ export default function Navbar() {
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center gap-2 rounded-xl px-2 py-1.5 md:px-3 md:py-2 transition-all outline-none focus-visible:outline-none focus:outline-none hover:bg-(--background-subtle)">
                   <Avatar className="w-7 h-7 md:w-8 md:h-8">
-                    {user.avatar && <AvatarImage src={user.avatar} alt={user.name} />}
+                    {user?.avatar && <AvatarImage src={user.avatar} alt={user?.name || ''} />}
                     <AvatarFallback className="text-xs bg-linear-to-br from-blue-500 to-blue-600 text-white font-semibold">
-                      {getInitials(user.name)}
+                      {getInitials(user?.name || '')}
                     </AvatarFallback>
                   </Avatar>
                 </button>
