@@ -51,14 +51,20 @@ export default function DashboardClient() {
   const dashboardStats = useQuery(
     api.analytics.getDashboardStats,
     userId
-      ? { requesterId: userId, organizationId: selectedOrgId as Id<'organizations'> | undefined }
+      ? {
+          requesterId: userId,
+          organizationId: (selectedOrgId || undefined) as Id<'organizations'> | undefined,
+        }
       : 'skip',
   );
 
   const recentLeavesData = useQuery(
     api.analytics.getRecentLeaves,
     userId
-      ? { requesterId: userId, organizationId: selectedOrgId as Id<'organizations'> | undefined }
+      ? {
+          requesterId: userId,
+          organizationId: (selectedOrgId || undefined) as Id<'organizations'> | undefined,
+        }
       : 'skip',
   );
 
