@@ -269,3 +269,136 @@ export const getTeamCalendar = query({
     return enrichedLeaves;
   },
 });
+
+// ── Dashboard Stats (aggregated counts — no full data transfer) ────────────
+export const getDashboardStats = query({
+  args: { requesterId: v.id('users') },
+  handler: async (ctx, { requesterId }) => {
+    const requester = await ctx.db.get(requesterId);
+    if (!requester) throw new Error('User not found');
+
+    const isSuperadminUser = requester.role === 'superadmin';
+    const orgId = requester.organizationId;
+
+    if (!isSuperadminUser && !orgId) {
+      return {
+        totalEmployees: 0,
+        pendingRequests: 0,
+        onLeaveNow: 0,
+        approvedThisMonth: 0,
+        pieData: [],
+        monthlyTrend: [],
+      };
+    }
+
+    // Count employees
+    const users = isSuperadminUser
+      ? await ctx.db.query('users').take(XLARGE_LIST_CAP)
+      : await ctx.db
+          .query('users')
+          .withIndex('by_org', (q) => q.eq('organizationId', orgId!))
+          .take(DEFAULT_LIST_CAP);
+    const totalEmployees = users.filter(
+      (u) => u.role !== 'superadmin' && u.isActive !== false,
+    ).length;
+
+    // Get leaves scoped by org
+    const leaves = isSuperadminUser
+      ? await ctx.db.query('leaveRequests').take(XLARGE_LIST_CAP)
+      : await ctx.db
+          .query('leaveRequests')
+          .withIndex('by_org', (q) => q.eq('organizationId', orgId!))
+          .take(DEFAULT_LIST_CAP);
+
+    const today = new Date().toISOString().slice(0, 10);
+    const now = new Date();
+    const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+
+    const pendingRequests = leaves.filter((l) => l.status === 'pending').length;
+    const onLeaveNow = leaves.filter(
+      (l) => l.status === 'approved' && l.startDate <= today && l.endDate >= today,
+    ).length;
+    const approvedThisMonth = leaves.filter(
+      (l) => l.status === 'approved' && l.startDate >= monthStart,
+    ).length;
+
+    // Pie data by type
+    const typeCounts: Record<string, number> = {};
+    for (const l of leaves) {
+      typeCounts[l.type] = (typeCounts[l.type] || 0) + 1;
+    }
+    const pieData = Object.entries(typeCounts).map(([type, value]) => ({ type, value }));
+
+    // Monthly trend (last 6 months)
+    const monthlyTrend: { key: string; approved: number; pending: number; rejected: number }[] = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      monthlyTrend.push({ key, approved: 0, pending: 0, rejected: 0 });
+    }
+    for (const l of leaves) {
+      const key = l.startDate.slice(0, 7);
+      const entry = monthlyTrend.find((m) => m.key === key);
+      if (entry && (l.status === 'approved' || l.status === 'pending' || l.status === 'rejected')) {
+        entry[l.status]++;
+      }
+    }
+
+    return {
+      totalEmployees,
+      pendingRequests,
+      onLeaveNow,
+      approvedThisMonth,
+      pieData,
+      monthlyTrend,
+    };
+  },
+});
+
+// ── Recent Leaves (last 6, lightweight) ────────────────────────────────────
+export const getRecentLeaves = query({
+  args: { requesterId: v.id('users') },
+  handler: async (ctx, { requesterId }) => {
+    const requester = await ctx.db.get(requesterId);
+    if (!requester) throw new Error('User not found');
+
+    const isSuperadminUser = requester.role === 'superadmin';
+    const orgId = requester.organizationId;
+
+    if (!isSuperadminUser && !orgId) return [];
+
+    const leaves = isSuperadminUser
+      ? await ctx.db.query('leaveRequests').order('desc').take(6)
+      : await ctx.db
+          .query('leaveRequests')
+          .withIndex('by_org_created', (q) => q.eq('organizationId', orgId!))
+          .order('desc')
+          .take(6);
+
+    // Batch enrich with user name/email only
+    const userIds = [...new Set(leaves.map((l) => l.userId))];
+    const users = await Promise.all(userIds.map((id) => ctx.db.get(id)));
+    const userMap = new Map(users.map((u) => [u?._id, u]));
+
+    return leaves.map((l) => {
+      const user = userMap.get(l.userId);
+      return {
+        _id: l._id,
+        _creationTime: l._creationTime,
+        userId: l.userId,
+        type: l.type,
+        startDate: l.startDate,
+        endDate: l.endDate,
+        days: l.days,
+        status: l.status,
+        reason: l.reason,
+        createdAt: l.createdAt,
+        updatedAt: l.updatedAt,
+        organizationId: l.organizationId,
+        userName: user?.name ?? 'Unknown',
+        userEmail: user?.email ?? '',
+        userDepartment: user?.department ?? '',
+      };
+    });
+  },
+});

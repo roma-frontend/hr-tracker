@@ -141,12 +141,17 @@ export default function RecognitionDetailClient() {
             <div className="border-t pt-4">
               <h3 className="font-medium mb-3">{t('recognition.reactions')}</h3>
               <div className="flex flex-wrap gap-2">
-                {kudo.reactions.map((reaction: any, index: number) => (
-                  <Badge key={index} variant="outline" className="flex items-center gap-1">
-                    {reaction.emoji}
-                    <span className="text-xs">{reaction.userId}</span>
-                  </Badge>
-                ))}
+                {kudo.reactions.map(
+                  (
+                    reaction: { userId: string; emoji: string; createdAt: number },
+                    index: number,
+                  ) => (
+                    <Badge key={index} variant="outline" className="flex items-center gap-1">
+                      {reaction.emoji}
+                      <span className="text-xs">{reaction.userId}</span>
+                    </Badge>
+                  ),
+                )}
               </div>
             </div>
           )}

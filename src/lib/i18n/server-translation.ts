@@ -5,7 +5,7 @@ import { join } from 'path';
 type TranslationKey = string;
 
 interface ServerTranslation {
-  t: (key: TranslationKey) => string;
+  t: (key: TranslationKey, params?: Record<string, string>) => string;
   locale: string;
 }
 
@@ -37,7 +37,7 @@ export async function getServerTranslation(
   const validLocale = ['en', 'hy', 'ru'].includes(locale) ? locale : 'en';
   const translations = loadNamespace(validLocale, namespace);
 
-  function t(key: TranslationKey): string {
+  function t(key: TranslationKey, params?: Record<string, string>): string {
     const keys = key.split('.');
     let value: unknown = translations;
     for (const k of keys) {
@@ -47,7 +47,13 @@ export async function getServerTranslation(
         return key;
       }
     }
-    return typeof value === 'string' ? value : key;
+    let result = typeof value === 'string' ? value : key;
+    if (params) {
+      for (const [k, v] of Object.entries(params)) {
+        result = result.replace(new RegExp(`{{${k}}}`, 'g'), v);
+      }
+    }
+    return result;
   }
 
   return { t, locale: validLocale };

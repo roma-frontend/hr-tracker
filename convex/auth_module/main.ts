@@ -367,6 +367,18 @@ export const login = mutation({
       }
 
       // ═══════════════════════════════════════════════════════════════
+      // ACCOUNT LOCKOUT — block after 5 failed password attempts for 15 min
+      // ═══════════════════════════════════════════════════════════════
+      if (!isOAuthLogin && !isFaceLogin) {
+        if (user.loginLockedUntil && user.loginLockedUntil > Date.now()) {
+          const minutesLeft = Math.ceil((user.loginLockedUntil - Date.now()) / 60000);
+          throw new Error(
+            `Account temporarily locked due to too many failed attempts. Try again in ${minutesLeft} minute(s).`,
+          );
+        }
+      }
+
+      // ═══════════════════════════════════════════════════════════════
       // CREDENTIAL VERIFICATION — the core auth gate
       // ═══════════════════════════════════════════════════════════════
       if (isOAuthLogin) {
@@ -403,12 +415,25 @@ export const login = mutation({
 
         const passwordOk = await verifyPassword(password, user.passwordHash);
         if (!passwordOk) {
+          // Increment failed attempts, lock after 5
+          const attempts = (user.loginFailedAttempts || 0) + 1;
+          const MAX_ATTEMPTS = 5;
+          const LOCKOUT_MS = 15 * 60 * 1000; // 15 minutes
+          const patch: Record<string, unknown> = { loginFailedAttempts: attempts };
+          if (attempts >= MAX_ATTEMPTS) {
+            patch.loginLockedUntil = Date.now() + LOCKOUT_MS;
+          }
+          await ctx.db.patch(user._id, patch);
+
           // Audit failed attempt
           await ctx.db.insert('auditLogs', {
             organizationId: user.organizationId,
             userId: user._id,
             action: 'login_failed',
-            details: 'Invalid password',
+            details:
+              attempts >= MAX_ATTEMPTS
+                ? `Account locked after ${attempts} failed attempts`
+                : 'Invalid password',
             createdAt: Date.now(),
           });
           throw new Error('Invalid email or password');
@@ -432,6 +457,8 @@ export const login = mutation({
         sessionToken,
         sessionExpiry,
         lastLoginAt: Date.now(),
+        loginFailedAttempts: 0,
+        loginLockedUntil: undefined,
       });
 
       return {

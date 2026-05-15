@@ -3,19 +3,13 @@
 import React, { useMemo } from 'react';
 import { motion } from '@/lib/cssMotion';
 import { useTranslation } from 'react-i18next';
-import { Users, Clock, CheckCircle, UserCheck, Plus, CalendarDays, TrendingUp } from 'lucide-react';
-import Link from 'next/link';
-import { format, isSameMonth } from 'date-fns';
-import { enUS, ru, hy } from 'date-fns/locale';
-import i18n from 'i18next';
+import { Users, Clock, CheckCircle, UserCheck, TrendingUp } from 'lucide-react';
 import { useQuery } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import { Id } from '../../../convex/_generated/dataModel';
-import { useAuthUser, type User } from '@/store/useAuthStore';
-import { useShallow } from 'zustand/shallow';
+import { useAuthUser } from '@/store/useAuthStore';
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization';
 import { StatsCard } from '@/components/dashboard/StatsCard';
-import { Button } from '@/components/ui/button';
 import { LEAVE_TYPE_LABELS, LEAVE_TYPE_COLORS, type LeaveType } from '@/lib/types';
 import { type LeaveEnriched, type Organization } from '@/lib/convex-types';
 import { DashboardBanners } from '@/components/dashboard/DashboardBanners';
@@ -36,27 +30,13 @@ const itemVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-function getDateFnsLocale(lang?: string) {
-  switch (lang) {
-    case 'ru':
-      return ru;
-    case 'hy':
-      return hy;
-    default:
-      return enUS;
-  }
-}
-
 export default function DashboardClient() {
   const { t, i18n } = useTranslation();
   const user = useAuthUser();
-  const lang = i18n.language || 'en';
-  const dateFnsLocale = getDateFnsLocale(lang);
 
   const [mounted, setMounted] = React.useState(false);
 
   const selectedOrgId = useSelectedOrganization();
-  const shouldUseOrgQuery = selectedOrgId && user?.id;
 
   const userId = user?.id as Id<'users'> | undefined;
 
@@ -67,13 +47,17 @@ export default function DashboardClient() {
 
   const selectedOrganization = organizationsList?.find((o) => o._id === selectedOrgId);
 
-  const leaves = useQuery(api.leaves.getAllLeaves, userId ? { requesterId: userId } : 'skip');
-
-  const usersFromConvex = useQuery(
-    api.users.queries.getAllUsers,
+  // Lightweight aggregated queries instead of loading all leaves/users
+  const dashboardStats = useQuery(
+    api.analytics.getDashboardStats,
     userId ? { requesterId: userId } : 'skip',
   );
-  const users = (usersFromConvex || []).map((u) => ({ ...u, id: u._id })) as unknown as User[];
+
+  const recentLeavesData = useQuery(
+    api.analytics.getRecentLeaves,
+    userId ? { requesterId: userId } : 'skip',
+  );
+
   const organization = useQuery(
     api.organizations.getMyOrganization,
     userId ? { userId } : 'skip',
@@ -89,81 +73,48 @@ export default function DashboardClient() {
     setMounted(true);
   }, []);
 
-  const today = new Date();
-  const todayStr = format(today, 'yyyy-MM-dd');
+  const stats = dashboardStats ?? {
+    totalEmployees: 0,
+    pendingRequests: 0,
+    onLeaveNow: 0,
+    approvedThisMonth: 0,
+    pieData: [],
+    monthlyTrend: [],
+  };
 
-  const filteredUsers = useMemo(() => {
-    if (!selectedOrgId) return users;
-    return users?.filter((u) => u.organizationId === selectedOrgId) ?? [];
-  }, [users, selectedOrgId]);
-
-  const filteredLeaves = useMemo(() => {
-    if (!selectedOrgId) return leaves;
-    return leaves?.filter((l) => l.organizationId === selectedOrgId) ?? [];
-  }, [leaves, selectedOrgId]);
-
-  const stats = useMemo(
-    () => ({
-      totalEmployees: filteredUsers?.filter((u) => u.role !== 'superadmin').length ?? 0,
-      pendingRequests: filteredLeaves?.filter((r) => r.status === 'pending').length ?? 0,
-      onLeaveNow:
-        filteredLeaves?.filter(
-          (r) => r.status === 'approved' && r.startDate <= todayStr && r.endDate >= todayStr,
-        ).length ?? 0,
-      approvedThisMonth:
-        filteredLeaves?.filter(
-          (r) => r.status === 'approved' && isSameMonth(new Date(r.startDate), today),
-        ).length ?? 0,
-    }),
-    [filteredUsers, filteredLeaves, todayStr, today],
-  );
-
-  const recentLeaves = useMemo(() => filteredLeaves?.slice(0, 6) ?? [], [filteredLeaves]);
+  const recentLeaves = recentLeavesData ?? [];
 
   const pieData = useMemo(() => {
     const data = (Object.keys(LEAVE_TYPE_COLORS) as LeaveType[]).map((key) => ({
       name: t(`leaveTypes.${key}`) || LEAVE_TYPE_LABELS[key],
-      value: filteredLeaves?.filter((r) => r.type === key).length ?? 0,
+      value: stats.pieData.find((p) => p.type === key)?.value ?? 0,
       color: LEAVE_TYPE_COLORS[key],
     }));
     return data.filter((d) => d.value > 0);
-  }, [filteredLeaves, t]);
+  }, [stats.pieData, t]);
 
   const monthlyTrend = useMemo(() => {
-    const months: Record<
-      string,
-      { month: string; approved: number; pending: number; rejected: number }
-    > = {};
     const now = new Date();
-
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    return stats.monthlyTrend.map((entry) => {
+      const [year, month] = entry.key.split('-');
+      const monthIdx = parseInt(month!, 10) - 1;
       const monthKey =
         ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'][
-          d.getMonth()
+          monthIdx
         ] ?? 'jan';
-      months[key] = {
+      return {
         month: t(`months.${monthKey}`),
-        approved: 0,
-        pending: 0,
-        rejected: 0,
+        approved: entry.approved,
+        pending: entry.pending,
+        rejected: entry.rejected,
       };
-    }
-
-    filteredLeaves?.forEach((l) => {
-      const key = l.startDate.slice(0, 7);
-      if (months[key]) {
-        months[key][l.status as 'approved' | 'pending' | 'rejected']++;
-      }
     });
-    return Object.values(months);
-  }, [filteredLeaves, t, i18n?.language]);
+  }, [stats.monthlyTrend, t, i18n?.language]);
 
   if (!mounted) return null;
 
-  const isLoading = filteredLeaves === undefined || filteredUsers === undefined;
-  const isError = filteredLeaves === null || filteredUsers === null;
+  const isLoading = dashboardStats === undefined || recentLeavesData === undefined;
+  const isError = dashboardStats === null || recentLeavesData === null;
 
   if (isError)
     return (

@@ -1,13 +1,14 @@
-﻿'use client';
-
-import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
+import { cookies } from 'next/headers';
+import { getServerTranslation } from '@/lib/i18n/server-translation';
 import { formatDate } from '@/lib/date-format';
 
-export default function TermsPage() {
-  const { t, i18n } = useTranslation();
+export default async function TermsPage() {
+  const cookieStore = await cookies();
+  const locale = cookieStore.get('i18nextLng')?.value || 'en';
+  const { t } = await getServerTranslation('landing', locale);
 
-  const currentDate = formatDate(new Date(), i18n.language, {
+  const currentDate = formatDate(new Date(), locale, {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -15,7 +16,6 @@ export default function TermsPage() {
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--landing-bg)' }}>
-      {/* Header */}
       <div className="border-b px-6 py-4" style={{ borderColor: 'var(--landing-card-border)' }}>
         <Link
           href="/"
@@ -49,7 +49,7 @@ export default function TermsPage() {
             {t('legal.termsTitle').split(' | ')[0]}
           </h1>
           <p className="text-sm" style={{ color: 'var(--landing-text-muted)', opacity: 0.7 }}>
-            {t('legal.lastUpdated', { date: currentDate })}
+            {t('legal.lastUpdated')} {currentDate}
           </p>
         </div>
 

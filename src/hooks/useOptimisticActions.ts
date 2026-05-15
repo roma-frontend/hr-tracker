@@ -290,6 +290,70 @@ export function useOptimisticReaction(messageId: Id<'chatMessages'>, userId: Id<
 }
 
 // -----------------------------------------------------------------------------
+// Tasks: Optimistic Create Task
+// -----------------------------------------------------------------------------
+
+interface OptimisticTask {
+  _id: string;
+  title: string;
+  description?: string;
+  assignedTo: Id<'users'>;
+  assignedBy: Id<'users'>;
+  status: 'pending';
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  deadline?: number;
+  tags?: string[];
+  createdAt: number;
+  updatedAt: number;
+  pending: boolean;
+}
+
+export function useOptimisticCreateTask() {
+  const createTask = useMutation(api.tasks.createTask);
+  const [error, setError] = useState<string | null>(null);
+
+  const [optimisticTasks, addOptimisticTask] = useOptimistic<OptimisticTask[], OptimisticTask>(
+    [],
+    (current, newTask) => [...current, newTask],
+  );
+
+  const createOptimistic = useCallback(
+    async (args: {
+      title: string;
+      description?: string;
+      assignedTo: Id<'users'>;
+      assignedBy: Id<'users'>;
+      priority: 'low' | 'medium' | 'high' | 'urgent';
+      deadline?: number;
+      tags?: string[];
+    }) => {
+      const now = Date.now();
+      const optimisticTask: OptimisticTask = {
+        _id: `temp-task-${now}-${Math.random().toString(36).slice(2, 9)}`,
+        ...args,
+        status: 'pending',
+        createdAt: now,
+        updatedAt: now,
+        pending: true,
+      };
+
+      try {
+        startTransition(() => addOptimisticTask(optimisticTask));
+        const taskId = await createTask(args);
+        setError(null);
+        return taskId;
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to create task');
+        throw err;
+      }
+    },
+    [createTask, addOptimisticTask],
+  );
+
+  return { createOptimistic, error, optimisticTasks };
+}
+
+// -----------------------------------------------------------------------------
 // Tasks: Optimistic Status Update
 // -----------------------------------------------------------------------------
 

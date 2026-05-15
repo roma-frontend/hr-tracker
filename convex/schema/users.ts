@@ -50,6 +50,8 @@ export const users = {
     faceIdBlockedAt: v.optional(v.number()),
     faceIdFailedAttempts: v.optional(v.number()),
     faceIdLastAttempt: v.optional(v.number()),
+    loginFailedAttempts: v.optional(v.number()),
+    loginLockedUntil: v.optional(v.number()),
     dateOfBirth: v.optional(v.string()),
     language: v.optional(v.string()),
     timezone: v.optional(v.string()),

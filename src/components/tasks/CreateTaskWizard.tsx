@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/wizard-step-components';
 import { CheckSquare, User, AlertCircle, Tag, Paperclip } from 'lucide-react';
 import { useMutation, useQuery } from 'convex/react';
+import { useOptimisticCreateTask } from '@/hooks/useOptimisticActions';
 import { api } from '@/convex/_generated/api';
 
 interface AttachmentData {
@@ -43,7 +44,7 @@ export function CreateTaskWizard({
   onCancel,
 }: CreateTaskWizardProps) {
   const { t } = useTranslation();
-  const createTask = useMutation(api.tasks.createTask);
+  const { createOptimistic: createTask } = useOptimisticCreateTask();
   const addAttachment = useMutation(api.tasks.addAttachment);
 
   const employees = useQuery(api.tasks.getUsersForAssignment, { requesterId: currentUserId });
