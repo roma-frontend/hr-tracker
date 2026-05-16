@@ -48,6 +48,7 @@ import {
 import type { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useSidebarStore } from '@/store/useSidebarStore';
+import { useSwipe } from '@/hooks/useSwipe';
 import { useAuthUser } from '@/store/useAuthStore';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { OrganizationSelector } from '@/components/layout/OrganizationSelector';
@@ -1059,6 +1060,19 @@ export function MobileSidebar() {
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
   }, [mobileOpen, setMobileOpen]);
+
+  // Swipe-to-open from left edge, swipe-left-to-close
+  useSwipe({
+    onSwipeRight: () => {
+      if (!mobileOpen) setMobileOpen(true);
+    },
+    onSwipeLeft: () => {
+      if (mobileOpen) setMobileOpen(false);
+    },
+    edgeSize: 30,
+    threshold: 40,
+    maxTime: 400,
+  });
 
   // Get user role with fallback
   const userRole = user?.role ?? 'employee';

@@ -88,6 +88,16 @@ const StatusUpdateBanner = dynamic(
   { ssr: false, loading: () => null },
 );
 
+const MobileTabBar = dynamic(
+  () => import('@/components/layout/MobileTabBar').then((m) => m.MobileTabBar),
+  { ssr: false, loading: () => null },
+);
+
+const MobilePageTransition = dynamic(
+  () => import('@/components/ui/mobile-page-transition').then((m) => m.MobilePageTransition),
+  { ssr: false, loading: () => null },
+);
+
 export function Providers({ children }: { children: React.ReactNode }) {
   const user = useAuthStore(useShallow((state: { user: User | null }) => state.user));
   const { status } = useSession();
@@ -213,12 +223,17 @@ export function Providers({ children }: { children: React.ReactNode }) {
                   </div>
                 </div>
               ) : (
-                <div className="p-3 sm:p-4 md:p-6 mx-auto max-w-7xl w-full">{children}</div>
+                <div className="p-3 sm:p-4 md:p-6 pb-20 lg:pb-6 mx-auto max-w-7xl w-full">
+                  <MobilePageTransition>{children}</MobilePageTransition>
+                </div>
               )}
             </main>
           </div>
           {/* AI Chat Widget - hidden on /chat page so it doesn't cover the send button */}
           {!isChatPage && <ChatWidget />}
+
+          {/* Mobile Tab Bar — fixed bottom navigation for mobile */}
+          <MobileTabBar />
 
           {/* Global incoming call detection — works on ALL pages */}
           {hydrated && user && <IncomingCallProvider />}

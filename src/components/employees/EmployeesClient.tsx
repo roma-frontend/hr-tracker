@@ -45,6 +45,7 @@ import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { useRouter } from 'next/navigation';
 
 import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { MobileCard } from '@/components/ui/mobile-card';
 import { Button } from '../ui/button';
 
 const ROLE_CONFIG = {
@@ -701,46 +702,18 @@ export function EmployeesClient() {
 
               {/* LIST VIEW */}
               {viewMode === 'list' && (
-                <div
-                  className="rounded-2xl border overflow-hidden"
-                  style={{ borderColor: 'var(--border)' }}
-                >
-                  {/* Table header */}
-                  <div
-                    className="hidden sm:grid grid-cols-12 gap-4 px-5 py-3 text-xs font-semibold uppercase tracking-wide"
-                    style={{ background: 'var(--background-subtle)', color: 'var(--text-muted)' }}
-                  >
-                    <div className="col-span-4">{t('dashboard.employee')}</div>
-                    <div className="col-span-2">{t('employeeInfo.department')}</div>
-                    <div className="col-span-2">{t('roles.supervisor')}</div>
-                    <div className="col-span-2">{t('dashboard.status')}</div>
-                    <div className="col-span-2" style={{ textAlign: 'center' }}>
-                      {t('dashboard.type')}
-                    </div>
-                  </div>
-                  <AnimatePresence>
-                    {filtered.map((emp: any, i: any) => {
+                <>
+                  {/* Mobile card view */}
+                  <div className="sm:hidden space-y-3">
+                    {filtered.map((emp: any) => {
                       const roleConf = ROLE_CONFIG[emp.role as keyof typeof ROLE_CONFIG];
-                      const typeConf =
-                        TYPE_CONFIG[(emp as any).employeeType as keyof typeof TYPE_CONFIG] ||
-                        TYPE_CONFIG.staff;
                       const RoleIcon = roleConf.icon;
-                      const presenceStatus = (emp as any).presenceStatus;
-                      const presence = presenceStatus ? getPresenceBadge(presenceStatus) : null;
                       return (
-                        <motion.div
+                        <MobileCard
                           key={emp._id}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: -20 }}
-                          transition={{ delay: i * 0.02 }}
                           onClick={() => router.push(`/employees/${emp._id}`)}
-                          className="flex flex-col gap-3 p-4 sm:grid sm:grid-cols-12 sm:gap-4 sm:px-5 sm:py-3.5 sm:items-center group cursor-pointer border-t transition-colors hover:bg-(--background-subtle) relative"
-                          style={{ borderColor: 'var(--border)', opacity: emp.isActive ? 1 : 0.5 }}
-                        >
-                          {/* Employee name + avatar */}
-                          <div className="sm:col-span-4 flex items-center gap-3 min-w-0">
-                            <div className="w-9 h-9 rounded-full overflow-hidden shrink-0 bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 flex items-center justify-center text-white text-xs font-bold">
+                          avatar={
+                            <div className="w-10 h-10 rounded-full overflow-hidden bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) flex items-center justify-center text-white text-xs font-bold">
                               {emp.avatarUrl ? (
                                 <img
                                   src={emp.avatarUrl}
@@ -757,138 +730,231 @@ export function EmployeesClient() {
                                   .slice(0, 2)
                               )}
                             </div>
-                            <div className="min-w-0 flex-1">
-                              <p
-                                className="font-semibold text-sm truncate"
-                                style={{ color: 'var(--text-primary)' }}
-                              >
-                                {emp.name}
-                              </p>
-                              <div className="flex items-center gap-1.5">
-                                <span
-                                  className="inline-flex items-center gap-0.5 text-xs font-medium"
-                                  style={{ color: roleConf.color }}
-                                >
-                                  <RoleIcon className="w-2.5 h-2.5" />
-                                  {emp.position ?? t(roleConf.labelKey)}
+                          }
+                          title={emp.name}
+                          subtitle={emp.position ?? t('employees.noPosition')}
+                          badge={
+                            <span
+                              className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-xs font-medium"
+                              style={{ background: roleConf.bg, color: roleConf.color }}
+                            >
+                              <RoleIcon className="w-2.5 h-2.5" />
+                              {t(roleConf.labelKey)}
+                            </span>
+                          }
+                          meta={
+                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-(--text-muted)">
+                              {emp.department && (
+                                <span className="flex items-center gap-1">
+                                  <Building2 className="w-3 h-3" />
+                                  {emp.department}
                                 </span>
-                              </div>
+                              )}
+                              {emp.email && (
+                                <span className="flex items-center gap-1">
+                                  <Mail className="w-3 h-3" />
+                                  <span className="truncate max-w-[160px]">{emp.email}</span>
+                                </span>
+                              )}
                             </div>
-                            {/* Mobile-only action chevron */}
-                            <ChevronRight
-                              className="w-4 h-4 sm:hidden shrink-0"
-                              style={{ color: 'var(--text-muted)' }}
-                            />
-                          </div>
-
-                          {/* Mobile info row */}
-                          <div className="flex flex-wrap items-center gap-2 sm:hidden">
-                            {emp.department && (
-                              <span
-                                className="text-xs px-2 py-0.5 rounded-full"
-                                style={{
-                                  background: 'var(--background-subtle)',
-                                  color: 'var(--text-muted)',
-                                }}
-                              >
-                                <Building2 className="w-3 h-3 inline mr-1" />
-                                {emp.department}
-                              </span>
-                            )}
-                            <span
-                              className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                                emp.isActive
-                                  ? 'bg-emerald-100 text-emerald-700'
-                                  : 'bg-red-100 text-red-700'
-                              }`}
-                            >
-                              {emp.isActive
-                                ? t('common.active', { defaultValue: 'Активен' })
-                                : t('common.inactive', { defaultValue: 'Неактивен' })}
-                            </span>
-                            <span
-                              className="text-xs px-2 py-0.5 rounded-full font-medium"
-                              style={{ background: typeConf.bg, color: typeConf.color }}
-                            >
-                              {t(typeConf.labelKey)}
-                            </span>
-                          </div>
-
-                          {/* Department - desktop only */}
-                          <div
-                            className="hidden sm:block sm:col-span-2 text-sm truncate"
-                            style={{ color: 'var(--text-muted)' }}
-                          >
-                            {emp.department ?? t('common.none')}
-                          </div>
-
-                          {/* Supervisor - desktop only */}
-                          <div className="hidden sm:block sm:col-span-2 text-sm truncate text-blue-500 font-medium">
-                            {(emp as any).supervisorId
-                              ? (supervisorMap.get((emp as any).supervisorId) ?? t('common.none'))
-                              : t('common.none')}
-                          </div>
-
-                          {/* Account status - desktop only */}
-                          <div className="hidden sm:block sm:col-span-2">
-                            <span
-                              className={`text-xs px-2 py-1 rounded-full font-medium ${
-                                emp.isActive
-                                  ? 'bg-emerald-100 text-emerald-700'
-                                  : 'bg-red-100 text-red-700'
-                              }`}
-                            >
-                              {emp.isActive
-                                ? t('common.active', { defaultValue: 'Активен' })
-                                : t('common.inactive', { defaultValue: 'Неактивен' })}
-                            </span>
-                          </div>
-
-                          {/* Type - desktop only */}
-                          <div
-                            className="hidden sm:block sm:col-span-2"
-                            style={{ textAlign: 'center' }}
-                          >
-                            <span
-                              className="text-xs px-2 py-0.5 rounded-full font-medium"
-                              style={{ background: typeConf.bg, color: typeConf.color }}
-                            >
-                              {t(typeConf.labelKey)}
-                            </span>
-                          </div>
-
-                          {/* Actions — view only on hover */}
-                          <div
-                            className="hidden sm:flex absolute right-3 top-1/2 -translate-y-1/2 items-center gap-1 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-md border"
-                            style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
-                          >
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                router.push(`/employees/${emp._id}`);
-                              }}
-                              className="p-1.5 rounded-md text-blue-500 hover:bg-blue-500/20 transition-colors"
-                              title={t('common.view')}
-                            >
-                              <Eye className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </motion.div>
+                          }
+                        />
                       );
                     })}
-                  </AnimatePresence>
-                  {filtered.length === 0 && (
-                    <div className="flex flex-col items-center justify-center py-20 gap-3">
-                      <Users
-                        className="w-12 h-12 opacity-20"
-                        style={{ color: 'var(--text-muted)' }}
-                      />
-                      <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                        {t('employees.noFound')}
-                      </p>
+                  </div>
+                  {/* Desktop table view */}
+                  <div
+                    className="hidden sm:block rounded-2xl border overflow-hidden"
+                    style={{ borderColor: 'var(--border)' }}
+                  >
+                    {/* Table header */}
+                    <div
+                      className="hidden sm:grid grid-cols-12 gap-4 px-5 py-3 text-xs font-semibold uppercase tracking-wide"
+                      style={{ background: 'var(--background-subtle)', color: 'var(--text-muted)' }}
+                    >
+                      <div className="col-span-4">{t('dashboard.employee')}</div>
+                      <div className="col-span-2">{t('employeeInfo.department')}</div>
+                      <div className="col-span-2">{t('roles.supervisor')}</div>
+                      <div className="col-span-2">{t('dashboard.status')}</div>
+                      <div className="col-span-2" style={{ textAlign: 'center' }}>
+                        {t('dashboard.type')}
+                      </div>
                     </div>
-                  )}
-                </div>
+                    <AnimatePresence>
+                      {filtered.map((emp: any, i: any) => {
+                        const roleConf = ROLE_CONFIG[emp.role as keyof typeof ROLE_CONFIG];
+                        const typeConf =
+                          TYPE_CONFIG[(emp as any).employeeType as keyof typeof TYPE_CONFIG] ||
+                          TYPE_CONFIG.staff;
+                        const RoleIcon = roleConf.icon;
+                        const presenceStatus = (emp as any).presenceStatus;
+                        const presence = presenceStatus ? getPresenceBadge(presenceStatus) : null;
+                        return (
+                          <motion.div
+                            key={emp._id}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            transition={{ delay: i * 0.02 }}
+                            onClick={() => router.push(`/employees/${emp._id}`)}
+                            className="flex flex-col gap-3 p-4 sm:grid sm:grid-cols-12 sm:gap-4 sm:px-5 sm:py-3.5 sm:items-center group cursor-pointer border-t transition-colors hover:bg-(--background-subtle) relative"
+                            style={{
+                              borderColor: 'var(--border)',
+                              opacity: emp.isActive ? 1 : 0.5,
+                            }}
+                          >
+                            {/* Employee name + avatar */}
+                            <div className="sm:col-span-4 flex items-center gap-3 min-w-0">
+                              <div className="w-9 h-9 rounded-full overflow-hidden shrink-0 bg-linear-to-r from-(--primary) to-(--primary-dark,var(--primary)) hover:opacity-90 flex items-center justify-center text-white text-xs font-bold">
+                                {emp.avatarUrl ? (
+                                  <img
+                                    src={emp.avatarUrl}
+                                    alt={emp.name}
+                                    className="w-full h-full object-cover"
+                                    referrerPolicy="no-referrer"
+                                  />
+                                ) : (
+                                  emp.name
+                                    .split(' ')
+                                    .map((n: any) => n[0])
+                                    .join('')
+                                    .toUpperCase()
+                                    .slice(0, 2)
+                                )}
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <p
+                                  className="font-semibold text-sm truncate"
+                                  style={{ color: 'var(--text-primary)' }}
+                                >
+                                  {emp.name}
+                                </p>
+                                <div className="flex items-center gap-1.5">
+                                  <span
+                                    className="inline-flex items-center gap-0.5 text-xs font-medium"
+                                    style={{ color: roleConf.color }}
+                                  >
+                                    <RoleIcon className="w-2.5 h-2.5" />
+                                    {emp.position ?? t(roleConf.labelKey)}
+                                  </span>
+                                </div>
+                              </div>
+                              {/* Mobile-only action chevron */}
+                              <ChevronRight
+                                className="w-4 h-4 sm:hidden shrink-0"
+                                style={{ color: 'var(--text-muted)' }}
+                              />
+                            </div>
+
+                            {/* Mobile info row */}
+                            <div className="flex flex-wrap items-center gap-2 sm:hidden">
+                              {emp.department && (
+                                <span
+                                  className="text-xs px-2 py-0.5 rounded-full"
+                                  style={{
+                                    background: 'var(--background-subtle)',
+                                    color: 'var(--text-muted)',
+                                  }}
+                                >
+                                  <Building2 className="w-3 h-3 inline mr-1" />
+                                  {emp.department}
+                                </span>
+                              )}
+                              <span
+                                className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                                  emp.isActive
+                                    ? 'bg-emerald-100 text-emerald-700'
+                                    : 'bg-red-100 text-red-700'
+                                }`}
+                              >
+                                {emp.isActive
+                                  ? t('common.active', { defaultValue: 'Активен' })
+                                  : t('common.inactive', { defaultValue: 'Неактивен' })}
+                              </span>
+                              <span
+                                className="text-xs px-2 py-0.5 rounded-full font-medium"
+                                style={{ background: typeConf.bg, color: typeConf.color }}
+                              >
+                                {t(typeConf.labelKey)}
+                              </span>
+                            </div>
+
+                            {/* Department - desktop only */}
+                            <div
+                              className="hidden sm:block sm:col-span-2 text-sm truncate"
+                              style={{ color: 'var(--text-muted)' }}
+                            >
+                              {emp.department ?? t('common.none')}
+                            </div>
+
+                            {/* Supervisor - desktop only */}
+                            <div className="hidden sm:block sm:col-span-2 text-sm truncate text-blue-500 font-medium">
+                              {(emp as any).supervisorId
+                                ? (supervisorMap.get((emp as any).supervisorId) ?? t('common.none'))
+                                : t('common.none')}
+                            </div>
+
+                            {/* Account status - desktop only */}
+                            <div className="hidden sm:block sm:col-span-2">
+                              <span
+                                className={`text-xs px-2 py-1 rounded-full font-medium ${
+                                  emp.isActive
+                                    ? 'bg-emerald-100 text-emerald-700'
+                                    : 'bg-red-100 text-red-700'
+                                }`}
+                              >
+                                {emp.isActive
+                                  ? t('common.active', { defaultValue: 'Активен' })
+                                  : t('common.inactive', { defaultValue: 'Неактивен' })}
+                              </span>
+                            </div>
+
+                            {/* Type - desktop only */}
+                            <div
+                              className="hidden sm:block sm:col-span-2"
+                              style={{ textAlign: 'center' }}
+                            >
+                              <span
+                                className="text-xs px-2 py-0.5 rounded-full font-medium"
+                                style={{ background: typeConf.bg, color: typeConf.color }}
+                              >
+                                {t(typeConf.labelKey)}
+                              </span>
+                            </div>
+
+                            {/* Actions — view only on hover */}
+                            <div
+                              className="hidden sm:flex absolute right-3 top-1/2 -translate-y-1/2 items-center gap-1 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-md border"
+                              style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
+                            >
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  router.push(`/employees/${emp._id}`);
+                                }}
+                                className="p-1.5 rounded-md text-blue-500 hover:bg-blue-500/20 transition-colors"
+                                title={t('common.view')}
+                              >
+                                <Eye className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </motion.div>
+                        );
+                      })}
+                    </AnimatePresence>
+                    {filtered.length === 0 && (
+                      <div className="flex flex-col items-center justify-center py-20 gap-3">
+                        <Users
+                          className="w-12 h-12 opacity-20"
+                          style={{ color: 'var(--text-muted)' }}
+                        />
+                        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                          {t('employees.noFound')}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </>
               )}
 
               {/* Load More Button for List View */}

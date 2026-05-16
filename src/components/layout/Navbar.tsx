@@ -73,6 +73,7 @@ import { FocusMode } from '@/components/productivity/FocusMode';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { ThemeSwitcher } from '@/components/ThemeSwitcher';
 import { useStatusUpdate } from '@/context/StatusUpdateContext';
+import { useScrollDirection } from '@/hooks/useScrollDirection';
 import { logger } from '@/lib/logger';
 import Link from 'next/link';
 
@@ -99,6 +100,7 @@ export function Navbar() {
   const prevUnreadCount = useRef<number>(-1);
   const prevNotifIds = useRef<Set<string>>(new Set());
   const isFirstLoad = useRef(true);
+  const scrollDirection = useScrollDirection();
 
   React.useEffect(() => {
     setMounted(true);
@@ -211,7 +213,9 @@ export function Navbar() {
 
   return (
     <>
-      <header className="h-16 border-b border-(--border) bg-(--navbar-bg) flex items-center px-4 gap-4 sticky top-0 z-50 transition-colors duration-300">
+      <header
+        className={`h-16 border-b border-(--border) bg-(--navbar-bg) flex items-center px-4 gap-4 sticky top-0 z-50 transition-[transform,colors] duration-300 ${scrollDirection === 'down' ? 'max-lg:-translate-y-full' : 'translate-y-0'}`}
+      >
         {/* Mobile hamburger */}
         <Button
           variant="ghost"
