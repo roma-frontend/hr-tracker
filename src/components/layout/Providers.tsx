@@ -185,11 +185,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
           {/* Mobile Sidebar */}
           <MobileSidebar />
 
-          {/* Main content — contain:layout reduces CLS from child layout changes */}
-          <div
-            className="flex-1 flex flex-col min-w-0 overflow-hidden"
-            style={{ contain: 'layout' }}
-          >
+          {/* Main content — overflow-clip prevents content bleed without creating containing block */}
+          <div className="flex-1 flex flex-col min-w-0 overflow-clip">
             {/* Navbar — ssr:false prevents theme/user/notification mismatch */}
             <Navbar />
             {/* Maintenance warning banner — below navbar, above content */}
@@ -203,12 +200,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
               className={
                 isChatPage || isAIChatPage
                   ? 'flex-1 overflow-hidden flex flex-col min-h-0'
-                  : 'flex-1 overflow-y-auto overflow-x-hidden min-h-0'
+                  : 'flex-1 overflow-y-auto overflow-x-hidden min-h-0 main-scrollable'
               }
-              style={{
-                contain: 'paint',
-                scrollbarGutter: isChatPage || isAIChatPage ? undefined : 'stable',
-              }}
             >
               {isChatPage ? (
                 <div className="flex flex-col flex-1 min-h-0 h-full p-0 sm:p-3 md:p-4">

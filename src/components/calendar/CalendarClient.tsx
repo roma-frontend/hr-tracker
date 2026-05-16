@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useMainRef } from '@/hooks/useMainRef';
 import { motion, AnimatePresence } from '@/lib/cssMotion';
 import { useTranslation } from 'react-i18next';
@@ -1038,679 +1039,692 @@ export const CalendarClient = React.memo(function CalendarClient() {
         selectedDate={selectedDay ?? undefined}
       />
 
-      {/* Leave Event Detail Modal - Modern Design */}
-      <AnimatePresence>
-        {selectedLeave && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="absolute inset-0 bg-black/60 backdrop-blur-md"
-              onClick={() => setSelectedLeave(null)}
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 30 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 30 }}
-              transition={{ type: 'spring', damping: 30, stiffness: 400 }}
-              className="relative z-10 w-full max-w-lg bg-(--card) rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh]"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Hero Header */}
-              <div className="relative px-6 pt-6 pb-8 overflow-hidden shrink-0">
-                <div
-                  className="absolute inset-0 opacity-15"
-                  style={{
-                    background: `linear-gradient(135deg, ${LEAVE_TYPE_BG[selectedLeave.type]} 0%, transparent 70%)`,
-                  }}
-                />
-                <div
-                  className="absolute top-0 right-0 w-40 h-40 rounded-full -mr-20 -mt-20 opacity-10 blur-3xl"
-                  style={{ background: LEAVE_TYPE_BG[selectedLeave.type] }}
-                />
-
-                <div className="relative flex items-start justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="relative">
-                      <div
-                        className="w-16 h-16 rounded-2xl flex items-center justify-center text-white text-xl font-bold shadow-lg"
-                        style={{
-                          background: `linear-gradient(135deg, ${LEAVE_TYPE_BG[selectedLeave.type]}, ${LEAVE_TYPE_BG[selectedLeave.type]}dd)`,
-                        }}
-                      >
-                        {getInitials(selectedLeave.userName ?? '?')}
-                      </div>
-                      <div
-                        className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full border-2 border-(--card) flex items-center justify-center"
-                        style={{ background: LEAVE_TYPE_BG[selectedLeave.type] }}
-                      >
-                        {selectedLeave.status === 'approved' ? (
-                          <CheckCircle className="w-3.5 h-3.5 text-white" />
-                        ) : selectedLeave.status === 'rejected' ? (
-                          <XCircle className="w-3.5 h-3.5 text-white" />
-                        ) : (
-                          <Clock className="w-3.5 h-3.5 text-white" />
-                        )}
-                      </div>
-                    </div>
-                    <div>
-                      <h3 className="text-2xl font-bold leading-tight drop-shadow-md">
-                        {selectedLeave.userName ?? t('common.unknownUser', 'Unknown')}
-                      </h3>
-                      <p className="text-sm mt-0.5 drop-shadow">
-                        {selectedLeave.userDepartment ?? ''}
-                      </p>
-                    </div>
-                  </div>
-                  <button
+      {/* Modals rendered via portal to escape overflow/contain constraints */}
+      {typeof document !== 'undefined' &&
+        createPortal(
+          <>
+            {/* Leave Event Detail Modal - Modern Design */}
+            <AnimatePresence>
+              {selectedLeave && (
+                <div className="fixed inset-0 lg:left-60 lg:top-16 z-50 flex items-center justify-center p-4">
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute inset-0 bg-black/60 backdrop-blur-md"
                     onClick={() => setSelectedLeave(null)}
-                    className="text-(--text-muted) hover:text-(--text-primary) transition-colors p-2 rounded-full hover:bg-(--background-subtle) shrink-0"
-                  >
-                    <XCircle className="w-6 h-6" />
-                  </button>
-                </div>
-
-                {/* Leave Type Badge */}
-                <div
-                  className="relative mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full"
-                  style={{
-                    background: `${LEAVE_TYPE_BG[selectedLeave.type]}15`,
-                    border: `1px solid ${LEAVE_TYPE_BG[selectedLeave.type]}30`,
-                  }}
-                >
-                  <span
-                    className="w-2.5 h-2.5 rounded-full"
-                    style={{ background: LEAVE_TYPE_BG[selectedLeave.type] }}
                   />
-                  <span
-                    className="text-sm font-semibold"
-                    style={{ color: LEAVE_TYPE_BG[selectedLeave.type] }}
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9, y: 30 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.9, y: 30 }}
+                    transition={{ type: 'spring', damping: 30, stiffness: 400 }}
+                    className="relative z-10 w-full max-w-lg bg-(--card) rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh]"
+                    onClick={(e) => e.stopPropagation()}
                   >
-                    {getLeaveTypeLabel(selectedLeave.type as LeaveType, t)}
-                  </span>
-                </div>
-              </div>
-
-              {/* Content - Scrollable */}
-              <div className="px-6 pb-6 overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-(--border) scrollbar-track-transparent">
-                <div className="bg-(--card) rounded-2xl border border-(--border) shadow-lg p-4 space-y-4">
-                  {/* Date Timeline */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1 text-center">
-                      <p className="text-[10px] font-semibold text-(--text-muted) uppercase tracking-wider mb-1">
-                        {t('driver.from', 'From')}
-                      </p>
-                      <p className="text-3xl font-bold text-(--text-primary) leading-none">
-                        {safeFormat(selectedLeave.startDate, 'd')}
-                      </p>
-                      <p className="text-xs text-(--text-muted) mt-0.5">
-                        {safeFormat(selectedLeave.startDate, 'MMM')}
-                      </p>
-                      <p className="text-[10px] text-(--text-muted)">
-                        {safeFormat(selectedLeave.startDate, 'yyyy')}
-                      </p>
-                    </div>
-
-                    <div className="flex-1 flex flex-col items-center px-2">
-                      <div className="w-8 h-px bg-(--border) mb-1.5" />
-                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-(--background-subtle) border border-(--border)">
-                        <CalendarDays className="w-3.5 h-3.5 text-(--text-muted)" />
-                        <span className="text-sm font-bold text-(--text-primary)">
-                          {selectedLeave.days}
-                        </span>
-                        <span className="text-[10px] text-(--text-muted) uppercase">
-                          {t('common.daysShort', 'd')}
-                        </span>
-                      </div>
-                      <div className="w-8 h-px bg-(--border) mt-1.5" />
-                    </div>
-
-                    <div className="flex-1 text-center">
-                      <p className="text-[10px] font-semibold text-(--text-muted) uppercase tracking-wider mb-1">
-                        {t('driver.to', 'To')}
-                      </p>
-                      <p className="text-3xl font-bold text-(--text-primary) leading-none">
-                        {safeFormat(selectedLeave.endDate, 'd')}
-                      </p>
-                      <p className="text-xs text-(--text-muted) mt-0.5">
-                        {safeFormat(selectedLeave.endDate, 'MMM')}
-                      </p>
-                      <p className="text-[10px] text-(--text-muted)">
-                        {safeFormat(selectedLeave.endDate, 'yyyy')}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Reason */}
-                  {selectedLeave.comment && (
-                    <div className="space-y-1.5">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-semibold text-(--text-muted) uppercase tracking-wider">
-                          {t('leave.reason', 'Reason')}
-                        </span>
-                        <div className="flex-1 h-px bg-(--border)" />
-                      </div>
-                      <p className="text-sm text-(--text-secondary) leading-relaxed bg-(--background-subtle) rounded-xl p-3 border border-(--border)">
-                        {selectedLeave.comment}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Status */}
-                  <div className="space-y-1.5">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-semibold text-(--text-muted) uppercase tracking-wider">
-                        {t('common.status', 'Status')}
-                      </span>
-                      <div className="flex-1 h-px bg-(--border)" />
-                    </div>
-                    <div
-                      className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl"
-                      style={{
-                        background:
-                          selectedLeave.status === 'approved'
-                            ? '#10b98115'
-                            : selectedLeave.status === 'rejected'
-                              ? '#ef444415'
-                              : '#f59e0b15',
-                        border: `1px solid ${
-                          selectedLeave.status === 'approved'
-                            ? '#10b98130'
-                            : selectedLeave.status === 'rejected'
-                              ? '#ef444430'
-                              : '#f59e0b30'
-                        }`,
-                      }}
-                    >
-                      {selectedLeave.status === 'approved' ? (
-                        <CheckCircle className="w-5 h-5 text-emerald-500" />
-                      ) : selectedLeave.status === 'rejected' ? (
-                        <XCircle className="w-5 h-5 text-red-500" />
-                      ) : (
-                        <Clock className="w-5 h-5 text-amber-500" />
-                      )}
-                      <span className="text-sm font-semibold text-(--text-primary)">
-                        {selectedLeave.status === 'approved'
-                          ? t('leave.approved')
-                          : selectedLeave.status === 'rejected'
-                            ? t('leave.rejected')
-                            : t('leave.pending')}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* Driver Event Detail Modal - Modern Design */}
-      <AnimatePresence>
-        {selectedDriverEvent && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="absolute inset-0 bg-black/60 backdrop-blur-md"
-              onClick={() => setSelectedDriverEvent(null)}
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 30 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 30 }}
-              transition={{ type: 'spring', damping: 30, stiffness: 400 }}
-              className="relative z-10 w-full max-w-lg bg-(--card) rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Hero Header */}
-              <div className="relative px-6 pt-6 pb-8 overflow-hidden shrink-0">
-                <div
-                  className="absolute inset-0 opacity-15"
-                  style={{
-                    background: `linear-gradient(135deg, ${DRIVER_EVENT_COLOR} 0%, transparent 70%)`,
-                  }}
-                />
-                <div
-                  className="absolute top-0 right-0 w-40 h-40 rounded-full -mr-20 -mt-20 opacity-10 blur-3xl"
-                  style={{ background: DRIVER_EVENT_COLOR }}
-                />
-
-                <div className="relative flex items-start justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="relative">
+                    {/* Hero Header */}
+                    <div className="relative px-6 pt-6 pb-8 overflow-hidden shrink-0">
                       <div
-                        className="w-16 h-16 rounded-2xl flex items-center justify-center text-white text-xl font-bold shadow-lg"
+                        className="absolute inset-0 opacity-15"
                         style={{
-                          background: `linear-gradient(135deg, ${DRIVER_EVENT_COLOR}, ${DRIVER_EVENT_COLOR}dd)`,
+                          background: `linear-gradient(135deg, ${LEAVE_TYPE_BG[selectedLeave.type]} 0%, transparent 70%)`,
+                        }}
+                      />
+                      <div
+                        className="absolute top-0 right-0 w-40 h-40 rounded-full -mr-20 -mt-20 opacity-10 blur-3xl"
+                        style={{ background: LEAVE_TYPE_BG[selectedLeave.type] }}
+                      />
+
+                      <div className="relative flex items-start justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="relative">
+                            <div
+                              className="w-16 h-16 rounded-2xl flex items-center justify-center text-white text-xl font-bold shadow-lg"
+                              style={{
+                                background: `linear-gradient(135deg, ${LEAVE_TYPE_BG[selectedLeave.type]}, ${LEAVE_TYPE_BG[selectedLeave.type]}dd)`,
+                              }}
+                            >
+                              {getInitials(selectedLeave.userName ?? '?')}
+                            </div>
+                            <div
+                              className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full border-2 border-(--card) flex items-center justify-center"
+                              style={{ background: LEAVE_TYPE_BG[selectedLeave.type] }}
+                            >
+                              {selectedLeave.status === 'approved' ? (
+                                <CheckCircle className="w-3.5 h-3.5 text-white" />
+                              ) : selectedLeave.status === 'rejected' ? (
+                                <XCircle className="w-3.5 h-3.5 text-white" />
+                              ) : (
+                                <Clock className="w-3.5 h-3.5 text-white" />
+                              )}
+                            </div>
+                          </div>
+                          <div>
+                            <h3 className="text-2xl font-bold leading-tight drop-shadow-md">
+                              {selectedLeave.userName ?? t('common.unknownUser', 'Unknown')}
+                            </h3>
+                            <p className="text-sm mt-0.5 drop-shadow">
+                              {selectedLeave.userDepartment ?? ''}
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => setSelectedLeave(null)}
+                          className="text-(--text-muted) hover:text-(--text-primary) transition-colors p-2 rounded-full hover:bg-(--background-subtle) shrink-0"
+                        >
+                          <XCircle className="w-6 h-6" />
+                        </button>
+                      </div>
+
+                      {/* Leave Type Badge */}
+                      <div
+                        className="relative mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full"
+                        style={{
+                          background: `${LEAVE_TYPE_BG[selectedLeave.type]}15`,
+                          border: `1px solid ${LEAVE_TYPE_BG[selectedLeave.type]}30`,
                         }}
                       >
-                        <Car className="w-8 h-8" />
+                        <span
+                          className="w-2.5 h-2.5 rounded-full"
+                          style={{ background: LEAVE_TYPE_BG[selectedLeave.type] }}
+                        />
+                        <span
+                          className="text-sm font-semibold"
+                          style={{ color: LEAVE_TYPE_BG[selectedLeave.type] }}
+                        >
+                          {getLeaveTypeLabel(selectedLeave.type as LeaveType, t)}
+                        </span>
                       </div>
-                      <div
-                        className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full border-2 border-(--card) flex items-center justify-center"
-                        style={{ background: DRIVER_EVENT_COLOR }}
-                      >
-                        {selectedDriverEvent.status === 'completed' ? (
-                          <CheckCircle className="w-3.5 h-3.5 text-white" />
-                        ) : selectedDriverEvent.status === 'cancelled' ? (
-                          <XCircle className="w-3.5 h-3.5 text-white" />
-                        ) : (
-                          <Clock className="w-3.5 h-3.5 text-white" />
+                    </div>
+
+                    {/* Content - Scrollable */}
+                    <div className="px-6 pb-6 overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-(--border) scrollbar-track-transparent">
+                      <div className="bg-(--card) rounded-2xl border border-(--border) shadow-lg p-4 space-y-4">
+                        {/* Date Timeline */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1 text-center">
+                            <p className="text-[10px] font-semibold text-(--text-muted) uppercase tracking-wider mb-1">
+                              {t('driver.from', 'From')}
+                            </p>
+                            <p className="text-3xl font-bold text-(--text-primary) leading-none">
+                              {safeFormat(selectedLeave.startDate, 'd')}
+                            </p>
+                            <p className="text-xs text-(--text-muted) mt-0.5">
+                              {safeFormat(selectedLeave.startDate, 'MMM')}
+                            </p>
+                            <p className="text-[10px] text-(--text-muted)">
+                              {safeFormat(selectedLeave.startDate, 'yyyy')}
+                            </p>
+                          </div>
+
+                          <div className="flex-1 flex flex-col items-center px-2">
+                            <div className="w-8 h-px bg-(--border) mb-1.5" />
+                            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-(--background-subtle) border border-(--border)">
+                              <CalendarDays className="w-3.5 h-3.5 text-(--text-muted)" />
+                              <span className="text-sm font-bold text-(--text-primary)">
+                                {selectedLeave.days}
+                              </span>
+                              <span className="text-[10px] text-(--text-muted) uppercase">
+                                {t('common.daysShort', 'd')}
+                              </span>
+                            </div>
+                            <div className="w-8 h-px bg-(--border) mt-1.5" />
+                          </div>
+
+                          <div className="flex-1 text-center">
+                            <p className="text-[10px] font-semibold text-(--text-muted) uppercase tracking-wider mb-1">
+                              {t('driver.to', 'To')}
+                            </p>
+                            <p className="text-3xl font-bold text-(--text-primary) leading-none">
+                              {safeFormat(selectedLeave.endDate, 'd')}
+                            </p>
+                            <p className="text-xs text-(--text-muted) mt-0.5">
+                              {safeFormat(selectedLeave.endDate, 'MMM')}
+                            </p>
+                            <p className="text-[10px] text-(--text-muted)">
+                              {safeFormat(selectedLeave.endDate, 'yyyy')}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Reason */}
+                        {selectedLeave.comment && (
+                          <div className="space-y-1.5">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-semibold text-(--text-muted) uppercase tracking-wider">
+                                {t('leave.reason', 'Reason')}
+                              </span>
+                              <div className="flex-1 h-px bg-(--border)" />
+                            </div>
+                            <p className="text-sm text-(--text-secondary) leading-relaxed bg-(--background-subtle) rounded-xl p-3 border border-(--border)">
+                              {selectedLeave.comment}
+                            </p>
+                          </div>
                         )}
+
+                        {/* Status */}
+                        <div className="space-y-1.5">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-semibold text-(--text-muted) uppercase tracking-wider">
+                              {t('common.status', 'Status')}
+                            </span>
+                            <div className="flex-1 h-px bg-(--border)" />
+                          </div>
+                          <div
+                            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl"
+                            style={{
+                              background:
+                                selectedLeave.status === 'approved'
+                                  ? '#10b98115'
+                                  : selectedLeave.status === 'rejected'
+                                    ? '#ef444415'
+                                    : '#f59e0b15',
+                              border: `1px solid ${
+                                selectedLeave.status === 'approved'
+                                  ? '#10b98130'
+                                  : selectedLeave.status === 'rejected'
+                                    ? '#ef444430'
+                                    : '#f59e0b30'
+                              }`,
+                            }}
+                          >
+                            {selectedLeave.status === 'approved' ? (
+                              <CheckCircle className="w-5 h-5 text-emerald-500" />
+                            ) : selectedLeave.status === 'rejected' ? (
+                              <XCircle className="w-5 h-5 text-red-500" />
+                            ) : (
+                              <Clock className="w-5 h-5 text-amber-500" />
+                            )}
+                            <span className="text-sm font-semibold text-(--text-primary)">
+                              {selectedLeave.status === 'approved'
+                                ? t('leave.approved')
+                                : selectedLeave.status === 'rejected'
+                                  ? t('leave.rejected')
+                                  : t('leave.pending')}
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <div>
-                      <h3 className="text-2xl font-bold leading-tight">
-                        {selectedDriverEvent.driverName ?? t('common.unknownUser', 'Unknown')}
-                      </h3>
-                      <p className="text-sm mt-0.5">
-                        {selectedDriverEvent.driverVehicle?.model || ''}
-                      </p>
-                    </div>
-                  </div>
-                  <button
+                  </motion.div>
+                </div>
+              )}
+            </AnimatePresence>
+
+            {/* Driver Event Detail Modal - Modern Design */}
+            <AnimatePresence>
+              {selectedDriverEvent && (
+                <div className="fixed inset-0 lg:left-60 lg:top-16 z-50 flex items-center justify-center p-4">
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute inset-0 bg-black/60 backdrop-blur-md"
                     onClick={() => setSelectedDriverEvent(null)}
-                    className="text-(--text-muted) hover:text-(--text-primary) transition-colors p-2 rounded-full hover:bg-(--background-subtle) shrink-0"
-                  >
-                    <XCircle className="w-6 h-6" />
-                  </button>
-                </div>
-
-                {/* Event Type Badge */}
-                <div
-                  className="relative mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-full"
-                  style={{
-                    background: `${DRIVER_EVENT_COLOR}15`,
-                    border: `1px solid ${DRIVER_EVENT_COLOR}30`,
-                  }}
-                >
-                  <span
-                    className="w-2.5 h-2.5 rounded-full"
-                    style={{ background: DRIVER_EVENT_COLOR }}
                   />
-                  <span className="text-sm font-semibold" style={{ color: DRIVER_EVENT_COLOR }}>
-                    {selectedDriverEvent.type === 'trip'
-                      ? t('driver.trip', 'Trip')
-                      : selectedDriverEvent.type === 'blocked'
-                        ? t('driver.blocked', 'Blocked')
-                        : t('driver.maintenance', 'Maintenance')}
-                  </span>
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9, y: 30 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.9, y: 30 }}
+                    transition={{ type: 'spring', damping: 30, stiffness: 400 }}
+                    className="relative z-10 w-full max-w-lg bg-(--card) rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {/* Hero Header */}
+                    <div className="relative px-6 pt-6 pb-8 overflow-hidden shrink-0">
+                      <div
+                        className="absolute inset-0 opacity-15"
+                        style={{
+                          background: `linear-gradient(135deg, ${DRIVER_EVENT_COLOR} 0%, transparent 70%)`,
+                        }}
+                      />
+                      <div
+                        className="absolute top-0 right-0 w-40 h-40 rounded-full -mr-20 -mt-20 opacity-10 blur-3xl"
+                        style={{ background: DRIVER_EVENT_COLOR }}
+                      />
+
+                      <div className="relative flex items-start justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="relative">
+                            <div
+                              className="w-16 h-16 rounded-2xl flex items-center justify-center text-white text-xl font-bold shadow-lg"
+                              style={{
+                                background: `linear-gradient(135deg, ${DRIVER_EVENT_COLOR}, ${DRIVER_EVENT_COLOR}dd)`,
+                              }}
+                            >
+                              <Car className="w-8 h-8" />
+                            </div>
+                            <div
+                              className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full border-2 border-(--card) flex items-center justify-center"
+                              style={{ background: DRIVER_EVENT_COLOR }}
+                            >
+                              {selectedDriverEvent.status === 'completed' ? (
+                                <CheckCircle className="w-3.5 h-3.5 text-white" />
+                              ) : selectedDriverEvent.status === 'cancelled' ? (
+                                <XCircle className="w-3.5 h-3.5 text-white" />
+                              ) : (
+                                <Clock className="w-3.5 h-3.5 text-white" />
+                              )}
+                            </div>
+                          </div>
+                          <div>
+                            <h3 className="text-2xl font-bold leading-tight">
+                              {selectedDriverEvent.driverName ?? t('common.unknownUser', 'Unknown')}
+                            </h3>
+                            <p className="text-sm mt-0.5">
+                              {selectedDriverEvent.driverVehicle?.model || ''}
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => setSelectedDriverEvent(null)}
+                          className="text-(--text-muted) hover:text-(--text-primary) transition-colors p-2 rounded-full hover:bg-(--background-subtle) shrink-0"
+                        >
+                          <XCircle className="w-6 h-6" />
+                        </button>
+                      </div>
+
+                      {/* Event Type Badge */}
+                      <div
+                        className="relative mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-full"
+                        style={{
+                          background: `${DRIVER_EVENT_COLOR}15`,
+                          border: `1px solid ${DRIVER_EVENT_COLOR}30`,
+                        }}
+                      >
+                        <span
+                          className="w-2.5 h-2.5 rounded-full"
+                          style={{ background: DRIVER_EVENT_COLOR }}
+                        />
+                        <span
+                          className="text-sm font-semibold"
+                          style={{ color: DRIVER_EVENT_COLOR }}
+                        >
+                          {selectedDriverEvent.type === 'trip'
+                            ? t('driver.trip', 'Trip')
+                            : selectedDriverEvent.type === 'blocked'
+                              ? t('driver.blocked', 'Blocked')
+                              : t('driver.maintenance', 'Maintenance')}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Content - Scrollable */}
+                    <div className="px-6 pb-6 overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-(--border) scrollbar-track-transparent">
+                      <div className="bg-(--card) rounded-2xl border border-(--border) shadow-lg p-4 space-y-4">
+                        {/* Date Timeline */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1 text-center">
+                            <p className="text-[10px] font-semibold text-(--text-muted) uppercase tracking-wider mb-1">
+                              {t('driver.from', 'From')}
+                            </p>
+                            <p className="text-3xl font-bold text-(--text-primary) leading-none">
+                              {format(new Date(selectedDriverEvent.startTime), 'd', {
+                                locale: dateFnsLocale,
+                              })}
+                            </p>
+                            <p className="text-xs text-(--text-muted) mt-1">
+                              {format(new Date(selectedDriverEvent.startTime), 'MMM', {
+                                locale: dateFnsLocale,
+                              })}
+                            </p>
+                            <p className="text-[10px] text-(--text-muted) mt-0.5">
+                              {format(new Date(selectedDriverEvent.startTime), 'HH:mm', {
+                                locale: dateFnsLocale,
+                              })}
+                            </p>
+                          </div>
+
+                          <div className="flex-1 flex flex-col items-center px-4">
+                            <div className="w-10 h-px bg-(--border) mb-2" />
+                            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-(--background-subtle) border border-(--border)">
+                              <Clock className="w-3.5 h-3.5 text-(--text-muted)" />
+                              <span className="text-xs font-bold text-(--text-primary)">
+                                {format(new Date(selectedDriverEvent.startTime), 'HH:mm', {
+                                  locale: dateFnsLocale,
+                                })}{' '}
+                                -{' '}
+                                {format(new Date(selectedDriverEvent.endTime), 'HH:mm', {
+                                  locale: dateFnsLocale,
+                                })}
+                              </span>
+                            </div>
+                            <div className="w-10 h-px bg-(--border) mt-2" />
+                          </div>
+
+                          <div className="flex-1 text-center">
+                            <p className="text-[10px] font-semibold text-(--text-muted) uppercase tracking-wider mb-1">
+                              {t('driver.to', 'To')}
+                            </p>
+                            <p className="text-3xl font-bold text-(--text-primary) leading-none">
+                              {format(new Date(selectedDriverEvent.endTime), 'd', {
+                                locale: dateFnsLocale,
+                              })}
+                            </p>
+                            <p className="text-xs text-(--text-muted) mt-1">
+                              {format(new Date(selectedDriverEvent.endTime), 'MMM', {
+                                locale: dateFnsLocale,
+                              })}
+                            </p>
+                            <p className="text-[10px] text-(--text-muted) mt-0.5">
+                              {format(new Date(selectedDriverEvent.endTime), 'HH:mm', {
+                                locale: dateFnsLocale,
+                              })}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Route Info */}
+                        {selectedDriverEvent.tripInfo && (
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-semibold text-(--text-muted) uppercase tracking-wider">
+                                {t('driver.route', 'Route')}
+                              </span>
+                              <div className="flex-1 h-px bg-(--border)" />
+                            </div>
+                            <div className="bg-(--background-subtle) rounded-xl p-4 border border-(--border) space-y-3">
+                              <div className="flex items-start gap-3">
+                                <div className="w-3 h-3 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
+                                <div>
+                                  <p className="text-[10px] text-(--text-muted) uppercase tracking-wider">
+                                    {t('driver.pickup', 'Pickup')}
+                                  </p>
+                                  <p className="text-sm font-semibold text-(--text-primary) mt-0.5">
+                                    {selectedDriverEvent.tripInfo.from}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="ml-1.5 border-l-2 border-dashed border-(--border)/40 h-6" />
+                              <div className="flex items-start gap-3">
+                                <div className="w-3 h-3 rounded-full bg-red-500 mt-1.5 shrink-0" />
+                                <div>
+                                  <p className="text-[10px] text-(--text-muted) uppercase tracking-wider">
+                                    {t('driver.dropoff', 'Dropoff')}
+                                  </p>
+                                  <p className="text-sm font-semibold text-(--text-primary) mt-0.5">
+                                    {selectedDriverEvent.tripInfo.to}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Purpose */}
+                        {selectedDriverEvent.tripInfo?.purpose && (
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-semibold text-(--text-muted) uppercase tracking-wider">
+                                {t('driver.purpose', 'Purpose')}
+                              </span>
+                              <div className="flex-1 h-px bg-(--border)" />
+                            </div>
+                            <p className="text-sm text-(--text-secondary) leading-relaxed bg-(--background-subtle) rounded-xl p-4 border border-(--border)">
+                              {selectedDriverEvent.tripInfo.purpose}
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Passengers */}
+                        {selectedDriverEvent.tripInfo?.passengerCount && (
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-semibold text-(--text-muted) uppercase tracking-wider">
+                                {t('driver.passengers', 'Passengers')}
+                              </span>
+                              <div className="flex-1 h-px bg-(--border)" />
+                            </div>
+                            <div className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-(--background-subtle) border border-(--border)">
+                              <Users className="w-5 h-5 text-(--text-muted)" />
+                              <span className="text-lg font-bold text-(--text-primary)">
+                                {selectedDriverEvent.tripInfo.passengerCount}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Notes */}
+                        {selectedDriverEvent.tripInfo?.notes && (
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-semibold text-(--text-muted) uppercase tracking-wider">
+                                {t('driver.notes', 'Notes')}
+                              </span>
+                              <div className="flex-1 h-px bg-(--border)" />
+                            </div>
+                            <p className="text-sm text-(--text-secondary) leading-relaxed bg-(--background-subtle) rounded-xl p-4 border border-(--border)">
+                              {selectedDriverEvent.tripInfo.notes}
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Vehicle Info */}
+                        {selectedDriverEvent.driverVehicle && (
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-semibold text-(--text-muted) uppercase tracking-wider">
+                                {t('driver.vehicle', 'Vehicle')}
+                              </span>
+                              <div className="flex-1 h-px bg-(--border)" />
+                            </div>
+                            <div className="flex items-center justify-center gap-3 px-4 py-3 rounded-xl bg-(--background-subtle) border border-(--border)">
+                              <Car className="w-5 h-5 text-(--text-muted)" />
+                              <div className="text-center">
+                                <p className="text-sm font-bold text-(--text-primary)">
+                                  {selectedDriverEvent.driverVehicle.model}
+                                </p>
+                                <p className="text-xs text-(--text-muted)">
+                                  {selectedDriverEvent.driverVehicle.plateNumber}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Status */}
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-semibold text-(--text-muted) uppercase tracking-wider">
+                              {t('common.status', 'Status')}
+                            </span>
+                            <div className="flex-1 h-px bg-(--border)" />
+                          </div>
+                          <div
+                            className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl"
+                            style={{
+                              background:
+                                selectedDriverEvent.status === 'completed'
+                                  ? '#10b98115'
+                                  : selectedDriverEvent.status === 'cancelled'
+                                    ? '#ef444415'
+                                    : '#f59e0b15',
+                              border: `1px solid ${
+                                selectedDriverEvent.status === 'completed'
+                                  ? '#10b98130'
+                                  : selectedDriverEvent.status === 'cancelled'
+                                    ? '#ef444430'
+                                    : '#f59e0b30'
+                              }`,
+                            }}
+                          >
+                            {selectedDriverEvent.status === 'completed' ? (
+                              <CheckCircle className="w-5 h-5 text-emerald-500" />
+                            ) : selectedDriverEvent.status === 'cancelled' ? (
+                              <XCircle className="w-5 h-5 text-red-500" />
+                            ) : (
+                              <Clock className="w-5 h-5 text-amber-500" />
+                            )}
+                            <span className="text-sm font-semibold text-(--text-primary)">
+                              {selectedDriverEvent.status === 'completed'
+                                ? t('driver.status.completed', 'Completed')
+                                : selectedDriverEvent.status === 'cancelled'
+                                  ? t('driver.status.cancelled', 'Cancelled')
+                                  : t('driver.status.scheduled', 'Scheduled')}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
                 </div>
-              </div>
-
-              {/* Content - Scrollable */}
-              <div className="px-6 pb-6 overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-(--border) scrollbar-track-transparent">
-                <div className="bg-(--card) rounded-2xl border border-(--border) shadow-lg p-4 space-y-4">
-                  {/* Date Timeline */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1 text-center">
-                      <p className="text-[10px] font-semibold text-(--text-muted) uppercase tracking-wider mb-1">
-                        {t('driver.from', 'From')}
-                      </p>
-                      <p className="text-3xl font-bold text-(--text-primary) leading-none">
-                        {format(new Date(selectedDriverEvent.startTime), 'd', {
-                          locale: dateFnsLocale,
-                        })}
-                      </p>
-                      <p className="text-xs text-(--text-muted) mt-1">
-                        {format(new Date(selectedDriverEvent.startTime), 'MMM', {
-                          locale: dateFnsLocale,
-                        })}
-                      </p>
-                      <p className="text-[10px] text-(--text-muted) mt-0.5">
-                        {format(new Date(selectedDriverEvent.startTime), 'HH:mm', {
-                          locale: dateFnsLocale,
-                        })}
-                      </p>
-                    </div>
-
-                    <div className="flex-1 flex flex-col items-center px-4">
-                      <div className="w-10 h-px bg-(--border) mb-2" />
-                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-(--background-subtle) border border-(--border)">
-                        <Clock className="w-3.5 h-3.5 text-(--text-muted)" />
-                        <span className="text-xs font-bold text-(--text-primary)">
-                          {format(new Date(selectedDriverEvent.startTime), 'HH:mm', {
-                            locale: dateFnsLocale,
-                          })}{' '}
-                          -{' '}
-                          {format(new Date(selectedDriverEvent.endTime), 'HH:mm', {
-                            locale: dateFnsLocale,
-                          })}
-                        </span>
-                      </div>
-                      <div className="w-10 h-px bg-(--border) mt-2" />
-                    </div>
-
-                    <div className="flex-1 text-center">
-                      <p className="text-[10px] font-semibold text-(--text-muted) uppercase tracking-wider mb-1">
-                        {t('driver.to', 'To')}
-                      </p>
-                      <p className="text-3xl font-bold text-(--text-primary) leading-none">
-                        {format(new Date(selectedDriverEvent.endTime), 'd', {
-                          locale: dateFnsLocale,
-                        })}
-                      </p>
-                      <p className="text-xs text-(--text-muted) mt-1">
-                        {format(new Date(selectedDriverEvent.endTime), 'MMM', {
-                          locale: dateFnsLocale,
-                        })}
-                      </p>
-                      <p className="text-[10px] text-(--text-muted) mt-0.5">
-                        {format(new Date(selectedDriverEvent.endTime), 'HH:mm', {
-                          locale: dateFnsLocale,
-                        })}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Route Info */}
-                  {selectedDriverEvent.tripInfo && (
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-semibold text-(--text-muted) uppercase tracking-wider">
-                          {t('driver.route', 'Route')}
-                        </span>
-                        <div className="flex-1 h-px bg-(--border)" />
-                      </div>
-                      <div className="bg-(--background-subtle) rounded-xl p-4 border border-(--border) space-y-3">
-                        <div className="flex items-start gap-3">
-                          <div className="w-3 h-3 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
-                          <div>
-                            <p className="text-[10px] text-(--text-muted) uppercase tracking-wider">
-                              {t('driver.pickup', 'Pickup')}
-                            </p>
-                            <p className="text-sm font-semibold text-(--text-primary) mt-0.5">
-                              {selectedDriverEvent.tripInfo.from}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="ml-1.5 border-l-2 border-dashed border-(--border)/40 h-6" />
-                        <div className="flex items-start gap-3">
-                          <div className="w-3 h-3 rounded-full bg-red-500 mt-1.5 shrink-0" />
-                          <div>
-                            <p className="text-[10px] text-(--text-muted) uppercase tracking-wider">
-                              {t('driver.dropoff', 'Dropoff')}
-                            </p>
-                            <p className="text-sm font-semibold text-(--text-primary) mt-0.5">
-                              {selectedDriverEvent.tripInfo.to}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Purpose */}
-                  {selectedDriverEvent.tripInfo?.purpose && (
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-semibold text-(--text-muted) uppercase tracking-wider">
-                          {t('driver.purpose', 'Purpose')}
-                        </span>
-                        <div className="flex-1 h-px bg-(--border)" />
-                      </div>
-                      <p className="text-sm text-(--text-secondary) leading-relaxed bg-(--background-subtle) rounded-xl p-4 border border-(--border)">
-                        {selectedDriverEvent.tripInfo.purpose}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Passengers */}
-                  {selectedDriverEvent.tripInfo?.passengerCount && (
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-semibold text-(--text-muted) uppercase tracking-wider">
-                          {t('driver.passengers', 'Passengers')}
-                        </span>
-                        <div className="flex-1 h-px bg-(--border)" />
-                      </div>
-                      <div className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-(--background-subtle) border border-(--border)">
-                        <Users className="w-5 h-5 text-(--text-muted)" />
-                        <span className="text-lg font-bold text-(--text-primary)">
-                          {selectedDriverEvent.tripInfo.passengerCount}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Notes */}
-                  {selectedDriverEvent.tripInfo?.notes && (
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-semibold text-(--text-muted) uppercase tracking-wider">
-                          {t('driver.notes', 'Notes')}
-                        </span>
-                        <div className="flex-1 h-px bg-(--border)" />
-                      </div>
-                      <p className="text-sm text-(--text-secondary) leading-relaxed bg-(--background-subtle) rounded-xl p-4 border border-(--border)">
-                        {selectedDriverEvent.tripInfo.notes}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Vehicle Info */}
-                  {selectedDriverEvent.driverVehicle && (
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-semibold text-(--text-muted) uppercase tracking-wider">
-                          {t('driver.vehicle', 'Vehicle')}
-                        </span>
-                        <div className="flex-1 h-px bg-(--border)" />
-                      </div>
-                      <div className="flex items-center justify-center gap-3 px-4 py-3 rounded-xl bg-(--background-subtle) border border-(--border)">
-                        <Car className="w-5 h-5 text-(--text-muted)" />
-                        <div className="text-center">
-                          <p className="text-sm font-bold text-(--text-primary)">
-                            {selectedDriverEvent.driverVehicle.model}
-                          </p>
-                          <p className="text-xs text-(--text-muted)">
-                            {selectedDriverEvent.driverVehicle.plateNumber}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Status */}
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-semibold text-(--text-muted) uppercase tracking-wider">
-                        {t('common.status', 'Status')}
-                      </span>
-                      <div className="flex-1 h-px bg-(--border)" />
-                    </div>
+              )}
+            </AnimatePresence>
+            {/* Google Calendar Event Detail Modal */}
+            <AnimatePresence>
+              {selectedGoogleEvent && (
+                <div className="fixed inset-0 lg:left-60 lg:top-16 z-50 flex items-center justify-center p-4">
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                    onClick={() => setSelectedGoogleEvent(null)}
+                  />
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.92, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.92, y: 20 }}
+                    transition={{ type: 'spring', damping: 28, stiffness: 350 }}
+                    className="relative z-10 w-full max-w-md rounded-2xl border border-(--border) bg-(--card) shadow-2xl overflow-hidden"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {/* Header with gradient */}
                     <div
-                      className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl"
+                      className="px-5 pt-5 pb-4 flex items-center justify-between relative"
                       style={{
-                        background:
-                          selectedDriverEvent.status === 'completed'
-                            ? '#10b98115'
-                            : selectedDriverEvent.status === 'cancelled'
-                              ? '#ef444415'
-                              : '#f59e0b15',
-                        border: `1px solid ${
-                          selectedDriverEvent.status === 'completed'
-                            ? '#10b98130'
-                            : selectedDriverEvent.status === 'cancelled'
-                              ? '#ef444430'
-                              : '#f59e0b30'
-                        }`,
+                        background: `linear-gradient(135deg, ${GOOGLE_EVENT_COLOR}22 0%, ${GOOGLE_EVENT_COLOR}08 100%)`,
+                        borderBottom: `2px solid ${GOOGLE_EVENT_COLOR}33`,
                       }}
                     >
-                      {selectedDriverEvent.status === 'completed' ? (
-                        <CheckCircle className="w-5 h-5 text-emerald-500" />
-                      ) : selectedDriverEvent.status === 'cancelled' ? (
-                        <XCircle className="w-5 h-5 text-red-500" />
-                      ) : (
-                        <Clock className="w-5 h-5 text-amber-500" />
-                      )}
-                      <span className="text-sm font-semibold text-(--text-primary)">
-                        {selectedDriverEvent.status === 'completed'
-                          ? t('driver.status.completed', 'Completed')
-                          : selectedDriverEvent.status === 'cancelled'
-                            ? t('driver.status.cancelled', 'Cancelled')
-                            : t('driver.status.scheduled', 'Scheduled')}
-                      </span>
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-12 h-12 rounded-full flex items-center justify-center text-white shadow-lg"
+                          style={{
+                            background: `linear-gradient(135deg, ${GOOGLE_EVENT_COLOR}, ${GOOGLE_EVENT_COLOR}cc)`,
+                          }}
+                        >
+                          <span className="text-lg font-bold">G</span>
+                        </div>
+                        <div className="min-w-0">
+                          <h3 className="text-lg font-bold text-(--text-primary) truncate">
+                            {selectedGoogleEvent.title}
+                          </h3>
+                          <p className="text-xs text-(--text-muted)">Google Calendar</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setSelectedGoogleEvent(null)}
+                        className="text-(--text-muted) hover:text-(--text-primary) transition-colors p-1.5 rounded-full hover:bg-(--background-subtle) shrink-0"
+                      >
+                        <XCircle className="w-5 h-5" />
+                      </button>
                     </div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-      {/* Google Calendar Event Detail Modal */}
-      <AnimatePresence>
-        {selectedGoogleEvent && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-              onClick={() => setSelectedGoogleEvent(null)}
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.92, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.92, y: 20 }}
-              transition={{ type: 'spring', damping: 28, stiffness: 350 }}
-              className="relative z-10 w-full max-w-md rounded-2xl border border-(--border) bg-(--card) shadow-2xl overflow-hidden"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Header with gradient */}
-              <div
-                className="px-5 pt-5 pb-4 flex items-center justify-between relative"
-                style={{
-                  background: `linear-gradient(135deg, ${GOOGLE_EVENT_COLOR}22 0%, ${GOOGLE_EVENT_COLOR}08 100%)`,
-                  borderBottom: `2px solid ${GOOGLE_EVENT_COLOR}33`,
-                }}
-              >
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-12 h-12 rounded-full flex items-center justify-center text-white shadow-lg"
-                    style={{
-                      background: `linear-gradient(135deg, ${GOOGLE_EVENT_COLOR}, ${GOOGLE_EVENT_COLOR}cc)`,
-                    }}
-                  >
-                    <span className="text-lg font-bold">G</span>
-                  </div>
-                  <div className="min-w-0">
-                    <h3 className="text-lg font-bold text-(--text-primary) truncate">
-                      {selectedGoogleEvent.title}
-                    </h3>
-                    <p className="text-xs text-(--text-muted)">Google Calendar</p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setSelectedGoogleEvent(null)}
-                  className="text-(--text-muted) hover:text-(--text-primary) transition-colors p-1.5 rounded-full hover:bg-(--background-subtle) shrink-0"
-                >
-                  <XCircle className="w-5 h-5" />
-                </button>
-              </div>
 
-              {/* Content */}
-              <div className="px-5 pb-5 space-y-4">
-                {/* Date & Time */}
-                <div className="rounded-xl border border-(--border) bg-(--background-subtle) p-4 space-y-3">
-                  <div className="flex items-center gap-2">
-                    <CalendarDays className="w-4 h-4 text-(--text-muted) shrink-0" />
-                    <span className="text-sm font-semibold text-(--text-primary)">
-                      {safeFormat(selectedGoogleEvent.startDate, 'EEEE, MMMM d, yyyy')}
-                    </span>
-                  </div>
-                  {selectedGoogleEvent.startTime ? (
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-(--text-muted) shrink-0" />
-                      <span className="text-sm text-(--text-secondary)">
-                        {format(new Date(selectedGoogleEvent.startTime), 'h:mm a', {
-                          locale: dateFnsLocale,
-                        })}
-                        {selectedGoogleEvent.endTime &&
-                          ` – ${format(new Date(selectedGoogleEvent.endTime), 'h:mm a', { locale: dateFnsLocale })}`}
-                      </span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-(--text-muted) shrink-0" />
-                      <span className="text-sm text-(--text-secondary)">
-                        {t('calendar.allDay', 'All day')}
-                      </span>
-                    </div>
-                  )}
-                  {/* Multi-day range */}
-                  {selectedGoogleEvent.endDate &&
-                    selectedGoogleEvent.startDate !==
-                      (selectedGoogleEvent.allDay
-                        ? format(addDays(new Date(selectedGoogleEvent.endDate), -1), 'yyyy-MM-dd')
-                        : selectedGoogleEvent.endDate) && (
-                      <div className="flex items-center gap-2 pt-1 border-t border-(--border)">
-                        <CalendarDays className="w-4 h-4 text-(--text-muted) shrink-0" />
-                        <span className="text-xs text-(--text-secondary)">
-                          {safeFormat(selectedGoogleEvent.startDate, 'MMM d')} &ndash;{' '}
-                          {safeFormat(
-                            selectedGoogleEvent.allDay
+                    {/* Content */}
+                    <div className="px-5 pb-5 space-y-4">
+                      {/* Date & Time */}
+                      <div className="rounded-xl border border-(--border) bg-(--background-subtle) p-4 space-y-3">
+                        <div className="flex items-center gap-2">
+                          <CalendarDays className="w-4 h-4 text-(--text-muted) shrink-0" />
+                          <span className="text-sm font-semibold text-(--text-primary)">
+                            {safeFormat(selectedGoogleEvent.startDate, 'EEEE, MMMM d, yyyy')}
+                          </span>
+                        </div>
+                        {selectedGoogleEvent.startTime ? (
+                          <div className="flex items-center gap-2">
+                            <Clock className="w-4 h-4 text-(--text-muted) shrink-0" />
+                            <span className="text-sm text-(--text-secondary)">
+                              {format(new Date(selectedGoogleEvent.startTime), 'h:mm a', {
+                                locale: dateFnsLocale,
+                              })}
+                              {selectedGoogleEvent.endTime &&
+                                ` – ${format(new Date(selectedGoogleEvent.endTime), 'h:mm a', { locale: dateFnsLocale })}`}
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <Clock className="w-4 h-4 text-(--text-muted) shrink-0" />
+                            <span className="text-sm text-(--text-secondary)">
+                              {t('calendar.allDay', 'All day')}
+                            </span>
+                          </div>
+                        )}
+                        {/* Multi-day range */}
+                        {selectedGoogleEvent.endDate &&
+                          selectedGoogleEvent.startDate !==
+                            (selectedGoogleEvent.allDay
                               ? format(
                                   addDays(new Date(selectedGoogleEvent.endDate), -1),
                                   'yyyy-MM-dd',
                                 )
-                              : selectedGoogleEvent.endDate,
-                            'MMM d, yyyy',
+                              : selectedGoogleEvent.endDate) && (
+                            <div className="flex items-center gap-2 pt-1 border-t border-(--border)">
+                              <CalendarDays className="w-4 h-4 text-(--text-muted) shrink-0" />
+                              <span className="text-xs text-(--text-secondary)">
+                                {safeFormat(selectedGoogleEvent.startDate, 'MMM d')} &ndash;{' '}
+                                {safeFormat(
+                                  selectedGoogleEvent.allDay
+                                    ? format(
+                                        addDays(new Date(selectedGoogleEvent.endDate), -1),
+                                        'yyyy-MM-dd',
+                                      )
+                                    : selectedGoogleEvent.endDate,
+                                  'MMM d, yyyy',
+                                )}
+                              </span>
+                            </div>
                           )}
-                        </span>
                       </div>
-                    )}
-                </div>
 
-                {/* Location */}
-                {selectedGoogleEvent.location && (
-                  <div className="space-y-1.5">
-                    <span className="text-xs font-semibold text-(--text-muted) uppercase tracking-wider flex items-center gap-1.5">
-                      <span className="text-sm">📍</span>
-                      {t('calendar.location', 'Location')}
-                    </span>
-                    <p className="text-sm text-(--text-secondary) bg-(--background-subtle) rounded-lg p-3 border border-(--border)">
-                      {selectedGoogleEvent.location}
-                    </p>
-                  </div>
-                )}
+                      {/* Location */}
+                      {selectedGoogleEvent.location && (
+                        <div className="space-y-1.5">
+                          <span className="text-xs font-semibold text-(--text-muted) uppercase tracking-wider flex items-center gap-1.5">
+                            <span className="text-sm">📍</span>
+                            {t('calendar.location', 'Location')}
+                          </span>
+                          <p className="text-sm text-(--text-secondary) bg-(--background-subtle) rounded-lg p-3 border border-(--border)">
+                            {selectedGoogleEvent.location}
+                          </p>
+                        </div>
+                      )}
 
-                {/* Description */}
-                {selectedGoogleEvent.description && (
-                  <div className="space-y-1.5">
-                    <span className="text-xs font-semibold text-(--text-muted) uppercase tracking-wider">
-                      {t('calendar.description', 'Description')}
-                    </span>
-                    <div className="text-sm text-(--text-secondary) bg-(--background-subtle) rounded-lg p-3 border border-(--border) leading-relaxed whitespace-pre-wrap max-h-40 overflow-y-auto">
-                      {selectedGoogleEvent.description}
+                      {/* Description */}
+                      {selectedGoogleEvent.description && (
+                        <div className="space-y-1.5">
+                          <span className="text-xs font-semibold text-(--text-muted) uppercase tracking-wider">
+                            {t('calendar.description', 'Description')}
+                          </span>
+                          <div className="text-sm text-(--text-secondary) bg-(--background-subtle) rounded-lg p-3 border border-(--border) leading-relaxed whitespace-pre-wrap max-h-40 overflow-y-auto">
+                            {selectedGoogleEvent.description}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Open in Google Calendar */}
+                      {selectedGoogleEvent.htmlLink && (
+                        <a
+                          href={selectedGoogleEvent.htmlLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-(--border) bg-(--background-subtle) text-sm font-medium text-(--text-primary) hover:bg-(--background) hover:border-(--primary)/50 transition-all"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                          {t('calendar.openInGoogle', 'Open in Google Calendar')}
+                        </a>
+                      )}
                     </div>
-                  </div>
-                )}
-
-                {/* Open in Google Calendar */}
-                {selectedGoogleEvent.htmlLink && (
-                  <a
-                    href={selectedGoogleEvent.htmlLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-(--border) bg-(--background-subtle) text-sm font-medium text-(--text-primary) hover:bg-(--background) hover:border-(--primary)/50 transition-all"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                    {t('calendar.openInGoogle', 'Open in Google Calendar')}
-                  </a>
-                )}
-              </div>
-            </motion.div>
-          </div>
+                  </motion.div>
+                </div>
+              )}
+            </AnimatePresence>
+          </>,
+          document.body,
         )}
-      </AnimatePresence>
     </div>
   );
 });

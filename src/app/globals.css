@@ -16,9 +16,11 @@ body.scroll-locked {
   right: 0 !important;
 }
 
-/* Prevent layout shift when scrollbar appears/disappears */
-html {
-  scrollbar-gutter: stable;
+/* Prevent layout shift when scrollbar appears/disappears — desktop only */
+@media (min-width: 1024px) {
+  .main-scrollable {
+    scrollbar-gutter: stable;
+  }
 }
 
 /* ── Safe Area Insets for notched devices (iPhone X+) ── */
