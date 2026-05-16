@@ -224,13 +224,6 @@ const nextConfig = {
         source: '/models/:path*',
         headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
       },
-      // Login page — preload face models
-      {
-        source: '/login',
-        headers: [
-          { key: 'Link', value: '</models/face_landmark_68_model-shard1>; rel=preload; as=fetch; crossorigin, </models/face_recognition_model-shard1>; rel=preload; as=fetch; crossorigin' },
-        ],
-      },
       // Images — cache 7 days + stale-while-revalidate
       {
         source: '/:path*.{png,jpg,jpeg,gif,webp,avif,ico,svg}',
