@@ -245,7 +245,7 @@ const getInitialSuggestions = (
 
 /** Pulsing hint that appears every 15s when widget is docked */
 function DockedPulse({ dockedSide, dockedY }: { dockedSide: 'left' | 'right'; dockedY: number }) {
-  const { t } = useTranslation();
+  const { t } = useTranslation('chat');
   const [show, setShow] = useState(false);
 
   useEffect(() => {
