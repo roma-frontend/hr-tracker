@@ -37,21 +37,21 @@ export async function loadFaceApiModels() {
   const api = await loadFaceApiLibrary();
   const MODEL_URL = '/models';
 
-  try {
-    console.log('⏳ Loading Tiny Face Detector...');
-    await api.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
-    console.log('✅ Tiny Face Detector loaded');
-  } catch (e) {
-    console.warn('⚠️ Tiny model not found, falling back to SSD Mobilenetv1...', e);
+  // Load all models in parallel for faster startup
+  const results = await Promise.allSettled([
+    api.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+    api.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+    api.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
+  ]);
+
+  // If tiny detector failed, load SSD as fallback
+  if (results[0].status === 'rejected') {
+    console.warn('⚠️ Tiny model not found, loading SSD Mobilenetv1...');
     await api.nets.ssdMobilenetv1.loadFromUri(MODEL_URL);
-    console.log('✅ SSD Mobilenetv1 loaded');
   }
 
-  await api.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
-  await api.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
-
   modelsLoaded = true;
-  console.log('✅ Models loaded');
+  console.log('✅ Face models loaded');
 }
 
 // Detect face and get descriptor

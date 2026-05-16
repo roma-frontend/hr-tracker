@@ -11,6 +11,7 @@ import { ShieldLoader } from '@/components/ui/ShieldLoader';
 import { useAuthStore } from '@/store/useAuthStore';
 import { WebAuthnButton } from '@/components/auth/WebAuthnButton';
 import { FaceLogin } from '@/components/auth/FaceLogin';
+import { loadFaceApiModels } from '@/lib/faceApi';
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 import { OAuthSyncLoader } from '@/components/auth/OAuthSyncLoader';
 import { OnboardingTour } from '@/components/onboarding/OnboardingTour';
@@ -297,6 +298,11 @@ export default function LoginPage() {
         deviceFingerprintRef.current = fingerprint;
       })
       .catch(() => {});
+  }, []);
+
+  // Preload face recognition models in background (eliminates 10s delay on Face ID tab)
+  useEffect(() => {
+    loadFaceApiModels().catch(() => {});
   }, []);
 
   // Check if OAuth sync is in progress OR redirecting
