@@ -3,8 +3,23 @@ import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import HttpBackend from 'i18next-http-backend';
 
-// Only common is bundled — all other namespaces load lazily via HttpBackend
+// EN namespaces bundled for instant render (no flash of keys)
 import commonEn from './locales/en/common.json';
+import landingEn from './locales/en/landing.json';
+import authEn from './locales/en/auth.json';
+import dashboardEn from './locales/en/dashboard.json';
+import leavesEn from './locales/en/leaves.json';
+import tasksEn from './locales/en/tasks.json';
+import employeesEn from './locales/en/employees.json';
+import chatEn from './locales/en/chat.json';
+import adminEn from './locales/en/admin.json';
+import driversEn from './locales/en/drivers.json';
+import settingsEn from './locales/en/settings.json';
+import modulesEn from './locales/en/modules.json';
+import payrollEn from './locales/en/payroll.json';
+import compensationEn from './locales/en/compensation.json';
+import learningEn from './locales/en/learning.json';
+import expensesEn from './locales/en/expenses.json';
 
 export const allNamespaces = [
   'common',
@@ -28,10 +43,25 @@ export const allNamespaces = [
 export type AppNamespace = (typeof allNamespaces)[number];
 export const defaultNS: AppNamespace = 'common';
 
-// Only common EN is bundled (~28KB). All other namespaces load on-demand via HTTP.
+// EN is fully bundled for instant render. RU/HY load lazily via HttpBackend.
 export const resources = {
   en: {
     common: commonEn,
+    landing: landingEn,
+    auth: authEn,
+    dashboard: dashboardEn,
+    leaves: leavesEn,
+    tasks: tasksEn,
+    employees: employeesEn,
+    chat: chatEn,
+    admin: adminEn,
+    drivers: driversEn,
+    settings: settingsEn,
+    modules: modulesEn,
+    payroll: payrollEn,
+    compensation: compensationEn,
+    learning: learningEn,
+    expenses: expensesEn,
   },
 } as const;
 
