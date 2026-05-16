@@ -5,17 +5,19 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { MessageBubble } from './MessageBubble';
 import { TypingIndicator } from './TypingIndicator';
 import { useTranslation } from 'react-i18next';
+import type { ChatMessage, ChatConversation, TypingUser } from './types';
+import type { Id } from '@/../convex/_generated/dataModel';
 
 interface ChatMessagesProps {
-  messages: any[];
-  typingUsers: any[];
-  currentUserId: any;
+  messages: ChatMessage[];
+  typingUsers: TypingUser[];
+  currentUserId: Id<'users'>;
   currentUserAvatar?: string;
   currentUserName: string;
-  conversation: any;
+  conversation: ChatConversation;
   lang: string;
-  onReply: (id: any, content: string, senderName: string) => void;
-  onOpenThread: (id: any, content: string) => void;
+  onReply: (id: Id<'chatMessages'> | string, content: string, senderName: string) => void;
+  onOpenThread: (id: Id<'chatMessages'> | string, content: string) => void;
   onSendMessage: (text: string) => Promise<void>;
   messagesEndRef: React.RefObject<HTMLDivElement>;
   messagesParentRef: React.RefObject<HTMLDivElement>;
@@ -124,7 +126,7 @@ export const ChatMessages = React.memo(function ChatMessages({
                 }}
               >
                 <MessageBubble
-                  message={msg}
+                  message={msg as React.ComponentProps<typeof MessageBubble>['message']}
                   isOwn={isOwn}
                   showAvatar={showAvatar}
                   showName={!!showName}

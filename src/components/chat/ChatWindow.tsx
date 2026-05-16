@@ -114,8 +114,11 @@ export const ChatWindow = React.memo(function ChatWindow({
   );
 
   // Reverse for chronological display (query is desc)
-  const messages: any[] | null = React.useMemo(
-    () => (paginatedMessages ? [...paginatedMessages].reverse() : null),
+  const messages = React.useMemo(
+    () =>
+      paginatedMessages
+        ? [...paginatedMessages].filter((m): m is NonNullable<typeof m> => m != null).reverse()
+        : null,
     [paginatedMessages],
   );
 
@@ -123,7 +126,7 @@ export const ChatWindow = React.memo(function ChatWindow({
   const dedupedMessages = React.useMemo(() => {
     if (!messages) return messages;
     const seen = new Set();
-    return messages.filter((msg: any) => {
+    return messages.filter((msg) => {
       if (seen.has(msg._id)) return false;
       seen.add(msg._id);
       return true;
@@ -153,8 +156,8 @@ export const ChatWindow = React.memo(function ChatWindow({
     const real = dedupedMessages ?? [];
     const optimistic = optMessages ?? [];
     // Filter out optimistic messages that have been confirmed by server (matching by _id)
-    const realIds = new Set(real.map((m: any) => m._id));
-    const pendingOptimistic = optimistic.filter((m: any) => !realIds.has(m._id));
+    const realIds = new Set<string>(real.map((m) => m._id));
+    const pendingOptimistic = optimistic.filter((m) => !realIds.has(m._id));
     return [...real, ...pendingOptimistic];
   }, [dedupedMessages, optMessages]);
 
@@ -184,7 +187,7 @@ export const ChatWindow = React.memo(function ChatWindow({
       ? ((conv as any).name ?? t('chat.defaultGroupName'))
       : (otherUser?.name ?? t('chat.defaultChatName'));
   const otherMembers = members?.filter((m) => m.userId !== currentUserId) ?? [];
-  const otherMemberIds = otherMembers.map((m: any) => m.userId as Id<'users'>);
+  const otherMemberIds = otherMembers.map((m) => m.userId as Id<'users'>);
 
   // Track previous message count to only scroll on NEW messages, not on conversation switch
   const prevMsgCountRef = useRef<number>(0);
@@ -257,7 +260,7 @@ export const ChatWindow = React.memo(function ChatWindow({
       return;
     }
 
-    const newPending: PendingFile[] = files.map((file: any) => ({
+    const newPending: PendingFile[] = files.map((file) => ({
       file,
       previewUrl: file.type.startsWith('image/') ? URL.createObjectURL(file) : null,
       isPDF: file.type === 'application/pdf',
@@ -555,7 +558,7 @@ export const ChatWindow = React.memo(function ChatWindow({
   // Send a poll
   const handleSendPoll = useCallback(async () => {
     const q = pollQuestion.trim();
-    const opts = pollOptions.map((o: any) => o.trim()).filter(Boolean);
+    const opts = pollOptions.map((o) => o.trim()).filter(Boolean);
     if (!q || opts.length < 2) return;
     setSending(true);
     try {
@@ -567,7 +570,7 @@ export const ChatWindow = React.memo(function ChatWindow({
         content: `📊 ${q}`,
         poll: {
           question: q,
-          options: opts.map((text: any, i: any) => ({ id: `opt_${i}`, text, votes: [] })),
+          options: opts.map((text, i) => ({ id: `opt_${i}`, text, votes: [] })),
         } as any,
       });
       setPollQuestion('');
@@ -601,7 +604,7 @@ export const ChatWindow = React.memo(function ChatWindow({
     // Don't play the same message twice
     if (lastPlayedMsgIdRef.current === latest._id) return;
     // Don't play for system service broadcasts (informational only)
-    if (latest.isServiceBroadcast) return;
+    if ('isServiceBroadcast' in latest && latest.isServiceBroadcast) return;
     // Don't play if conversation is muted
     if (conv?.membership?.isMuted) return;
     lastPlayedMsgIdRef.current = latest._id;
@@ -616,10 +619,12 @@ export const ChatWindow = React.memo(function ChatWindow({
 
     // Tab not focused — play sound + show browser notification
     playChatMessageSound();
+    const sender =
+      'sender' in latest ? (latest.sender as { name?: string; avatarUrl?: string } | null) : null;
     if (Notification.permission === 'granted') {
-      new Notification(latest.sender?.name ?? 'New message', {
+      new Notification(sender?.name ?? 'New message', {
         body: latest.content?.slice(0, 80) || '📎 Attachment',
-        icon: latest.sender?.avatarUrl ?? '/favicon.ico',
+        icon: sender?.avatarUrl ?? '/favicon.ico',
         badge: '/favicon.ico',
         tag: latest._id,
         silent: true, // sound is handled by playChatMessageSound
@@ -827,7 +832,7 @@ export const ChatWindow = React.memo(function ChatWindow({
               role="status"
               aria-label={t('chat.loadingMessages', 'Loading messages')}
             >
-              {[...Array(5)].map((_: any, i: any) => (
+              {[...Array(5)].map((_, i) => (
                 <div key={i} className={cn('flex gap-3', i % 2 === 0 ? '' : 'flex-row-reverse')}>
                   <div className="w-8 h-8 rounded-full bg-white/5 shrink-0" />
                   <div className={cn('space-y-1', i % 2 === 0 ? '' : 'items-end flex flex-col')}>
@@ -864,7 +869,7 @@ export const ChatWindow = React.memo(function ChatWindow({
                   position: 'relative',
                 }}
               >
-                {virtualizer.getVirtualItems().map((virtualRow: any) => {
+                {virtualizer.getVirtualItems().map((virtualRow) => {
                   const msg = allMessages[virtualRow.index];
                   if (!msg) return null;
 
@@ -892,7 +897,7 @@ export const ChatWindow = React.memo(function ChatWindow({
                       }}
                     >
                       <MessageBubble
-                        message={msg}
+                        message={msg as React.ComponentProps<typeof MessageBubble>['message']}
                         isOwn={isOwn}
                         showAvatar={showAvatar}
                         showName={!!showName}
@@ -952,7 +957,7 @@ export const ChatWindow = React.memo(function ChatWindow({
             className="px-2 xs:px-3 sm:px-4 py-2 border-t flex gap-2 flex-wrap"
             style={{ borderColor: 'var(--border)', background: 'var(--background-subtle)' }}
           >
-            {pendingFiles.map((pf: any, idx: any) => (
+            {pendingFiles.map((pf, idx) => (
               <div key={idx} className="relative group/pf">
                 {pf.previewUrl ? (
                   // Image preview
@@ -1079,7 +1084,7 @@ export const ChatWindow = React.memo(function ChatWindow({
               placeholder={t('chat.pollQuestion')}
               className="w-full px-2.5 xs:px-3 py-1.5 text-[10px] xs:text-xs rounded-lg border border-(--input-border) bg-(--input) text-(--text-primary) outline-none mb-2"
             />
-            {pollOptions.map((opt: any, i: any) => (
+            {pollOptions.map((opt, i) => (
               <div key={i} className="flex items-center gap-1 mb-1">
                 <input
                   value={opt}
@@ -1264,7 +1269,7 @@ export const ChatWindow = React.memo(function ChatWindow({
                     className="absolute bottom-full left-0 right-0 mb-2 rounded-xl shadow-2xl border overflow-hidden z-50 animate-slide-up"
                     style={{ background: 'var(--background)', borderColor: 'var(--border)' }}
                   >
-                    {mentionSuggestions.map((m: any, idx: any) => (
+                    {mentionSuggestions.map((m, idx) => (
                       <button
                         key={m.userId}
                         onClick={() => m.user?.name && insertMention(m.user.name)}

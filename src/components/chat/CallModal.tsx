@@ -34,7 +34,7 @@ interface Props {
 function getInitials(name: string) {
   return name
     .split(' ')
-    .map((n: any) => n[0])
+    .map((n: string) => n[0])
     .join('')
     .toUpperCase()
     .slice(0, 2);
@@ -280,14 +280,17 @@ export function CallModal({
         });
         setCallStatus('connecting');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('[CallModal] Media error:', {
-        name: err.name,
-        message: err.message,
-        code: err.code,
+        name: err instanceof Error ? err.name : 'Unknown',
+        message: err instanceof Error ? err.message : 'Unknown error',
+        code: (err as { code?: number })?.code,
       });
 
-      if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+      if (
+        err instanceof Error &&
+        (err.name === 'NotReadableError' || err.name === 'TrackStartError')
+      ) {
         // Device in use - show message and auto-retry
         const message =
           retryCount >= 3
@@ -312,11 +315,14 @@ export function CallModal({
             initMedia();
           }, delay);
         }
-      } else if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+      } else if (
+        err instanceof Error &&
+        (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError')
+      ) {
         setMediaError(
           'Доступ к камере/микрофону запрещён. Разрешите доступ в настройках браузера и перезагрузите страницу.',
         );
-      } else if (err.name === 'NotFoundError') {
+      } else if (err instanceof Error && err.name === 'NotFoundError') {
         setMediaError('Камера или микрофон не найдены. Проверьте подключение устройств.');
       } else {
         setMediaError('Не удалось получить доступ к камере/микрофону. Попробуйте снова.');

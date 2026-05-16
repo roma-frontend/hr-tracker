@@ -6,10 +6,11 @@ import { ArrowLeft, Phone, Video, Search, Info } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getInitials } from '@/lib/stringUtils';
 import { useTranslation } from 'react-i18next';
+import type { ChatConversation, ChatConversationOtherUser } from './types';
 
 interface ChatHeaderProps {
-  conversation: any;
-  otherUser: any;
+  conversation: ChatConversation;
+  otherUser: ChatConversationOtherUser | null;
   displayName: string;
   membersCount: number;
   onBack: () => void;

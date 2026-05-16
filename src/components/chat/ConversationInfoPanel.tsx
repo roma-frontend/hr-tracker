@@ -18,7 +18,7 @@ interface Props {
 function getInitials(name: string) {
   return name
     .split(' ')
-    .map((n: any) => n[0])
+    .map((n: string) => n[0])
     .join('')
     .toUpperCase()
     .slice(0, 2);
@@ -35,7 +35,9 @@ export function ConversationInfoPanel({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUsers, setSelectedUsers] = useState<Id<'users'>[]>([]);
   const [adding, setAdding] = useState(false);
-  const [selectedOrgId, setSelectedOrgId] = useState<Id<'organizations'> | undefined>(organizationId);
+  const [selectedOrgId, setSelectedOrgId] = useState<Id<'organizations'> | undefined>(
+    organizationId,
+  );
   const [showOrgDropdown, setShowOrgDropdown] = useState(false);
 
   const members = useQuery(api.chat.queries.getConversationMembers, { conversationId });
@@ -217,48 +219,50 @@ export function ConversationInfoPanel({
                         }}
                       >
                         <div className="max-h-40 overflow-y-auto custom-scrollbar">
-                          {allOrganizations.map((org: any) => (
-                            <button
-                              key={org._id}
-                              onClick={() => {
-                                setSelectedOrgId(org._id as Id<'organizations'>);
-                                setShowOrgDropdown(false);
-                                setSearchQuery('');
-                                setSelectedUsers([]);
-                              }}
-                              className="w-full flex items-center gap-2 px-2.5 py-2 text-xs transition-all hover:opacity-80"
-                              style={{
-                                background:
-                                  org._id === selectedOrgId
-                                    ? 'var(--sidebar-item-active)'
-                                    : 'transparent',
-                                color:
-                                  org._id === selectedOrgId
-                                    ? 'var(--primary)'
-                                    : 'var(--text-primary)',
-                              }}
-                              onMouseEnter={(e) => {
-                                if (org._id !== selectedOrgId)
-                                  e.currentTarget.style.background = 'var(--sidebar-item-hover)';
-                              }}
-                              onMouseLeave={(e) => {
-                                if (org._id !== selectedOrgId)
-                                  e.currentTarget.style.background = 'transparent';
-                              }}
-                            >
-                              <Building2
-                                className="w-3 h-3 shrink-0"
-                                style={{ color: 'var(--text-muted)' }}
-                              />
-                              <span className="truncate flex-1 text-left">{org.name}</span>
-                              {org._id === selectedOrgId && (
-                                <span
-                                  className="w-1.5 h-1.5 rounded-full shrink-0"
-                                  style={{ background: 'var(--primary)' }}
+                          {allOrganizations.map(
+                            (org: { _id: Id<'organizations'>; name: string }) => (
+                              <button
+                                key={org._id}
+                                onClick={() => {
+                                  setSelectedOrgId(org._id as Id<'organizations'>);
+                                  setShowOrgDropdown(false);
+                                  setSearchQuery('');
+                                  setSelectedUsers([]);
+                                }}
+                                className="w-full flex items-center gap-2 px-2.5 py-2 text-xs transition-all hover:opacity-80"
+                                style={{
+                                  background:
+                                    org._id === selectedOrgId
+                                      ? 'var(--sidebar-item-active)'
+                                      : 'transparent',
+                                  color:
+                                    org._id === selectedOrgId
+                                      ? 'var(--primary)'
+                                      : 'var(--text-primary)',
+                                }}
+                                onMouseEnter={(e) => {
+                                  if (org._id !== selectedOrgId)
+                                    e.currentTarget.style.background = 'var(--sidebar-item-hover)';
+                                }}
+                                onMouseLeave={(e) => {
+                                  if (org._id !== selectedOrgId)
+                                    e.currentTarget.style.background = 'transparent';
+                                }}
+                              >
+                                <Building2
+                                  className="w-3 h-3 shrink-0"
+                                  style={{ color: 'var(--text-muted)' }}
                                 />
-                              )}
-                            </button>
-                          ))}
+                                <span className="truncate flex-1 text-left">{org.name}</span>
+                                {org._id === selectedOrgId && (
+                                  <span
+                                    className="w-1.5 h-1.5 rounded-full shrink-0"
+                                    style={{ background: 'var(--primary)' }}
+                                  />
+                                )}
+                              </button>
+                            ),
+                          )}
                         </div>
                       </div>
                     )}
@@ -285,7 +289,7 @@ export function ConversationInfoPanel({
               {/* User list */}
               <div className="space-y-1 max-h-48 overflow-y-auto custom-scrollbar">
                 {filteredUsers.length > 0 ? (
-                  filteredUsers.map((user: any) => (
+                  filteredUsers.map((user) => (
                     <label
                       key={user._id}
                       className="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
@@ -361,7 +365,7 @@ export function ConversationInfoPanel({
 
           {/* Members list */}
           <div className="space-y-2">
-            {members?.map((member: any) => (
+            {members?.map((member) => (
               <div
                 key={member.userId}
                 className="flex items-center gap-2 p-2 rounded-lg"

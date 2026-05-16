@@ -46,7 +46,7 @@ export function IncomingCallProvider() {
         const conv = conversations.find((c) => c && c._id === incomingCallData.conversationId);
         if (conv) {
           const initiatorMember = (conv as any).members?.find(
-            (m: any) => m.userId === incomingCallData.initiatorId,
+            (m: { userId: Id<'users'> }) => m.userId === incomingCallData.initiatorId,
           );
           initiatorName = initiatorMember?.user?.name ?? (conv as any).otherUser?.name ?? 'Someone';
         }

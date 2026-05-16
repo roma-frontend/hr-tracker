@@ -25,7 +25,7 @@ interface Props {
 function getInitials(name: string) {
   return name
     .split(' ')
-    .map((n: any) => n[0])
+    .map((n: string) => n[0])
     .join('')
     .toUpperCase()
     .slice(0, 2);
@@ -62,8 +62,8 @@ export function ThreadPanel({
   const allReplies = React.useMemo(() => {
     const real = replies ?? [];
     const optimistic = optReplies ?? [];
-    const realIds = new Set(real.map((r: any) => r._id));
-    const pendingOptimistic = optimistic.filter((r: any) => !realIds.has(r._id));
+    const realIds = new Set<string>(real.map((r) => r._id));
+    const pendingOptimistic = optimistic.filter((r) => !realIds.has(r._id));
     return [...real, ...pendingOptimistic];
   }, [replies, optReplies]);
 
@@ -133,7 +133,7 @@ export function ThreadPanel({
             <ShieldLoader size="xs" variant="inline" />
           </div>
         )}
-        {allReplies?.map((r: any) => {
+        {allReplies?.map((r) => {
           const isOwn = r.senderId === currentUserId;
           return (
             <div

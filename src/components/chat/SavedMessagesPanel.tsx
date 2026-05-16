@@ -83,17 +83,21 @@ export function SavedMessagesPanel({ userId, organizationId, onClose, onSelectMe
               </p>
             </div>
           ) : (
-            savedMessages?.map((saved: any) => {
+            savedMessages?.map((saved) => {
               if (!saved) return null;
-              const isOwn = saved.senderId === userId;
+              const msg = saved as typeof saved & {
+                savedAt?: number;
+                conversation?: { name?: string; type?: string };
+              };
+              const isOwn = msg.senderId === userId;
 
               return (
                 <div
-                  key={saved._id}
+                  key={msg._id}
                   onClick={() =>
                     onSelectMessage(
-                      saved.conversationId as Id<'chatConversations'>,
-                      saved._id as Id<'chatMessages'>,
+                      msg.conversationId as Id<'chatConversations'>,
+                      msg._id as Id<'chatMessages'>,
                     )
                   }
                   className="group relative p-4 rounded-xl border cursor-pointer hover:shadow-md transition-all"
@@ -103,22 +107,22 @@ export function SavedMessagesPanel({ userId, organizationId, onClose, onSelectMe
                   }}
                 >
                   {/* Conversation badge */}
-                  {saved.conversation && (
+                  {msg.conversation && (
                     <div className="flex items-center gap-2 mb-2">
                       <MessageCircle
                         className="w-3.5 h-3.5"
                         style={{ color: 'var(--text-muted)' }}
                       />
                       <span className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
-                        {saved.conversation.name ||
-                          (saved.conversation.type === 'direct' ? 'Direct Message' : 'Group')}
+                        {msg.conversation.name ||
+                          (msg.conversation.type === 'direct' ? 'Direct Message' : 'Group')}
                       </span>
                     </div>
                   )}
 
                   {/* Message content */}
                   <MessageBubble
-                    message={saved}
+                    message={msg as React.ComponentProps<typeof MessageBubble>['message']}
                     isOwn={isOwn}
                     showAvatar={true}
                     showName={!isOwn}
@@ -130,7 +134,7 @@ export function SavedMessagesPanel({ userId, organizationId, onClose, onSelectMe
 
                   {/* Unsave button */}
                   <button
-                    onClick={(e) => handleUnsave(e, saved._id as Id<'chatMessages'>)}
+                    onClick={(e) => handleUnsave(e, msg._id as Id<'chatMessages'>)}
                     className="absolute top-2 right-2 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-(--background)"
                     title="Remove from saved"
                   >
@@ -140,7 +144,7 @@ export function SavedMessagesPanel({ userId, organizationId, onClose, onSelectMe
                   {/* Saved timestamp */}
                   <div className="mt-2 text-xs" style={{ color: 'var(--text-disabled)' }}>
                     {t('chat.messages')}{' '}
-                    {new Date(saved.savedAt).toLocaleDateString(
+                    {new Date(msg.savedAt ?? msg._creationTime).toLocaleDateString(
                       i18n.language === 'ru' ? 'ru-RU' : i18n.language === 'hy' ? 'hy-AM' : 'en-US',
                     )}
                   </div>

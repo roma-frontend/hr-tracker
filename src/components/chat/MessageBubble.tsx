@@ -698,7 +698,7 @@ export const MessageBubble = React.memo(function MessageBubble({
 
         <div
           className={cn(
-            'flex flex-col max-w-[95%] xs:max-w-[90%] sm:max-w-[80%] md:max-w-[65%] w-full min-w-[80%]',
+            'flex flex-col max-w-[95%] xs:max-w-[90%] sm:max-w-[80%] md:max-w-[65%] w-full',
             isOwn ? 'items-end' : 'items-start',
           )}
         >

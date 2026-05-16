@@ -24,7 +24,7 @@ interface Props {
 function getInitials(name: string) {
   return name
     .split(' ')
-    .map((n: any) => n[0])
+    .map((n: string) => n[0])
     .join('')
     .toUpperCase()
     .slice(0, 2);
@@ -87,15 +87,25 @@ export function NewConversationModal({
           (u) =>
             u._id !== currentUserId && u.isActive && u.isApproved && u.email !== SUPERADMIN_EMAIL,
         )
-        .map((u: any) => ({
-          _id: u._id as Id<'users'>,
-          name: u.name ?? '',
-          avatarUrl: u.avatarUrl,
-          department: u.department,
-          position: u.position,
-          presenceStatus: u.presenceStatus,
-          organizationId: u.organizationId as Id<'organizations'> | undefined,
-        }));
+        .map(
+          (u: {
+            _id: Id<'users'>;
+            name?: string;
+            avatarUrl?: string;
+            department?: string;
+            position?: string;
+            presenceStatus?: string;
+            organizationId?: Id<'organizations'>;
+          }) => ({
+            _id: u._id as Id<'users'>,
+            name: u.name ?? '',
+            avatarUrl: u.avatarUrl,
+            department: u.department,
+            position: u.position,
+            presenceStatus: u.presenceStatus,
+            organizationId: u.organizationId as Id<'organizations'> | undefined,
+          }),
+        );
     }
 
     // orgScopedUsers already returns the normalized shape (including organizationId)
@@ -166,9 +176,7 @@ export function NewConversationModal({
           const selected = users.filter((u) => selectedUsers.includes(u._id));
           const orgIds = Array.from(
             new Set(
-              selected
-                .map((u: any) => u.organizationId)
-                .filter((id): id is Id<'organizations'> => !!id),
+              selected.map((u) => u.organizationId).filter((id): id is Id<'organizations'> => !!id),
             ),
           );
           if (orgIds.length === 1) {
@@ -260,7 +268,7 @@ export function NewConversationModal({
                     >
                       {t('chat.allOrgs')}
                     </button>
-                    {organizations?.map((org: any) => (
+                    {organizations?.map((org: { _id: Id<'organizations'>; name: string }) => (
                       <button
                         key={org._id}
                         onClick={() => {
@@ -293,7 +301,7 @@ export function NewConversationModal({
 
         {/* Mode tabs */}
         <div className="flex p-3 gap-2">
-          {(['dm', 'group'] as const).map((m: any) => (
+          {(['dm', 'group'] as const).map((m) => (
             <button
               key={m}
               onClick={() => {
@@ -358,7 +366,7 @@ export function NewConversationModal({
         {/* Selected chips (group mode) */}
         {mode === 'group' && selectedUsers.length > 0 && (
           <div className="px-3 pb-2 flex flex-wrap gap-1">
-            {selectedUsers.map((uid: any) => {
+            {selectedUsers.map((uid) => {
               const u = users?.find((x) => x._id === uid);
               return (
                 <span
@@ -378,7 +386,7 @@ export function NewConversationModal({
 
         {/* User list */}
         <div className="flex-1 overflow-y-auto px-2 pb-2 space-y-0.5">
-          {filtered.map((u: any) => {
+          {filtered.map((u) => {
             const isSelected = selectedUsers.includes(u._id);
             return (
               <button

@@ -6,6 +6,12 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import EmojiPicker from './EmojiPicker';
 import { VoiceMessageRecorder } from './VoiceMessageRecorder';
 import { useTranslation } from 'react-i18next';
+import type { ChatConversationMemberInfo } from './types';
+
+interface ChatInputMentionSuggestion {
+  userId: string;
+  user?: { name?: string; avatarUrl?: string; department?: string } | null;
+}
 
 interface ChatInputProps {
   input: string;
@@ -27,7 +33,7 @@ interface ChatInputProps {
   showVoiceRecorder: boolean;
   scheduledFor: string;
   mentionQuery: string | null;
-  mentionSuggestions: any[];
+  mentionSuggestions: ChatInputMentionSuggestion[];
   mentionIndex: number;
   setMentionIndex: (index: number) => void;
   insertMention: (name: string) => void;
