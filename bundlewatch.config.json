@@ -1,0 +1,10 @@
+{
+  "$schema": "https://unpkg.com/bundlewatch@0.4.0/schema.json",
+  "files": [
+    { "path": ".next/static/chunks/framework-*.js", "maxSize": "120KB" },
+    { "path": ".next/static/chunks/commons-*.js", "maxSize": "80KB" },
+    { "path": ".next/static/chunks/pages/_app-*.js", "maxSize": "200KB" },
+    { "path": ".next/static/css/*.css", "maxSize": "50KB" }
+  ],
+  "ci": { "trackBranches": ["main"] }
+}

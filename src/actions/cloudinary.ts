@@ -137,6 +137,15 @@ export async function uploadChatAttachment(
       resource_type: resourceType,
       overwrite: false,
       unique_filename: true,
+      // Image optimization
+      ...(mimeType.startsWith('image/')
+        ? {
+            transformation: [
+              { width: 1200, crop: 'limit' },
+              { quality: 'auto', fetch_format: 'auto' },
+            ],
+          }
+        : {}),
       // For audio files, add specific transformations
       ...(resourceType === 'video'
         ? {

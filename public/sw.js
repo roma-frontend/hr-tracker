@@ -1,16 +1,33 @@
-// Service Worker for Push Notifications
-const CACHE_NAME = 'hr-office-v1';
+// Service Worker for Push Notifications + Offline Support
+const CACHE_NAME = 'hr-office-v2';
+const OFFLINE_URL = '/offline';
+const PRECACHE_URLS = [OFFLINE_URL];
 
-// Install event
+// Install event — precache offline page
 self.addEventListener('install', (event) => {
-  console.log('Service Worker installing...');
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS))
+  );
   self.skipWaiting();
 });
 
-// Activate event
+// Activate event — clean old caches
 self.addEventListener('activate', (event) => {
-  console.log('Service Worker activating...');
-  event.waitUntil(clients.claim());
+  event.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
+    )
+  );
+  clients.claim();
+});
+
+// Fetch event — serve offline page when network fails for navigation requests
+self.addEventListener('fetch', (event) => {
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match(OFFLINE_URL))
+    );
+  }
 });
 
 // Push notification event

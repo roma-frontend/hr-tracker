@@ -141,7 +141,7 @@ export const metadata: Metadata = {
     shortcut: '/favicon-animated.svg?v=3',
     apple: [{ url: '/apple-touch-icon.svg?v=3', sizes: '180x180', type: 'image/svg+xml' }],
   },
-  manifest: '/site.webmanifest',
+  manifest: '/manifest.json',
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -200,6 +200,12 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         className={`${ibmPlexSans.variable} ${inter.variable} ${notoSansArmenian.variable} antialiased`}
         suppressHydrationWarning
       >
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[9999] focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md"
+        >
+          Skip to main content
+        </a>
         <Suspense
           fallback={
             <div className="flex h-screen items-center justify-center bg-(--background)">
@@ -208,7 +214,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           }
         >
           <AppProviders>
-            {children}
+            <main id="main-content">{children}</main>
             {/* Defer Analytics loading to reduce main thread work */}
             <Analytics />
           </AppProviders>

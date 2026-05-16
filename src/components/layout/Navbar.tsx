@@ -231,6 +231,7 @@ export function Navbar() {
           size="icon"
           className="text-(--text-muted) hover:text-(--text-primary)"
           onClick={() => router.push('/')}
+          aria-label={t('nav.home', { defaultValue: 'Home' })}
           title={t('nav.home') || 'Home'}
         >
           <Home className="w-5 h-5" />
