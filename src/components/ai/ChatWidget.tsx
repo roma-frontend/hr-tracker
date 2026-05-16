@@ -1239,13 +1239,14 @@ export function ChatWidget() {
                     }
                   : undocking
                     ? {
-                        bottom: typeof window !== 'undefined' && window.innerWidth >= 1024 ? 24 : 64,
+                        bottom:
+                          typeof window !== 'undefined' && window.innerWidth >= 1024 ? 24 : 64,
                         right: 24,
                         top: 'auto',
                         left: 'auto',
                         borderRadius: '9999px',
-                        width: 56,
-                        height: 56,
+                        width: typeof window !== 'undefined' && window.innerWidth >= 640 ? 56 : 40,
+                        height: typeof window !== 'undefined' && window.innerWidth >= 640 ? 56 : 40,
                         transition: 'all 0.4s cubic-bezier(0.34,1.56,0.64,1)',
                       }
                     : {
