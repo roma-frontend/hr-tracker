@@ -1239,7 +1239,7 @@ export function ChatWidget() {
                     }
                   : undocking
                     ? {
-                        bottom: 24,
+                        bottom: typeof window !== 'undefined' && window.innerWidth >= 1024 ? 24 : 64,
                         right: 24,
                         top: 'auto',
                         left: 'auto',
