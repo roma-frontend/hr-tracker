@@ -698,7 +698,7 @@ export const MessageBubble = React.memo(function MessageBubble({
 
         <div
           className={cn(
-            'flex flex-col max-w-[95%] xs:max-w-[90%] sm:max-w-[80%] md:max-w-[65%] w-full',
+            'flex flex-col max-w-[75%] xs:max-w-[75%] sm:max-w-[70%] md:max-w-[65%]',
             isOwn ? 'items-end' : 'items-start',
           )}
         >
@@ -730,7 +730,7 @@ export const MessageBubble = React.memo(function MessageBubble({
 
           {/* Bubble */}
           <div
-            className="relative rounded-2xl px-3 py-2 text-sm wrap-break-words transition-all duration-200 hover:brightness-105 max-w-full xs:max-w-[280px] sm:max-w-[320px] md:max-w-90 w-full min-w-full md:min-w-45"
+            className="relative rounded-2xl px-3 py-2 text-sm wrap-break-words transition-all duration-200 hover:brightness-105 max-w-full md:max-w-90 md:min-w-45"
             style={{
               background: isOwn ? 'var(--primary)' : 'var(--secondary)',
               color: isOwn ? 'white' : 'var(--text-primary)',
