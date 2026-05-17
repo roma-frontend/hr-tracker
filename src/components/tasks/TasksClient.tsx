@@ -16,6 +16,7 @@ import {
   DndContext,
   DragOverlay,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   useDroppable,
@@ -501,8 +502,11 @@ export const TasksClient = memo(function TasksClient({ userId, userRole }: Tasks
   // For superadmin, use selectedOrgId if available; for admin, use their org from user
   const effectiveOrgId = isSuperadmin && selectedOrgId ? selectedOrgId : undefined;
 
-  // DnD sensors — require 5px movement before drag starts (prevents accidental drags)
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+  // DnD sensors — mouse: 5px distance, touch: 1s hold to prevent accidental drags while scrolling
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 1000, tolerance: 5 } }),
+  );
   const { updateOptimistic } = useOptimisticTaskStatus();
 
   // Queries - for admin/superadmin, get all tasks in their organization

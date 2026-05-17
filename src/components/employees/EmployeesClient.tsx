@@ -315,7 +315,7 @@ export function EmployeesClient() {
               </button>
             )}
           </div>
-          <div className="flex gap-2 items-center overflow-x-auto pb-2 scrollbar-hide w-full">
+          <div className="flex gap-2 items-center overflow-x-auto pb-2 pr-2 scrollbar-hide w-full">
             {[
               {
                 value: filterRole,
