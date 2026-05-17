@@ -23,6 +23,16 @@ body.scroll-locked {
   }
 }
 
+/* Hide scrollbar on mobile while keeping scroll functional */
+@media (max-width: 1023px) {
+  * {
+    scrollbar-width: none;
+  }
+  *::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 /* ── Safe Area Insets for notched devices (iPhone X+) ── */
 :root {
   --safe-top: env(safe-area-inset-top);
