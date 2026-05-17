@@ -315,64 +315,66 @@ export function EmployeesClient() {
               </button>
             )}
           </div>
-          <div className="flex gap-2 items-center overflow-x-auto pb-2 pr-2 scrollbar-hide w-full">
-            {[
-              {
-                value: filterRole,
-                setter: setFilterRole,
-                options: ['all', 'admin', 'supervisor', 'employee'],
-                label: 'Role',
-              },
-              {
-                value: filterType,
-                setter: setFilterType,
-                options: ['all', 'staff', 'contractor'],
-                label: 'Type',
-              },
-              ...(canManage
-                ? [
-                    {
-                      value: filterStatus,
-                      setter: setFilterStatus,
-                      options: ['all', 'active', 'inactive'],
-                      label: 'Status',
-                    },
-                  ]
-                : []),
-            ].map(({ value, setter, options, label }: any) => {
-              const getTranslation = (o: string) => {
-                if (o === 'all') {
-                  if (label === 'Role')
-                    return t('employees.allRoles', { defaultValue: 'All Roles' });
-                  if (label === 'Type')
-                    return t('employees.allTypes', { defaultValue: 'All Types' });
-                  if (label === 'Status')
-                    return t('employees.allStatuses', { defaultValue: 'All Statuses' });
-                }
-                return t(`employees.filter_${o}`, { defaultValue: o });
-              };
-              return (
-                <CustomSelect
-                  key={label}
-                  value={value}
-                  onChange={setter}
-                  options={options.map((o: any) => ({
-                    value: o,
-                    label: (() => {
-                      if (label === 'Type')
-                        return t('employees.allTypes', { defaultValue: 'All Types' });
-                      if (label === 'Status')
-                        return t('employees.allStatuses', { defaultValue: 'All Statuses' });
-                      return t(`employees.filter_${o}`, { defaultValue: o });
-                    })(),
-                  }))}
-                  triggerClassName="bg-(--card) border-(--border) text-(--text-primary) px-3 py-2 rounded-xl border text-sm outline-none capitalize flex-1 min-w-[100px]"
-                  dropdownClassName="bg-(--card) border-(--border) text-(--text-primary)"
-                />
-              );
-            })}
+          <div className="flex gap-2 items-center">
+            <div className="flex gap-2 items-center overflow-x-auto pb-2 scrollbar-hide flex-1 min-w-0">
+              {[
+                {
+                  value: filterRole,
+                  setter: setFilterRole,
+                  options: ['all', 'admin', 'supervisor', 'employee'],
+                  label: 'Role',
+                },
+                {
+                  value: filterType,
+                  setter: setFilterType,
+                  options: ['all', 'staff', 'contractor'],
+                  label: 'Type',
+                },
+                ...(canManage
+                  ? [
+                      {
+                        value: filterStatus,
+                        setter: setFilterStatus,
+                        options: ['all', 'active', 'inactive'],
+                        label: 'Status',
+                      },
+                    ]
+                  : []),
+              ].map(({ value, setter, options, label }: any) => {
+                const getTranslation = (o: string) => {
+                  if (o === 'all') {
+                    if (label === 'Role')
+                      return t('employees.allRoles', { defaultValue: 'All Roles' });
+                    if (label === 'Type')
+                      return t('employees.allTypes', { defaultValue: 'All Types' });
+                    if (label === 'Status')
+                      return t('employees.allStatuses', { defaultValue: 'All Statuses' });
+                  }
+                  return t(`employees.filter_${o}`, { defaultValue: o });
+                };
+                return (
+                  <CustomSelect
+                    key={label}
+                    value={value}
+                    onChange={setter}
+                    options={options.map((o: any) => ({
+                      value: o,
+                      label: (() => {
+                        if (label === 'Type')
+                          return t('employees.allTypes', { defaultValue: 'All Types' });
+                        if (label === 'Status')
+                          return t('employees.allStatuses', { defaultValue: 'All Statuses' });
+                        return t(`employees.filter_${o}`, { defaultValue: o });
+                      })(),
+                    }))}
+                    triggerClassName="bg-(--card) border-(--border) text-(--text-primary) px-3 py-2 rounded-xl border text-sm outline-none capitalize flex-1 min-w-[100px]"
+                    dropdownClassName="bg-(--card) border-(--border) text-(--text-primary)"
+                  />
+                );
+              })}
+            </div>
             {/* View toggle */}
-            <div className="flex rounded-xl shrink-0" style={{ borderColor: 'var(--border)' }}>
+            <div className="flex rounded-xl shrink-0 pb-2" style={{ borderColor: 'var(--border)' }}>
               <button
                 onClick={() => setViewMode('grid')}
                 className={cn(
