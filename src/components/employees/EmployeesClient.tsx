@@ -283,98 +283,41 @@ export function EmployeesClient() {
           transition={{ delay: 0.1 }}
           className="grid gap-3"
         >
-          <div className="relative flex-1">
-            <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
-              style={{ color: 'var(--text-muted)' }}
-            />
-            <input
-              value={search}
-              onChange={(e) => {
-                const value = e.target.value;
-                setSearch(value); // Мгновенное обновление для input
-                handleSearchChange(value); // Debounced для фильтрации
-              }}
-              placeholder={t('placeholders.searchByName')}
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none"
-              style={{
-                background: 'var(--card)',
-                borderColor: 'var(--border)',
-                color: 'var(--text-primary)',
-              }}
-            />
-            {search && (
-              <button
-                onClick={() => {
-                  setSearch('');
-                  setDebouncedSearch('');
-                }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 hover:text-gray-600"
-              >
-                ✕
-              </button>
-            )}
-          </div>
           <div className="flex gap-2 items-center">
-            <div className="flex gap-2 items-center overflow-x-auto pb-2 scrollbar-hide flex-1 min-w-0">
-              {[
-                {
-                  value: filterRole,
-                  setter: setFilterRole,
-                  options: ['all', 'admin', 'supervisor', 'employee'],
-                  label: 'Role',
-                },
-                {
-                  value: filterType,
-                  setter: setFilterType,
-                  options: ['all', 'staff', 'contractor'],
-                  label: 'Type',
-                },
-                ...(canManage
-                  ? [
-                      {
-                        value: filterStatus,
-                        setter: setFilterStatus,
-                        options: ['all', 'active', 'inactive'],
-                        label: 'Status',
-                      },
-                    ]
-                  : []),
-              ].map(({ value, setter, options, label }: any) => {
-                const getTranslation = (o: string) => {
-                  if (o === 'all') {
-                    if (label === 'Role')
-                      return t('employees.allRoles', { defaultValue: 'All Roles' });
-                    if (label === 'Type')
-                      return t('employees.allTypes', { defaultValue: 'All Types' });
-                    if (label === 'Status')
-                      return t('employees.allStatuses', { defaultValue: 'All Statuses' });
-                  }
-                  return t(`employees.filter_${o}`, { defaultValue: o });
-                };
-                return (
-                  <CustomSelect
-                    key={label}
-                    value={value}
-                    onChange={setter}
-                    options={options.map((o: any) => ({
-                      value: o,
-                      label: (() => {
-                        if (label === 'Type')
-                          return t('employees.allTypes', { defaultValue: 'All Types' });
-                        if (label === 'Status')
-                          return t('employees.allStatuses', { defaultValue: 'All Statuses' });
-                        return t(`employees.filter_${o}`, { defaultValue: o });
-                      })(),
-                    }))}
-                    triggerClassName="bg-(--card) border-(--border) text-(--text-primary) px-3 py-2 rounded-xl border text-sm outline-none capitalize flex-1 min-w-[100px]"
-                    dropdownClassName="bg-(--card) border-(--border) text-(--text-primary)"
-                  />
-                );
-              })}
+            <div className="relative flex-1">
+              <Search
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
+                style={{ color: 'var(--text-muted)' }}
+              />
+              <input
+                value={search}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setSearch(value); // Мгновенное обновление для input
+                  handleSearchChange(value); // Debounced для фильтрации
+                }}
+                placeholder={t('placeholders.searchByName')}
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none"
+                style={{
+                  background: 'var(--card)',
+                  borderColor: 'var(--border)',
+                  color: 'var(--text-primary)',
+                }}
+              />
+              {search && (
+                <button
+                  onClick={() => {
+                    setSearch('');
+                    setDebouncedSearch('');
+                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 hover:text-gray-600"
+                >
+                  ✕
+                </button>
+              )}
             </div>
             {/* View toggle */}
-            <div className="flex rounded-xl shrink-0 pb-2" style={{ borderColor: 'var(--border)' }}>
+            <div className="flex rounded-xl shrink-0">
               <button
                 onClick={() => setViewMode('grid')}
                 className={cn(
@@ -400,6 +343,63 @@ export function EmployeesClient() {
                 <List className="w-4 h-4" />
               </button>
             </div>
+          </div>
+          <div className="flex gap-2 items-center overflow-x-auto pb-2 scrollbar-hide">
+            {[
+              {
+                value: filterRole,
+                setter: setFilterRole,
+                options: ['all', 'admin', 'supervisor', 'employee'],
+                label: 'Role',
+              },
+              {
+                value: filterType,
+                setter: setFilterType,
+                options: ['all', 'staff', 'contractor'],
+                label: 'Type',
+              },
+              ...(canManage
+                ? [
+                    {
+                      value: filterStatus,
+                      setter: setFilterStatus,
+                      options: ['all', 'active', 'inactive'],
+                      label: 'Status',
+                    },
+                  ]
+                : []),
+            ].map(({ value, setter, options, label }: any) => {
+              const getTranslation = (o: string) => {
+                if (o === 'all') {
+                  if (label === 'Role')
+                    return t('employees.allRoles', { defaultValue: 'All Roles' });
+                  if (label === 'Type')
+                    return t('employees.allTypes', { defaultValue: 'All Types' });
+                  if (label === 'Status')
+                    return t('employees.allStatuses', { defaultValue: 'All Statuses' });
+                }
+                return t(`employees.filter_${o}`, { defaultValue: o });
+              };
+              return (
+                <CustomSelect
+                  key={label}
+                  value={value}
+                  onChange={setter}
+                  options={options.map((o: any) => ({
+                    value: o,
+                    label: (() => {
+                      if (label === 'Type')
+                        return t('employees.allTypes', { defaultValue: 'All Types' });
+                      if (label === 'Status')
+                        return t('employees.allStatuses', { defaultValue: 'All Statuses' });
+                      return t(`employees.filter_${o}`, { defaultValue: o });
+                    })(),
+                  }))}
+                  triggerClassName="bg-(--card) border-(--border) text-(--text-primary) px-3 py-2 rounded-xl border text-sm outline-none capitalize flex-1 min-w-[100px]"
+                  dropdownClassName="bg-(--card) border-(--border) text-(--text-primary)"
+                />
+              );
+            })}
           </div>
         </motion.div>
 
