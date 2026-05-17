@@ -37,6 +37,8 @@
     "save": "Save",
     "cancel": "Cancel",
     "delete": "Delete",
+    "view": "View",
+    "viewProfile": "View Profile",
     "request": "Request",
     "accountInformation": "Account Information",
     "memberSince": "Member Since",
