@@ -170,8 +170,10 @@ export async function POST(req: Request) {
       case '/digest':
         reply = r.digestSending!;
         await sendReply(token, chatId, reply);
-        // Fire and forget - Convex action runs independently
-        convex.action(api.newsletter.sendTestTelegram, { chatId, language }).catch(() => {});
+        // Call Convex action - await it (Convex handles the Telegram send internally)
+        try {
+          await convex.action(api.newsletter.sendTestTelegram, { chatId, language });
+        } catch { /* AI generation can sometimes fail, user already got "generating" msg */ }
         return NextResponse.json({ ok: true });
       case '/invite': {
         const sub = await convex.query(api.newsletter.getSubscriberPublic, { chatId });
