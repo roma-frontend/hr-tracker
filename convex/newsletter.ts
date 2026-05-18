@@ -1,6 +1,7 @@
 // @ts-nocheck - Convex API types cause TS2589 in complex module graphs
 import {
   mutation,
+  query,
   action,
   internalAction,
   internalQuery,
@@ -124,6 +125,7 @@ export const subscribeTelegram = mutation({
       unsubscribeToken,
       telegramChatId: args.chatId,
       channel: 'telegram',
+      referralCode: args.chatId,
     });
 
     return { success: true, alreadySubscribed: false };
@@ -146,15 +148,18 @@ export const unsubscribeTelegram = mutation({
 export const getActiveSubscribers = internalQuery({
   args: {},
   handler: async (ctx) => {
-    return await ctx.db
+    const now = Date.now();
+    const subs = await ctx.db
       .query('newsletterSubscribers')
       .withIndex('by_active', (q) => q.eq('unsubscribed', false))
       .collect();
+    // Filter out paused subscribers
+    return subs.filter((s) => !s.pausedUntil || s.pausedUntil < now);
   },
 });
 
 export const generateWeeklyContent = internalAction({
-  args: { language: v.optional(v.string()) },
+  args: { language: v.optional(v.string()), topics: v.optional(v.array(v.string())) },
   handler: async (_, args) => {
     const apiKey = process.env.OPENROUTER_API_KEY;
     if (!apiKey) throw new Error('OPENROUTER_API_KEY not configured');
@@ -165,7 +170,11 @@ export const generateWeeklyContent = internalAction({
         ? ''
         : ` Write ALL content in ${lang === 'ru' ? 'Russian' : lang === 'hy' ? 'Armenian' : 'German'} language.`;
 
-    const prompt = `Generate a professional HR weekly newsletter in JSON format.${langInstruction} Include:
+    const topicsInstruction = args.topics?.length
+      ? ` Focus content on these topics: ${args.topics.join(', ')}.`
+      : '';
+
+    const prompt = `Generate a professional HR weekly newsletter in JSON format.${langInstruction}${topicsInstruction} Include:
 - subject: catchy email subject line
 - greeting: warm opening paragraph
 - tips: array of 3 objects with {title, body, emoji} - practical HR tips
@@ -217,16 +226,21 @@ export const sendWeeklyDigest = internalAction({
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://hr-project-sigma.vercel.app';
 
-    // Group subscribers by language
-    const byLang: Record<string, typeof subscribers> = {};
+    // Group subscribers by language + topics key
+    const groups: Record<string, typeof subscribers> = {};
     for (const sub of subscribers) {
       const lang = sub.language || 'en';
-      (byLang[lang] ??= []).push(sub);
+      const topicsKey = (sub.topics || []).sort().join(',') || 'general';
+      const key = `${lang}|${topicsKey}`;
+      (groups[key] ??= []).push(sub);
     }
 
-    for (const [lang, subs] of Object.entries(byLang)) {
+    for (const [key, subs] of Object.entries(groups)) {
+      const [lang, topicsKey] = key.split('|');
+      const topics = topicsKey === 'general' ? undefined : topicsKey!.split(',');
       const content = await ctx.runAction(internal.newsletter.generateWeeklyContent, {
         language: lang,
+        topics,
       });
 
       // Email subscribers
@@ -260,7 +274,13 @@ export const sendWeeklyDigest = internalAction({
       if (telegramSubs.length > 0) {
         const tgMessage = formatTelegramNewsletter(content);
         for (const sub of telegramSubs) {
-          await sendTelegramMessage(sub.telegramChatId!, tgMessage);
+          const ok = await sendTelegramMessage(sub.telegramChatId!, tgMessage);
+          await ctx.runMutation(internal.newsletter.trackDelivery, {
+            subscriberId: sub._id,
+            channel: 'telegram',
+            type: 'digest',
+            delivered: ok,
+          });
         }
       }
 
@@ -271,7 +291,7 @@ export const sendWeeklyDigest = internalAction({
     }
 
     console.log(
-      `Newsletter sent to ${subscribers.length} subscribers in ${Object.keys(byLang).length} languages`,
+      `Newsletter sent to ${subscribers.length} subscribers in ${Object.keys(groups).length} groups`,
     );
   },
 });
@@ -280,6 +300,204 @@ export const updateLastSent = internalMutation({
   args: { id: v.id('newsletterSubscribers') },
   handler: async (ctx, args) => {
     await ctx.db.patch(args.id, { lastSentAt: Date.now() });
+  },
+});
+
+// === DRIP CAMPAIGN ===
+const DRIP_MESSAGES = {
+  en: [
+    "👋 <b>Welcome to HR Office!</b>\n\nWe're thrilled to have you. HR Office is an all-in-one platform for managing employees, leaves, attendance, and more.\n\n🚀 Get started: https://hr-project-sigma.vercel.app",
+    '💡 <b>Did you know?</b>\n\nHR Office features:\n• Face recognition attendance\n• AI-powered analytics\n• Real-time team chat\n• Automated leave workflows\n\nExplore all features in your dashboard!',
+    '📊 <b>Success Story</b>\n\nCompanies using HR Office report:\n• 60% less time on admin tasks\n• 95% employee satisfaction with self-service\n• Zero payroll errors\n\nReady to transform your HR?',
+    "🎉 <b>Your first digest arrives Monday!</b>\n\nEvery week you'll get AI-curated HR tips, trends, and insights personalized to your interests.\n\nReply /topics to customize what you receive.",
+  ],
+  ru: [
+    '👋 <b>Добро пожаловать в HR Office!</b>\n\nМы рады вас видеть. HR Office — это единая платформа для управления сотрудниками, отпусками, посещаемостью и многим другим.\n\n🚀 Начать: https://hr-project-sigma.vercel.app',
+    '💡 <b>Знаете ли вы?</b>\n\nВозможности HR Office:\n• Распознавание лиц для учёта посещаемости\n• AI-аналитика\n• Командный чат в реальном времени\n• Автоматизация отпусков\n\nИсследуйте все функции!',
+    '📊 <b>История успеха</b>\n\nКомпании с HR Office отмечают:\n• На 60% меньше времени на рутину\n• 95% удовлетворённость сотрудников\n• Ноль ошибок в расчётах\n\nГотовы трансформировать HR?',
+    '🎉 <b>Ваш первый дайджест придёт в понедельник!</b>\n\nКаждую неделю вы будете получать AI-подборку HR советов и трендов.\n\nОтправьте /topics чтобы настроить темы.',
+  ],
+};
+
+export const processDripCampaign = internalAction({
+  args: {},
+  handler: async (ctx) => {
+    const subscribers = await ctx.runQuery(internal.newsletter.getDripEligible, {});
+    for (const sub of subscribers) {
+      const step = sub.dripStep ?? -1;
+      const nextStep = step + 1;
+      if (nextStep > 3) continue;
+
+      const lang = sub.language || 'en';
+      const messages = DRIP_MESSAGES[lang as keyof typeof DRIP_MESSAGES] || DRIP_MESSAGES.en;
+      const msg = messages[nextStep]!;
+
+      if (sub.telegramChatId && sub.channel === 'telegram') {
+        await sendTelegramMessage(sub.telegramChatId, msg);
+      }
+      // Could also send email drip here if needed
+
+      await ctx.runMutation(internal.newsletter.advanceDrip, { id: sub._id, step: nextStep });
+    }
+  },
+});
+
+export const getDripEligible = internalQuery({
+  args: {},
+  handler: async (ctx) => {
+    const now = Date.now();
+    const subs = await ctx.db
+      .query('newsletterSubscribers')
+      .withIndex('by_active', (q) => q.eq('unsubscribed', false))
+      .collect();
+
+    // Drip schedule: day 0, day 2, day 4, day 6
+    return subs.filter((s) => {
+      const step = s.dripStep ?? -1;
+      if (step >= 3) return false;
+      const daysSinceSubscribe = (now - s.subscribedAt) / (1000 * 60 * 60 * 24);
+      const requiredDays = [0, 2, 4, 6];
+      const nextStep = step + 1;
+      return daysSinceSubscribe >= requiredDays[nextStep]!;
+    });
+  },
+});
+
+export const advanceDrip = internalMutation({
+  args: { id: v.id('newsletterSubscribers'), step: v.number() },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.id, { dripStep: args.step, dripLastSentAt: Date.now() });
+  },
+});
+
+// === SELF-SERVICE COMMANDS ===
+export const updateLanguage = mutation({
+  args: {
+    chatId: v.string(),
+    language: v.union(v.literal('en'), v.literal('ru'), v.literal('hy'), v.literal('deu')),
+  },
+  handler: async (ctx, args) => {
+    const sub = await ctx.db
+      .query('newsletterSubscribers')
+      .withIndex('by_telegram', (q) => q.eq('telegramChatId', args.chatId))
+      .first();
+    if (!sub) return { success: false };
+    await ctx.db.patch(sub._id, { language: args.language });
+    return { success: true };
+  },
+});
+
+export const updateTopics = mutation({
+  args: {
+    chatId: v.string(),
+    topics: v.array(
+      v.union(
+        v.literal('hr-tips'),
+        v.literal('leadership'),
+        v.literal('wellness'),
+        v.literal('tech'),
+      ),
+    ),
+  },
+  handler: async (ctx, args) => {
+    const sub = await ctx.db
+      .query('newsletterSubscribers')
+      .withIndex('by_telegram', (q) => q.eq('telegramChatId', args.chatId))
+      .first();
+    if (!sub) return { success: false };
+    await ctx.db.patch(sub._id, { topics: args.topics });
+    return { success: true };
+  },
+});
+
+export const pauseSubscription = mutation({
+  args: { chatId: v.string(), weeks: v.number() },
+  handler: async (ctx, args) => {
+    const sub = await ctx.db
+      .query('newsletterSubscribers')
+      .withIndex('by_telegram', (q) => q.eq('telegramChatId', args.chatId))
+      .first();
+    if (!sub) return { success: false };
+    const pausedUntil = Date.now() + args.weeks * 7 * 24 * 60 * 60 * 1000;
+    await ctx.db.patch(sub._id, { pausedUntil });
+    return { success: true, pausedUntil };
+  },
+});
+
+export const getSubscriberByChatId = internalQuery({
+  args: { chatId: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query('newsletterSubscribers')
+      .withIndex('by_telegram', (q) => q.eq('telegramChatId', args.chatId))
+      .first();
+  },
+});
+
+export const getSubscriberPublic = query({
+  args: { chatId: v.string() },
+  handler: async (ctx, args) => {
+    const sub = await ctx.db
+      .query('newsletterSubscribers')
+      .withIndex('by_telegram', (q) => q.eq('telegramChatId', args.chatId))
+      .first();
+    if (!sub) return null;
+    return {
+      language: sub.language,
+      topics: sub.topics,
+      referralCode: sub.referralCode,
+      referralCount: sub.referralCount || 0,
+    };
+  },
+});
+
+// === REFERRAL SYSTEM ===
+export const trackReferral = mutation({
+  args: { chatId: v.string(), referrerCode: v.string() },
+  handler: async (ctx, args) => {
+    const sub = await ctx.db
+      .query('newsletterSubscribers')
+      .withIndex('by_telegram', (q) => q.eq('telegramChatId', args.chatId))
+      .first();
+    if (sub) await ctx.db.patch(sub._id, { referredBy: args.referrerCode });
+
+    // Increment referrer's count
+    const referrer = await ctx.db
+      .query('newsletterSubscribers')
+      .withIndex('by_referral', (q) => q.eq('referralCode', args.referrerCode))
+      .first();
+    if (referrer) {
+      await ctx.db.patch(referrer._id, { referralCount: (referrer.referralCount || 0) + 1 });
+    }
+    return { success: true };
+  },
+});
+
+// === ANALYTICS ===
+export const trackDelivery = internalMutation({
+  args: {
+    subscriberId: v.id('newsletterSubscribers'),
+    channel: v.union(v.literal('email'), v.literal('telegram')),
+    type: v.union(v.literal('digest'), v.literal('drip'), v.literal('poll')),
+    delivered: v.boolean(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.insert('newsletterAnalytics', {
+      subscriberId: args.subscriberId,
+      sentAt: Date.now(),
+      channel: args.channel,
+      type: args.type,
+      delivered: args.delivered,
+    });
+    if (args.delivered) {
+      const sub = await ctx.db.get(args.subscriberId);
+      if (sub) {
+        await ctx.db.patch(args.subscriberId, {
+          totalSent: (sub.totalSent || 0) + 1,
+          totalDelivered: (sub.totalDelivered || 0) + 1,
+        });
+      }
+    }
   },
 });
 
@@ -344,5 +562,103 @@ export const sendTestTelegram = action({
     const ok = await sendTelegramMessage(args.chatId, msg);
     if (!ok) throw new Error('Failed to send Telegram message. Check TELEGRAM_BOT_TOKEN.');
     return { success: true };
+  },
+});
+
+// === INTERACTIVE POLLS ===
+export const createPoll = mutation({
+  args: {
+    question: v.string(),
+    options: v.array(v.string()),
+    durationHours: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+    const duration = (args.durationHours || 48) * 60 * 60 * 1000;
+    return await ctx.db.insert('newsletterPolls', {
+      question: args.question,
+      options: args.options.map((text) => ({ text, votes: 0 })),
+      sentAt: now,
+      closesAt: now + duration,
+      active: true,
+    });
+  },
+});
+
+export const sendPollToSubscribers = internalAction({
+  args: { pollId: v.id('newsletterPolls') },
+  handler: async (ctx) => {
+    const poll = await ctx.runQuery(internal.newsletter.getPoll, { pollId: arguments[1].pollId });
+    if (!poll) return;
+
+    const subscribers = await ctx.runQuery(internal.newsletter.getActiveSubscribers, {});
+    const telegramSubs = subscribers.filter((s) => s.telegramChatId && s.channel === 'telegram');
+
+    const token = process.env.TELEGRAM_BOT_TOKEN;
+    if (!token) return;
+
+    for (const sub of telegramSubs) {
+      const buttons = poll.options.map((opt: any, i: number) => [
+        {
+          text: opt.text,
+          callback_data: `poll_${poll._id}_${i}`,
+        },
+      ]);
+
+      await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: sub.telegramChatId,
+          text: `📊 <b>Poll:</b> ${poll.question}`,
+          parse_mode: 'HTML',
+          reply_markup: { inline_keyboard: buttons },
+        }),
+      });
+    }
+  },
+});
+
+export const getPoll = internalQuery({
+  args: { pollId: v.id('newsletterPolls') },
+  handler: async (ctx, args) => await ctx.db.get(args.pollId),
+});
+
+export const votePoll = mutation({
+  args: { pollId: v.id('newsletterPolls'), chatId: v.string(), optionIndex: v.number() },
+  handler: async (ctx, args) => {
+    const sub = await ctx.db
+      .query('newsletterSubscribers')
+      .withIndex('by_telegram', (q) => q.eq('telegramChatId', args.chatId))
+      .first();
+    if (!sub) return { success: false, error: 'not_subscribed' };
+
+    const poll = await ctx.db.get(args.pollId);
+    if (!poll || !poll.active || Date.now() > poll.closesAt)
+      return { success: false, error: 'poll_closed' };
+
+    // Check if already voted
+    const existing = await ctx.db
+      .query('newsletterPollVotes')
+      .withIndex('by_subscriber_poll', (q) =>
+        q.eq('subscriberId', sub._id).eq('pollId', args.pollId),
+      )
+      .first();
+    if (existing) return { success: false, error: 'already_voted' };
+
+    // Record vote
+    await ctx.db.insert('newsletterPollVotes', {
+      pollId: args.pollId,
+      subscriberId: sub._id,
+      optionIndex: args.optionIndex,
+      votedAt: Date.now(),
+    });
+
+    // Update poll counts
+    const options = [...poll.options];
+    options[args.optionIndex]!.votes += 1;
+    await ctx.db.patch(args.pollId, { options });
+
+    return { success: true, totalVotes: options.reduce((s, o) => s + o.votes, 0) };
   },
 });

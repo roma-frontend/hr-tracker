@@ -52,4 +52,7 @@ crons.weekly(
   internal.newsletter.sendWeeklyDigest,
 );
 
+// Newsletter drip campaign (every 12 hours)
+crons.interval('newsletter-drip', { hours: 12 }, internal.newsletter.processDripCampaign);
+
 export default crons;
