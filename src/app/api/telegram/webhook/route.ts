@@ -170,19 +170,8 @@ export async function POST(req: Request) {
       case '/digest':
         reply = r.digestSending!;
         await sendReply(token, chatId, reply);
-        // Trigger digest generation async (fire and forget via fetch to self)
-        try {
-          const sub = await convex.query(api.newsletter.getSubscriberPublic, { chatId });
-          if (sub) {
-            const content = await convex.action(api.newsletter.sendTestTelegram, {
-              chatId,
-              language: sub.language,
-            });
-            return NextResponse.json({ ok: true });
-          }
-        } catch {
-          /* ignore errors, user already got "generating" message */
-        }
+        // Fire and forget - Convex action runs independently
+        convex.action(api.newsletter.sendTestTelegram, { chatId, language }).catch(() => {});
         return NextResponse.json({ ok: true });
       case '/invite': {
         const sub = await convex.query(api.newsletter.getSubscriberPublic, { chatId });
