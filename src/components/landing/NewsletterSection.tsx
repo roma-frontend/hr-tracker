@@ -47,12 +47,20 @@ export default function NewsletterSection() {
     }
     setHasError(false);
     setIsLoading(true);
-    setTimeout(() => {
+    try {
+      await fetch('/api/telegram/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'newsletter', data: { email } }),
+      });
       setIsSubmitted(true);
-      setIsLoading(false);
       toast.success(t('newsletter.successMessage'));
       setEmail('');
-    }, 1000);
+    } catch {
+      toast.error(t('newsletter.errorMessage', 'Something went wrong'));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

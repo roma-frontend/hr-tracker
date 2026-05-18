@@ -4,6 +4,7 @@ import { Resend } from 'resend';
 import { resolvePlanFromPriceId } from '@/lib/stripe-config';
 import * as Sentry from '@sentry/nextjs';
 import { logger } from '@/lib/logger';
+import { sendTelegramNotification } from '@/lib/telegram';
 
 function getStripe(): Stripe | null {
   const key = process.env.STRIPE_SECRET_KEY;
@@ -172,6 +173,7 @@ export async function POST(req: NextRequest) {
               subscriptionId: sub.id,
               trialEnd: sub.trial_end ? (sub.trial_end as number) * 1000 : undefined,
             });
+            await sendTelegramNotification(`💳 <b>Новая подписка Stripe</b>\n\n📧 ${customerEmail}\n📦 План: ${plan}\n🆔 ${sub.id}`);
           }
         }
         break;
@@ -198,6 +200,7 @@ export async function POST(req: NextRequest) {
           status: 'canceled',
           cancelAtPeriodEnd: false,
         });
+        await sendTelegramNotification(`❌ <b>Подписка отменена</b>\n\n🆔 ${sub.id}`);
         break;
       }
 

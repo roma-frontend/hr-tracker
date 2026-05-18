@@ -175,6 +175,11 @@ export function AddEmployeeModal({ open, onClose }: AddEmployeeModalProps) {
           : {}),
       });
       toast.success(t('success.created'));
+      fetch('/api/telegram/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'new_employee', data: { name, email, department, position, role } }),
+      }).catch(() => {});
       onClose();
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : t('errors.somethingWentWrong'));

@@ -116,6 +116,11 @@ export default function RequestOrgPage() {
         });
 
         toast.success(t('registerOrgPage.requestSubmitted', 'Request submitted successfully!'));
+        fetch('/api/telegram/notify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'org_register', data: { orgName: formData.orgName, name: formData.userName, email: formData.email, phone: formData.phone } }),
+        }).catch(() => {});
         router.push('/register-org/pending');
       } catch (_err) {
         const errorMessage = _err instanceof Error ? _err.message : 'Failed to submit request';

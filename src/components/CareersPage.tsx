@@ -682,6 +682,11 @@ function VacancyModal({
         consentGiven: form.consent,
       });
       setSubmitted(true);
+      fetch('/api/telegram/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'career', data: { name: form.name.trim(), email: form.email.trim(), phone: form.phone.trim(), vacancy: details?.title || '' } }),
+      }).catch(() => {});
     } catch (e: unknown) {
       setError(
         e instanceof Error ? e.message : t('common.somethingWentWrong', 'Something went wrong'),

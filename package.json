@@ -140,7 +140,7 @@
     "tailwind-merge": "^3.5.0",
     "three": "^0.183.1",
     "use-debounce": "^10.1.0",
-    "vaul": "1.1.2",
+    "vaul": "^1.1.2",
     "zod": "^4.3.6",
     "zustand": "^5.0.11"
   },

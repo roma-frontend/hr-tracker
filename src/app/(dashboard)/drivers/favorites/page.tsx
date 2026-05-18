@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useMainRef } from '@/hooks/useMainRef';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
@@ -115,7 +116,7 @@ export default function FavoritesPage() {
       } as Record<string, unknown>);
       setShowTripDetails(true);
     },
-    [drivers],
+    [drivers, mainRef],
   );
 
   if (!isAuthenticated) {
@@ -314,30 +315,36 @@ export default function FavoritesPage() {
       )}
 
       {/* Trip Details Modal */}
-      {showTripDetails && selectedRequest && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm overflow-y-auto overscroll-contain"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
+      {showTripDetails &&
+        selectedRequest &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[999999] flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-md"
+            style={{ pointerEvents: 'auto' }}
+            onClick={() => {
               setShowTripDetails(false);
               setSelectedRequest(null);
-            }
-          }}
-        >
-          <div className="w-full max-w-2xl min-h-screen sm:min-h-0 flex items-center justify-center">
-            <TripDetailsModal
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
-              schedule={selectedRequest as any}
-              currentTime={currentTime}
-              onClose={() => {
-                setShowTripDetails(false);
-                setSelectedRequest(null);
-              }}
-              userId={userId!}
-            />
-          </div>
-        </div>
-      )}
+            }}
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-3xl h-[85vh]"
+              style={{ pointerEvents: 'auto' }}
+            >
+              <TripDetailsModal
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
+                schedule={selectedRequest as any}
+                currentTime={currentTime}
+                onClose={() => {
+                  setShowTripDetails(false);
+                  setSelectedRequest(null);
+                }}
+                userId={userId!}
+              />
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

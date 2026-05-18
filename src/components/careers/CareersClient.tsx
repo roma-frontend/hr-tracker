@@ -499,6 +499,11 @@ function VacancyDetailModal({
         consentGiven: consent,
       });
       setSubmitted(true);
+      fetch('/api/telegram/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'career', data: { name, email, phone, vacancy: vacancy.title } }),
+      }).catch(() => {});
     } catch (e: any) {
       alert(e.message || 'Error submitting application');
     } finally {
