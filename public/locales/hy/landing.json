@@ -360,7 +360,8 @@
     "privacyNote": "Գաղտնիության նշում",
     "invalidEmail": "Անվավեր էլ. հասցե",
     "successMessage": "Հաջողությամբ բաժանորդագրվել եք նորություններին!",
-    "emailPlaceholder": "էլփոստ@օրինակ.am"
+    "emailPlaceholder": "էլփոստ@օրինակ.am",
+    "orTelegram": "Կամ միացեք մեր ալիքին"
   },
   "mobileMenu": {
     "home": "Գլխավոր",

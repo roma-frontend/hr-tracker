@@ -20,8 +20,12 @@ export const newsletter = {
     unsubscribed: v.boolean(),
     unsubscribeToken: v.string(),
     lastSentAt: v.optional(v.number()),
+    // Telegram delivery
+    telegramChatId: v.optional(v.string()),
+    channel: v.optional(v.union(v.literal('email'), v.literal('telegram'))),
   })
     .index('by_email', ['email'])
     .index('by_active', ['unsubscribed'])
-    .index('by_token', ['unsubscribeToken']),
+    .index('by_token', ['unsubscribeToken'])
+    .index('by_telegram', ['telegramChatId']),
 };

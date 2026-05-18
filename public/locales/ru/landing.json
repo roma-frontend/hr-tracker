@@ -361,7 +361,8 @@
     "privacyNote": "Мы уважаем вашу конфиденциальность. Отпишитесь в любое время.",
     "invalidEmail": "Пожалуйста, введите корректный email адрес",
     "successMessage": "Успешно подписались на рассылку!",
-    "emailPlaceholder": "Введите ваш email"
+    "emailPlaceholder": "Введите ваш email",
+    "orTelegram": "или подпишитесь через"
   },
   "mobileMenu": {
     "home": "Главная",

@@ -361,7 +361,8 @@
     "privacyNote": "Wir respektieren Ihre Privatsphäre. Sie können sich jederzeit abmelden.",
     "invalidEmail": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
     "successMessage": "Erfolgreich für den Newsletter angemeldet!",
-    "emailPlaceholder": "Geben Sie Ihre E-Mail ein"
+    "emailPlaceholder": "Geben Sie Ihre E-Mail ein",
+    "orTelegram": "oder abonnieren Sie über"
   },
   "mobileMenu": {
     "home": "Startseite",

@@ -360,7 +360,8 @@
     "privacyNote": "We respect your privacy. Unsubscribe at any time.",
     "invalidEmail": "Please enter a valid email address",
     "successMessage": "Successfully subscribed to newsletter!",
-    "emailPlaceholder": "Enter your email"
+    "emailPlaceholder": "Enter your email",
+    "orTelegram": "or subscribe via"
   },
   "mobileMenu": {
     "home": "Home",

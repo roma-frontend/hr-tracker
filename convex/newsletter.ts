@@ -18,6 +18,21 @@ function getResendClient(): Resend | null {
   return new Resend(key);
 }
 
+async function sendTelegramMessage(chatId: string, text: string): Promise<boolean> {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  if (!token) return false;
+  try {
+    const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML' }),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
 export const subscribe = mutation({
   args: {
     email: v.string(),
@@ -78,6 +93,56 @@ export const unsubscribe = mutation({
   },
 });
 
+export const subscribeTelegram = mutation({
+  args: {
+    chatId: v.string(),
+    name: v.optional(v.string()),
+    language: v.union(v.literal('en'), v.literal('ru'), v.literal('hy'), v.literal('deu')),
+  },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query('newsletterSubscribers')
+      .withIndex('by_telegram', (q) => q.eq('telegramChatId', args.chatId))
+      .first();
+
+    if (existing) {
+      if (existing.unsubscribed) {
+        await ctx.db.patch(existing._id, { unsubscribed: false, subscribedAt: Date.now() });
+        return { success: true, alreadySubscribed: false };
+      }
+      return { success: true, alreadySubscribed: true };
+    }
+
+    const unsubscribeToken = Math.random().toString(36).substring(2) + Date.now().toString(36);
+
+    await ctx.db.insert('newsletterSubscribers', {
+      email: `telegram_${args.chatId}@bot`,
+      name: args.name,
+      language: args.language,
+      subscribedAt: Date.now(),
+      unsubscribed: false,
+      unsubscribeToken,
+      telegramChatId: args.chatId,
+      channel: 'telegram',
+    });
+
+    return { success: true, alreadySubscribed: false };
+  },
+});
+
+export const unsubscribeTelegram = mutation({
+  args: { chatId: v.string() },
+  handler: async (ctx, args) => {
+    const sub = await ctx.db
+      .query('newsletterSubscribers')
+      .withIndex('by_telegram', (q) => q.eq('telegramChatId', args.chatId))
+      .first();
+    if (!sub || sub.unsubscribed) return { success: false };
+    await ctx.db.patch(sub._id, { unsubscribed: true });
+    return { success: true };
+  },
+});
+
 export const getActiveSubscribers = internalQuery({
   args: {},
   handler: async (ctx) => {
@@ -89,12 +154,18 @@ export const getActiveSubscribers = internalQuery({
 });
 
 export const generateWeeklyContent = internalAction({
-  args: {},
-  handler: async () => {
+  args: { language: v.optional(v.string()) },
+  handler: async (_, args) => {
     const apiKey = process.env.OPENROUTER_API_KEY;
     if (!apiKey) throw new Error('OPENROUTER_API_KEY not configured');
 
-    const prompt = `Generate a professional HR weekly newsletter in JSON format. Include:
+    const lang = args.language || 'en';
+    const langInstruction =
+      lang === 'en'
+        ? ''
+        : ` Write ALL content in ${lang === 'ru' ? 'Russian' : lang === 'hy' ? 'Armenian' : 'German'} language.`;
+
+    const prompt = `Generate a professional HR weekly newsletter in JSON format.${langInstruction} Include:
 - subject: catchy email subject line
 - greeting: warm opening paragraph
 - tips: array of 3 objects with {title, body, emoji} - practical HR tips
@@ -138,53 +209,70 @@ Keep content professional, actionable, and concise. Return ONLY valid JSON.`;
 export const sendWeeklyDigest = internalAction({
   args: {},
   handler: async (ctx) => {
-    const resend = getResendClient();
-    if (!resend) {
-      console.log('Resend not configured, skipping weekly newsletter');
-      return;
-    }
-
     const subscribers = await ctx.runQuery(internal.newsletter.getActiveSubscribers, {});
     if (subscribers.length === 0) {
       console.log('No active subscribers, skipping newsletter');
       return;
     }
 
-    const content = await ctx.runAction(internal.newsletter.generateWeeklyContent, {});
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://hr-project-sigma.vercel.app';
 
-    // Send in batches of 100
-    for (let i = 0; i < subscribers.length; i += 100) {
-      const batch = subscribers.slice(i, i + 100);
-      const emails = batch.map((sub) => {
-        const html = render(
-          WeeklyDigestEmail({
-            name: sub.name || 'HR Professional',
-            content,
-            unsubscribeUrl: `${appUrl}/api/newsletter/unsubscribe?token=${sub.unsubscribeToken}`,
-          }),
-        );
-        return {
-          from: 'HR Office <onboarding@resend.dev>',
-          to: sub.email,
-          subject: content.subject,
-          html,
-        };
+    // Group subscribers by language
+    const byLang: Record<string, typeof subscribers> = {};
+    for (const sub of subscribers) {
+      const lang = sub.language || 'en';
+      (byLang[lang] ??= []).push(sub);
+    }
+
+    for (const [lang, subs] of Object.entries(byLang)) {
+      const content = await ctx.runAction(internal.newsletter.generateWeeklyContent, {
+        language: lang,
       });
 
-      try {
-        await resend.batch.send(emails);
-      } catch (error) {
-        console.error('Failed to send newsletter batch:', error);
+      // Email subscribers
+      const emailSubs = subs.filter((s) => !s.telegramChatId || s.channel === 'email');
+      const resend = getResendClient();
+      if (resend && emailSubs.length > 0) {
+        for (let i = 0; i < emailSubs.length; i += 100) {
+          const batch = emailSubs.slice(i, i + 100);
+          const emails = batch.map((sub) => ({
+            from: 'HR Office <onboarding@resend.dev>',
+            to: sub.email,
+            subject: content.subject,
+            html: render(
+              WeeklyDigestEmail({
+                name: sub.name || 'HR Professional',
+                content,
+                unsubscribeUrl: `${appUrl}/api/newsletter/unsubscribe?token=${sub.unsubscribeToken}`,
+              }),
+            ),
+          }));
+          try {
+            await resend.batch.send(emails);
+          } catch (e) {
+            console.error('Email batch error:', e);
+          }
+        }
+      }
+
+      // Telegram subscribers
+      const telegramSubs = subs.filter((s) => s.telegramChatId && s.channel === 'telegram');
+      if (telegramSubs.length > 0) {
+        const tgMessage = formatTelegramNewsletter(content);
+        for (const sub of telegramSubs) {
+          await sendTelegramMessage(sub.telegramChatId!, tgMessage);
+        }
+      }
+
+      // Update lastSentAt
+      for (const sub of subs) {
+        await ctx.runMutation(internal.newsletter.updateLastSent, { id: sub._id });
       }
     }
 
-    // Update lastSentAt for all subscribers
-    for (const sub of subscribers) {
-      await ctx.runMutation(internal.newsletter.updateLastSent, { id: sub._id });
-    }
-
-    console.log(`Weekly newsletter sent to ${subscribers.length} subscribers`);
+    console.log(
+      `Newsletter sent to ${subscribers.length} subscribers in ${Object.keys(byLang).length} languages`,
+    );
   },
 });
 
@@ -196,12 +284,14 @@ export const updateLastSent = internalMutation({
 });
 
 export const sendTestEmail = action({
-  args: { email: v.string() },
+  args: { email: v.string(), language: v.optional(v.string()) },
   handler: async (ctx, args) => {
     const resend = getResendClient();
     if (!resend) throw new Error('Resend not configured');
 
-    const content = await ctx.runAction(internal.newsletter.generateWeeklyContent, {});
+    const content = await ctx.runAction(internal.newsletter.generateWeeklyContent, {
+      language: args.language,
+    });
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://hr-project-sigma.vercel.app';
 
     const html = render(
@@ -219,6 +309,40 @@ export const sendTestEmail = action({
       html,
     });
 
+    return { success: true };
+  },
+});
+
+function formatTelegramNewsletter(content: any): string {
+  let msg = `🏢 <b>HR Office Weekly Digest</b>\n\n`;
+  msg += `${content.greeting}\n\n`;
+  msg += `💡 <b>Tips of the Week</b>\n`;
+  for (const tip of content.tips || []) {
+    msg += `\n${tip.emoji} <b>${tip.title}</b>\n${tip.body}\n`;
+  }
+  msg += `\n📈 <b>HR Trends</b>\n`;
+  for (const trend of content.trends || []) {
+    msg += `\n• <b>${trend.title}</b>\n${trend.body}\n`;
+  }
+  if (content.quote) {
+    msg += `\n💬 <i>"${content.quote.text}"</i>\n— ${content.quote.author}\n`;
+  }
+  if (content.promo) {
+    msg += `\n🚀 <b>${content.promo.title}</b>\n${content.promo.body}\n`;
+    msg += `\n👉 <a href="${content.promo.link}">${content.promo.cta}</a>`;
+  }
+  return msg;
+}
+
+export const sendTestTelegram = action({
+  args: { chatId: v.string(), language: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    const content = await ctx.runAction(internal.newsletter.generateWeeklyContent, {
+      language: args.language,
+    });
+    const msg = formatTelegramNewsletter(content);
+    const ok = await sendTelegramMessage(args.chatId, msg);
+    if (!ok) throw new Error('Failed to send Telegram message. Check TELEGRAM_BOT_TOKEN.');
     return { success: true };
   },
 });
