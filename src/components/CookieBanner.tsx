@@ -19,11 +19,23 @@ export default function CookieBanner() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // SECURITY & PERFORMANCE: Defer cookie banner rendering until after LCP measurement.
-    // LCP is typically measured within 2.5s. Delaying banner prevents it from being
-    // counted as the LCP element (was causing 5,700ms render delay per Lighthouse).
-    // Increased delay to 4s for better LCP optimization on slower connections.
-    const timer = setTimeout(() => setMounted(true), 4000);
+    // PERFORMANCE: Defer cookie banner rendering until the browser is idle so it
+    // is not picked up as the LCP element (previously caused ~5,700ms render
+    // delay per Lighthouse). `requestIdleCallback` lets us show it as soon as
+    // the main thread is free instead of waiting on a fixed 4s timer.
+    const show = () => setMounted(true);
+    const win = window as Window & {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+
+    if (typeof win.requestIdleCallback === 'function') {
+      const id = win.requestIdleCallback(show, { timeout: 2500 });
+      return () => win.cancelIdleCallback?.(id);
+    }
+
+    // Fallback for browsers without requestIdleCallback (e.g. Safari).
+    const timer = setTimeout(show, 1500);
     return () => clearTimeout(timer);
   }, []);
 
