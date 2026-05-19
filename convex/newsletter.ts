@@ -19,6 +19,20 @@ function getResendClient(): Resend | null {
   return new Resend(key);
 }
 
+/**
+ * Returns the canonical public URL used in newsletter/digest CTAs.
+ * We intentionally ignore the legacy `hroffice.com` value that may still
+ * live in env vars, because the live deployment is on Vercel.
+ */
+function getPublicAppUrl(): string {
+  const fallback = 'https://hr-project-sigma.vercel.app';
+  const raw = process.env.NEXT_PUBLIC_APP_URL?.trim();
+  if (!raw) return fallback;
+  // Ignore the old marketing domain that is no longer in use
+  if (/hroffice\.com/i.test(raw)) return fallback;
+  return raw.replace(/\/+$/, '');
+}
+
 async function sendTelegramMessage(chatId: string, text: string): Promise<boolean> {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   if (!token) return false;
@@ -174,7 +188,7 @@ export const generateWeeklyContent = internalAction({
       ? ` Focus content on these topics: ${args.topics.join(', ')}.`
       : '';
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://hr-project-sigma.vercel.app';
+    const appUrl = getPublicAppUrl();
 
     const prompt = `Generate a professional HR weekly newsletter in JSON format.${langInstruction}${topicsInstruction} Include:
 - subject: catchy email subject line
@@ -231,7 +245,7 @@ export const sendWeeklyDigest = internalAction({
       return;
     }
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://hr-project-sigma.vercel.app';
+    const appUrl = getPublicAppUrl();
 
     // Group subscribers by language + topics key
     const groups: Record<string, typeof subscribers> = {};
@@ -517,7 +531,7 @@ export const sendTestEmail = action({
     const content = await ctx.runAction(internal.newsletter.generateWeeklyContent, {
       language: args.language,
     });
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://hr-project-sigma.vercel.app';
+    const appUrl = getPublicAppUrl();
 
     const html = render(
       WeeklyDigestEmail({
@@ -539,6 +553,7 @@ export const sendTestEmail = action({
 });
 
 function formatTelegramNewsletter(content: any): string {
+  const appUrl = getPublicAppUrl();
   let msg = `🏢 <b>HR Office Weekly Digest</b>\n\n`;
   msg += `${content.greeting}\n\n`;
   msg += `💡 <b>Tips of the Week</b>\n`;
@@ -553,8 +568,13 @@ function formatTelegramNewsletter(content: any): string {
     msg += `\n💬 <i>"${content.quote.text}"</i>\n— ${content.quote.author}\n`;
   }
   if (content.promo) {
+    // Always force the CTA link to the canonical app URL — never trust what
+    // the LLM returned, otherwise it can drift to outdated domains like
+    // `hroffice.com/platform`.
+    const ctaLink = appUrl;
+    const ctaText = content.promo.cta || 'Explore Now';
     msg += `\n🚀 <b>${content.promo.title}</b>\n${content.promo.body}\n`;
-    msg += `\n👉 <a href="${content.promo.link}">${content.promo.cta}</a>`;
+    msg += `\n👉 <a href="${ctaLink}">${ctaText}</a>`;
   }
   return msg;
 }
