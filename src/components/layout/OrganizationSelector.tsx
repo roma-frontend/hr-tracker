@@ -20,9 +20,9 @@ export function OrganizationSelector({ collapsed = false }: OrgSelectorProps) {
   const store = useOrgSelectorStore();
   const [isOpen, setIsOpen] = useState(false);
   const [mounted, setMounted] = React.useState(false);
+  const ref = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    // Delay mounting to ensure store hydration from localStorage
     const timer = setTimeout(() => {
       setMounted(true);
     }, 50);
@@ -30,8 +30,13 @@ export function OrganizationSelector({ collapsed = false }: OrgSelectorProps) {
   }, []);
 
   React.useEffect(() => {
-    // Watch for org selection changes
-  }, [store.selectedOrgId, mounted]);
+    if (!isOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setIsOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [isOpen]);
 
   const selectedOrgId = store.selectedOrgId;
   const setSelectedOrgId = store.setSelectedOrgId;
@@ -50,7 +55,7 @@ export function OrganizationSelector({ collapsed = false }: OrgSelectorProps) {
 
   return (
     <div className="px-2 py-3 border-t" style={{ borderColor: 'var(--sidebar-border)' }}>
-      <div className="relative">
+      <div className="relative" ref={ref}>
         <Button
           onClick={() => setIsOpen(!isOpen)}
           className={cn(
