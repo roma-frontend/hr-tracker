@@ -174,13 +174,15 @@ export const generateWeeklyContent = internalAction({
       ? ` Focus content on these topics: ${args.topics.join(', ')}.`
       : '';
 
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://hr-project-sigma.vercel.app';
+
     const prompt = `Generate a professional HR weekly newsletter in JSON format.${langInstruction}${topicsInstruction} Include:
 - subject: catchy email subject line
 - greeting: warm opening paragraph
 - tips: array of 3 objects with {title, body, emoji} - practical HR tips
 - trends: array of 2 objects with {title, body} - current HR industry trends
 - quote: object with {text, author} - inspirational leadership quote
-- promo: object with {title, body, cta, link} - call to action for HR Office platform
+- promo: object with {title, body, cta, link} - call to action for HR Office platform. The link MUST be: ${appUrl}
 
 Keep content professional, actionable, and concise. Return ONLY valid JSON.`;
 
@@ -211,7 +213,12 @@ Keep content professional, actionable, and concise. Return ONLY valid JSON.`;
     const content = data.choices?.[0]?.message?.content || '';
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error('Failed to parse AI response as JSON');
-    return JSON.parse(jsonMatch[0]);
+    const parsed = JSON.parse(jsonMatch[0]);
+    // Override promo link to ensure correct URL
+    if (parsed.promo) {
+      parsed.promo.link = appUrl;
+    }
+    return parsed;
   },
 });
 
